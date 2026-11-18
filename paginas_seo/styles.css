@@ -186,6 +186,18 @@ article.guia .meta{text-align:center;font-size:11px;letter-spacing:.1em;text-tra
 .prose th{text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);border-bottom:1px solid rgba(255,255,255,.16);padding:10px 12px}
 .prose td{border-bottom:1px solid var(--ln);padding:10px 12px;color:#cbd5e1}
 .prose td:not(:first-child){white-space:nowrap}
+@media (max-width:640px){
+  .prose table,.prose tbody{display:block;min-width:0;width:100%}
+  .prose caption{display:block}
+  .prose thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .prose tr{display:block;border:1px solid var(--ln);border-radius:12px;padding:6px 14px;margin-top:10px}
+  .prose td{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid var(--ln);padding:8px 0;text-align:right}
+  .prose td:last-child{border-bottom:0}
+  .prose td::before{content:attr(data-l);text-align:left;font-size:12px;color:var(--tx3)}
+  .prose td:first-child{display:block;text-align:left;font-weight:600;color:var(--tx);white-space:normal;overflow-wrap:anywhere}
+  .prose td:first-child::before{content:none}
+  .prose td:not(:first-child){white-space:normal}
+}
 .fecho{margin-top:28px;border:1px solid var(--acline);background:var(--acsoft);border-radius:18px;padding:22px}
 .fecho p.t{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:600}
 .fecho p{font-size:14px;color:var(--tx2);margin-top:6px}

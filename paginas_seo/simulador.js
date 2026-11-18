@@ -139,27 +139,29 @@
     } catch (e) { /* endereço estranho: usa os valores padrão */ }
   }
 
-  function enderecoDaSimulacao() {
+  // O link compartilhado leva o '#simulador' (abre já no simulador); a barra de endereços fica sem ele,
+  // senão o Safari volta para o topo do simulador, e não para onde a pessoa estava, ao voltar de uma página interna.
+  function enderecoDaSimulacao(comAncora) {
     var q = new URLSearchParams();
     q.set('imovel', String(Math.round(estado.imovel)));
     if (estado.financiado && estado.saldo > 0) q.set('saldo', String(Math.round(estado.saldo)));
     q.set('receber', String(Math.round(rec())));
     q.set('prazo', String(estado.anos));
     if (estado.conforto > 0) q.set('conforto', String(Math.round(estado.conforto)));
-    return window.location.origin + window.location.pathname + '?' + q.toString() + '#simulador';
+    return window.location.origin + window.location.pathname + '?' + q.toString() + (comAncora ? '#simulador' : '');
   }
 
   function atualizarEndereco() {
     clearTimeout(timerUrl);
     timerUrl = setTimeout(function () {
-      try { window.history.replaceState(null, '', enderecoDaSimulacao()); } catch (e) { /* sem histórico: o botão de copiar continua valendo */ }
+      try { window.history.replaceState(null, '', enderecoDaSimulacao(false)); } catch (e) { /* sem histórico: o botão de copiar continua valendo */ }
     }, 400);
   }
 
   async function copiarLink() {
-    var url = enderecoDaSimulacao();
+    var url = enderecoDaSimulacao(true);
     var ok = false;
-    try { window.history.replaceState(null, '', url); } catch (e) { /* ignora */ }
+    try { window.history.replaceState(null, '', enderecoDaSimulacao(false)); } catch (e) { /* ignora */ }
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(url); ok = true; }
     } catch (e) { /* tenta o plano B abaixo */ }

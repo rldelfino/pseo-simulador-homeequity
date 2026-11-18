@@ -17,7 +17,7 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 
 ## Comandos
 - Gerar: `python gerador_homeequity.py` (saída em `paginas_seo/`, publicada no Cloudflare Pages sem build). O CSS é escrito à mão em `src/estilo.css` (sem Tailwind/npm).
-- Testes: `python -m pytest -q` (62). Navegador de ponta a ponta (Chromium + WebKit, desktop e celular, 160 checagens no total): `python testar_navegador.py` (precisa do Playwright; fora do CI).
+- Testes: `python -m pytest -q` (64). Navegador de ponta a ponta (Chromium + WebKit, desktop e celular, 160 checagens no total): `python testar_navegador.py` (precisa do Playwright; fora do CI).
 - Ícones e imagem de compartilhamento: `python gerar_icones.py` (Playwright + Pillow).
 - Taxas do BCB: `python etl_taxas.py` (grava `dados/taxas_referencia.csv`; falha de rede não derruba). Robô semanal em `.github/workflows/atualiza_taxas.yml` (seg 08:00 UTC): taxas, rebuild, pytest, commit, IndexNow.
 - Fontes: `conteudo.py` (textos, títulos ≤ 60), `layout.py` (HTML), `src/simulador.js`, `calculo.py` (conta de referência; `calculo.js` é gerado e os testes comparam as duas via Node).
@@ -35,9 +35,12 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 - Umami: plano gratuito só permite 1 site ("Website limit reached"), então `UMAMI_ID` usa o ID compartilhado dos irmãos; filtrar por hostname `homeequity.datalabglobal.com`.
 - NÃO verificado: se o formulário do parceiro aceita pré-preenchimento por endereço (hoje abre limpo); iPhone físico; valores mínimo/máximo de crédito do parceiro (o simulador usa mínimo de R$ 50 mil a receber e teto de R$ 3 milhões de crédito como limites de interface, baseados em condições públicas de outras instituições (Creditas R$ 50 mil a R$ 3 mi; Neon até R$ 3 mi), não regra do parceiro); revisão jurídica dos textos.
 
+- Linkado no hub (cartão PT/EN, rodapé, llms.txt) e no rodapé de 002, 003 e 005. Search Console/Bing/IndexNow feitos; DuckDuckGo não tem sitemap (usa o índice do Bing e o rastreador próprio).
+- Auditoria e benchmark (18/11): `../_plano-equity-condominio/AUDITORIA-HOME-EQUITY.md`. Conta bate com exemplo público da Creditas (R$ 150 mil, 48 m, IPCA 4,22% → R$ 4.349 / R$ 208,7 mil). Corrigidos: `#simulador` na barra de endereço (Safari voltava ao topo do simulador) e tabelas viram cartões no celular (`data-l` + CSS).
+
 ## Próximos passos
-1. Conferir o domínio no ar (`curl -I`), Search Console e Bing (sitemap + indexação só das URLs novas), IndexNow.
-2. Linkar este simulador no rodapé dos irmãos (`OUTROS_SIMULADORES` em 005 e demais).
+1. Decidir melhorias do benchmark: tabela de amortização, custos estimados (só com fonte), renda mínima estimada, "quitar dívida cara".
+2. Ver indexação no Google/Bing em alguns dias (`site:homeequity.datalabglobal.com`).
 3. Só então começar o Auto Equity (007).
 
 ## Testes fora do CI (rodar antes de publicar mudanças no simulador)

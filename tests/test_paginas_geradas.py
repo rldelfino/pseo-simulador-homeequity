@@ -178,6 +178,22 @@ def test_tem_acessibilidade_basica(site):
     assert '<dialog id="dlg-confirma" aria-labelledby="dlg-titulo">' in html
 
 
+def test_tabelas_tem_rotulo_por_celula_para_o_celular(site):
+    """No celular o CSS empilha cada linha em cartão e lê o rótulo de data-l; sem ele os números perdem o nome da coluna."""
+    for nome in ("home-equity-ou-outro-credito.html", "taxas-de-referencia.html", "custos-alem-dos-juros.html"):
+        html = _ler(site, nome)
+        assert "<td>" not in html, nome
+        assert 'data-l="' in html, nome
+
+
+def test_endereco_da_barra_nao_leva_ancora():
+    """Com '#simulador' na barra, o Safari volta para o topo do simulador ao voltar de uma página interna; só o link copiado leva a âncora."""
+    with open(os.path.join("src", "simulador.js"), encoding="utf-8") as f:
+        js = f.read()
+    assert "replaceState(null, '', enderecoDaSimulacao(false))" in js
+    assert js.count("enderecoDaSimulacao(true)") == 1
+
+
 def test_js_nao_mexe_em_estilo_inline():
     """A CSP (style-src 'self') não aceita estilo inline e o Safari avisa até de CSSOM: o JS só pode usar atributos e classes."""
     for nome in ("simulador.js", "menu.js"):

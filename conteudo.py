@@ -60,7 +60,8 @@ def a(href, texto):
 
 def tabela(cabecalho, linhas, legenda):
     topo = "".join('<th scope="col">' + c + "</th>" for c in cabecalho)
-    corpo = "".join("<tr>" + "".join("<td>" + c + "</td>" for c in l) + "</tr>" for l in linhas)
+    # data-l: rótulo da coluna, usado no celular (o CSS empilha cada linha em um cartão; sem rolagem lateral)
+    corpo = "".join("<tr>" + "".join('<td data-l="' + cabecalho[i] + '">' + c + "</td>" for i, c in enumerate(l)) + "</tr>" for l in linhas)
     return '<div class="tw"><table><caption>' + legenda + "</caption><thead><tr>" + topo + "</tr></thead><tbody>" + corpo + "</tbody></table></div>\n"
 
 
