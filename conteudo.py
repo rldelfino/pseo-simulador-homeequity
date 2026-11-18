@@ -93,6 +93,57 @@ def nota_taxa_maior(ref, i, imovel, receber, saldo, meses):
             "): nessa taxa, a parcela do cenário acima seria de " + brl0(r["parcela"]) + ". A taxa final vem da análise.")
 
 
+# ---------- amortização e "quitar dívida" (home): mesmos textos que o simulador.js escreve ----------
+DIVIDAS = [("pessoal", "Crédito pessoal sem garantia"), ("cheque", "Cheque especial"), ("rotativo", "Cartão de crédito rotativo")]
+DIVIDA_PADRAO = 60_000
+DIVIDA_TIPO_PADRAO = "pessoal"
+
+
+def amort_resumo(r, linhas):
+    """Frase acima da tabela de amortização: quanto do primeiro ano é juros."""
+    pago = r["parcela"] * 12
+    j = linhas[0]["juros"]
+    return ("No primeiro ano, " + brl0(j) + " dos " + brl0(pago) + " que você paga são juros (" + str(round(j / pago * 100)) +
+            "%). A parcela é fixa: com o tempo ela amortiza mais a dívida e os juros caem.")
+
+
+def amort_nota(ref):
+    return ("A conta mantém o IPCA em " + pct(ref["ipca12m"]) + " ao ano (últimos 12 meses, " + ref["ipcaMes"] + ") e a parcela fixa. Se o IPCA mudar, a parcela e o saldo mudam. "
+            "Não inclui IOF, avaliação do imóvel, registro nem seguros.")
+
+
+def amort_linhas(linhas):
+    """Linhas <tr> da tabela (o JS monta as mesmas)."""
+    return "".join('<tr><th scope="row">' + str(x["ano"]) + "</th><td>" + brl0(x["juros"]) + "</td><td>" + brl0(x["amortizacao"]) + "</td><td>" + brl0(x["saldo"]) + "</td></tr>"
+                   for x in linhas)
+
+
+def amort_total(linhas, credito):
+    juros = sum(x["juros"] for x in linhas)
+    return '<tr><th scope="row">Total</th><td>' + brl0(juros) + "</td><td>" + brl0(credito) + "</td><td></td></tr>"
+
+
+def quitar_cartoes(c, taxa_div_pct, anos, he_pct, custom=False):
+    """Dois cartões: a dívida na taxa dela e no Home Equity (mesmo prazo). c vem de calculo.comparar_quitacao."""
+    nome_a = ("Na taxa da sua dívida (" if custom else "Na taxa média (") + pct(taxa_div_pct) + " a.m.)"
+    a_ = ('<div class="alt"><h3>' + nome_a + '</h3><div class="p num">' + brl0(c["parcela_atual"]) + '</div><div class="d">Só de juros: ' + brl0(c["juros_mes1"]) +
+          " no 1º mês<br>Total em " + str(anos) + " anos: " + brl0(c["total_atual"]) + "</div></div>")
+    if c["economia_mes"] > 0:
+        dest = '<span class="dn">' + brl0(c["economia_mes"]) + " a menos por mês</span>"
+    else:
+        dest = '<span class="up">sem redução de parcela nesta conta</span>'
+    b = ('<div class="alt cur"><h3>No Home Equity (' + pct(he_pct) + ' a.m.)</h3><div class="p num">' + brl0(c["parcela_he"]) + '</div><div class="d">Total em ' + str(anos) +
+         " anos: " + brl0(c["total_he"]) + "<br>" + dest + "</div></div>")
+    return a_ + b
+
+
+def quitar_texto(c, anos):
+    if c["economia_mes"] > 0:
+        return ("Trocar esta dívida reduziria a parcela em " + brl0(c["economia_mes"]) + " por mês e o total pago em cerca de " + brl0(c["economia_total"]) +
+                ", com a mesma duração (" + str(anos) + " anos). Avaliação, registro e seguros não entram na conta e reduzem essa economia.")
+    return "Com esta taxa, o Home Equity não reduz a parcela da dívida. Peça o CET da proposta e compare antes de decidir."
+
+
 # ---------- perguntas frequentes (home) ----------
 FAQ = [
     ("Posso continuar morando no imóvel?",

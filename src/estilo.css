@@ -221,6 +221,24 @@ footer.rod .base{border-top:1px solid var(--ln);padding:18px 0 40px;font-size:12
 footer.rod .base p{margin:4px 0;max-width:none;color:var(--tx3)}
 footer.rod .base a{color:var(--tx2)}
 
+.amort{margin-top:6px}
+.amort summary{cursor:pointer;min-height:44px;display:inline-flex;align-items:center;color:var(--aclt);font-weight:600;font-size:14px}
+.amort table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.amort caption{text-align:left;font-size:12px;color:var(--tx3);padding-bottom:8px}
+.amort th,.amort td{padding:8px 10px;border-bottom:1px solid var(--ln);text-align:right}
+.amort thead th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ac)}
+.amort tbody th,.amort tfoot th{text-align:left;font-weight:600;color:var(--tx)}
+.amort td{color:#cbd5e1;white-space:nowrap}
+.amort tfoot th,.amort tfoot td{font-weight:700;color:var(--tx);border-bottom:0}
+@media(max-width:480px){
+  .amort table{font-size:12px}
+  .amort th,.amort td{padding:8px 4px}
+  .amort thead th{font-size:10px;letter-spacing:0}
+}
+.quitar .qin{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.quitar .qtxt{font-size:14px;color:#cbd5e1;margin-top:14px}
+.quitar .row2{margin-top:14px}
+.quitar .hint{margin-top:14px}
 @media(max-width:900px){
   .prose table{min-width:0;font-size:13px}
   .prose th,.prose td{padding:8px 6px}

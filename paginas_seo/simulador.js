@@ -5,8 +5,10 @@
   var H = window.DatalabHomeEquity;
   if (!H) return;
 
-  var estado = { financiado: false, imovel: 800000, saldo: 0, receber: 250000, anos: 15, conforto: 3000 };
+  var estado = { financiado: false, imovel: 800000, saldo: 0, receber: 250000, anos: 15, conforto: 3000, divida: 60000, tipoDiv: 'pessoal', taxaDiv: 5 };
   var usou = false;
+  var usouQuitar = false;
+  var abriuAmort = false;
   var desenhos = 0;
   var timerUrl = null;
   var timerCopiado = null;
@@ -124,6 +126,82 @@
       '): nessa taxa, a parcela do cenário acima seria de ' + H.brl(r.parcela) + '. A taxa final vem da análise.';
   }
 
+  function celula(tag, texto, escopo) {
+    var c = el(tag, '', texto);
+    if (escopo) c.setAttribute('scope', escopo);
+    return c;
+  }
+
+  // Amortização ano a ano (mesma conta de calculo.py: amortizacao_anual). Texto igual ao de conteudo.py.
+  function desenharAmort(r, i, meses, semMargem) {
+    var corpo = $('amort-corpo'), rodape = $('amort-rodape');
+    limpar(corpo); limpar(rodape);
+    if (semMargem) {
+      $('amort-resumo').textContent = 'Ajuste o saldo ou o valor do imóvel para ver a amortização.';
+      $('amort-nota').textContent = '';
+      return;
+    }
+    var linhas = H.amortizacaoAnual(r.credito, i, meses);
+    var pago = r.parcela * 12;
+    var j1 = linhas[0].juros;
+    $('amort-resumo').textContent = 'No primeiro ano, ' + H.brl(j1) + ' dos ' + H.brl(pago) + ' que você paga são juros (' + Math.round((j1 / pago) * 100) +
+      '%). A parcela é fixa: com o tempo ela amortiza mais a dívida e os juros caem.';
+    var juros = 0;
+    linhas.forEach(function (x) {
+      var tr = el('tr');
+      tr.appendChild(celula('th', String(x.ano), 'row'));
+      tr.appendChild(celula('td', H.brl(x.juros)));
+      tr.appendChild(celula('td', H.brl(x.amortizacao)));
+      tr.appendChild(celula('td', H.brl(x.saldo)));
+      corpo.appendChild(tr);
+      juros += x.juros;
+    });
+    var t = el('tr');
+    t.appendChild(celula('th', 'Total', 'row'));
+    t.appendChild(celula('td', H.brl(juros)));
+    t.appendChild(celula('td', H.brl(r.credito)));
+    t.appendChild(celula('td', ''));
+    rodape.appendChild(t);
+    $('amort-nota').textContent = 'A conta mantém o IPCA em ' + H.pct(H.ref.ipca12m) + ' ao ano (últimos 12 meses, ' + H.ref.ipcaMes +
+      ') e a parcela fixa. Se o IPCA mudar, a parcela e o saldo mudam. Não inclui IOF, avaliação do imóvel, registro nem seguros.';
+  }
+
+  // "Quitar dívida cara": a mesma dívida e o mesmo prazo na taxa média da dívida e no Home Equity (conteudo.py: quitar_cartoes/quitar_texto).
+  function taxaDivida() { return estado.tipoDiv === 'outra' ? estado.taxaDiv : H.ref[estado.tipoDiv + 'Am']; }
+
+  function desenharQuitar(i, meses, rmax) {
+    var outra = estado.tipoDiv === 'outra';
+    var t = taxaDivida();
+    var d = estado.divida;
+    var aviso = $('q-aviso'), cartoes = $('q-cartoes'), texto = $('q-texto'), usar = $('btn-usar-divida');
+    $('bloco-taxa-div').hidden = !outra;
+    var erro = '';
+    if (!(d > 0)) erro = 'Informe quanto você deve.';
+    else if (outra && !(t >= 0.1 && t <= 30)) erro = 'Informe uma taxa entre 0,1% e 30% ao mês.';
+    else if (rmax < 1) erro = 'O saldo devedor do imóvel já usa o limite: não sobra valor para quitar outra dívida.';
+    if (erro) {
+      aviso.hidden = false; aviso.textContent = erro;
+      limpar(cartoes); texto.textContent = ''; usar.disabled = true;
+      return;
+    }
+    usar.disabled = false;
+    var uso = Math.min(d, rmax);
+    var msg = '';
+    if (d > rmax) msg = 'O limite do imóvel cobre até ' + H.brl(rmax) + ': calculamos com esse valor.';
+    else if (d < H.RECEBER_MIN) msg = 'Como referência de mercado, o Home Equity costuma ter crédito mínimo de ' + H.brl(H.RECEBER_MIN) + ': abaixo disso a troca pode não estar disponível.';
+    aviso.hidden = !msg; aviso.textContent = msg;
+    var c = H.compararQuitacao(uso, t / 100, meses, i);
+    limpar(cartoes);
+    cartoes.appendChild(cartaoAlt((outra ? 'Na taxa da sua dívida (' : 'Na taxa média (') + H.pct(t) + ' a.m.)', c.parcelaAtual,
+      ['Só de juros: ' + H.brl(c.jurosMes1) + ' no 1º mês', 'Total em ' + estado.anos + ' anos: ' + H.brl(c.totalAtual)], false));
+    var dest = c.economiaMes > 0 ? { cls: 'dn', texto: H.brl(c.economiaMes) + ' a menos por mês' } : { cls: 'up', texto: 'sem redução de parcela nesta conta' };
+    cartoes.appendChild(cartaoAlt('No Home Equity (' + H.pct(i * 100) + ' a.m.)', c.parcelaHe, ['Total em ' + estado.anos + ' anos: ' + H.brl(c.totalHe)], true, dest));
+    texto.textContent = c.economiaMes > 0
+      ? 'Trocar esta dívida reduziria a parcela em ' + H.brl(c.economiaMes) + ' por mês e o total pago em cerca de ' + H.brl(c.economiaTotal) + ', com a mesma duração (' + estado.anos +
+        ' anos). Avaliação, registro e seguros não entram na conta e reduzem essa economia.'
+      : 'Com esta taxa, o Home Equity não reduz a parcela da dívida. Peça o CET da proposta e compare antes de decidir.';
+  }
+
   // Endereço compartilhável: só números. O canonical da página continua sendo a home.
   function lerEndereco() {
     try {
@@ -197,6 +275,9 @@
     if (foco !== 'receber') $('campo-receber').value = BRL_NUM.format(rec());
     if (foco !== 'conforto') $('campo-conforto').value = estado.conforto > 0 ? BRL_NUM.format(estado.conforto) : '';
     $('sel-prazo').value = String(estado.anos);
+    $('sel-divida').value = estado.tipoDiv;
+    if (foco !== 'divida') $('campo-divida').value = BRL_NUM.format(estado.divida);
+    if (foco !== 'taxadiv') $('campo-taxa-div').value = String(estado.taxaDiv).replace('.', ',');
     preencherRange($('range-imovel'), estado.imovel);
     var rr = $('range-receber');
     rr.min = String(minReceber()); rr.max = String(Math.max(minReceber(), Math.floor(rmax / 5000) * 5000));
@@ -205,6 +286,7 @@
     $('max-receber').textContent = mil(Number(rr.max));
     var aviso = $('msg-ajuste');
     if (semMargem) { aviso.hidden = false; aviso.textContent = 'O saldo devedor já usa o limite do imóvel: não sobra valor para receber.'; }
+    else if (ajustou && foco !== 'receber' && estado.receber < minReceber()) { aviso.hidden = false; aviso.textContent = 'Ajustamos o valor para o mínimo de ' + H.brl(minReceber()) + '.'; }
     else if (ajustou && foco !== 'receber') { aviso.hidden = false; aviso.textContent = 'Ajustamos o valor para o limite de ' + H.brl(rmax) + (limiteTeto() ? ' (teto de ' + H.brl(H.CREDITO_MAX) + ' de crédito' + (estado.saldo > 0 ? ', menos o saldo' : '') + ').' : ' (60% do imóvel' + (estado.saldo > 0 ? ' menos o saldo' : '') + ').'); }
     else if (!ajustou) aviso.hidden = true;
 
@@ -223,6 +305,8 @@
 
     if (!semMargem) { desenharRaio(r, i, meses); } else { limpar($('alts')); $('raio-texto').textContent = 'Ajuste o saldo ou o valor do imóvel para ver as comparações.'; }
     desenharNota(i, meses);
+    desenharAmort(r, i, meses, semMargem);
+    desenharQuitar(i, meses, rmax);
     desenhos += 1;
     if (desenhos > 1) atualizarEndereco();
   }
@@ -233,16 +317,23 @@
     evento('usou-simulador-homeequity', { receber: rec(), prazo: estado.anos });
   }
 
-  function ligarCampo(id, chave, minimo, foco) {
+  function mexeuQuitar() {
+    if (usouQuitar) return;
+    usouQuitar = true;
+    evento('usou-quitar-divida', { tipo: estado.tipoDiv });
+  }
+
+  function ligarCampo(id, chave, minimo, foco, aoMexer) {
     var c = $(id);
+    var mexeu = aoMexer || interagiu;
     c.addEventListener('input', function (e) {
       var v = lerNumero(e.target.value);
-      if (v >= minimo) { estado[chave] = v; interagiu(); desenhar(foco); }
+      if (v >= minimo) { estado[chave] = v; mexeu(); desenhar(foco); }
     });
     c.addEventListener('blur', function (e) {
       estado[chave] = lerNumero(e.target.value);
       if (chave === 'conforto' && e.target.value.trim() === '') estado.conforto = 0;
-      interagiu();
+      mexeu();
       desenhar();
     });
     c.addEventListener('keydown', function (e) { if (e.key === 'Enter') e.target.blur(); });
@@ -264,6 +355,19 @@
     $('range-receber').addEventListener('input', function (e) { estado.receber = Number(e.target.value); interagiu(); desenhar(); });
     $('sel-prazo').addEventListener('change', function (e) { estado.anos = Number(e.target.value); interagiu(); desenhar(); });
     $('btn-copiar').addEventListener('click', copiarLink);
+
+    ligarCampo('campo-divida', 'divida', 1, 'divida', mexeuQuitar);
+    ligarCampo('campo-taxa-div', 'taxaDiv', 0.01, 'taxadiv', mexeuQuitar);
+    $('sel-divida').addEventListener('change', function (e) { estado.tipoDiv = e.target.value; mexeuQuitar(); desenhar(); });
+    $('btn-usar-divida').addEventListener('click', function () {
+      estado.receber = Math.min(estado.divida, maxReceber());
+      interagiu(); desenhar();
+      var alvo = $('simulador');
+      if (alvo && alvo.scrollIntoView) alvo.scrollIntoView();
+    });
+    $('det-amort').addEventListener('toggle', function (e) {
+      if (e.target.open && !abriuAmort) { abriuAmort = true; evento('abriu-amortizacao', { prazo: estado.anos }); }
+    });
 
     var dlg = $('dlg-confirma');
     function fechar() { if (typeof dlg.close === 'function') dlg.close(); else { dlg.removeAttribute('open'); devolverFoco(); } }
