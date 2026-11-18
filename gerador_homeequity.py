@@ -26,7 +26,7 @@ SAIDA_PADRAO = os.path.join(AQUI, "paginas_seo")
 
 DOMINIO = "https://homeequity.datalabglobal.com"
 HUB = "https://www.datalabglobal.com"
-UMAMI_ID = ""  # ID do site no Umami. Vazio = o script de medição não entra nas páginas (criar o site "Home Equity" no Umami e colocar o ID aqui)
+UMAMI_ID = "ba3c0b88-59e8-47dd-866d-0b05e5e7dae9"  # mesmo site do Umami dos irmãos (plano gratuito = 1 site); separar por hostname = homeequity.datalabglobal.com
 RAZAO_SOCIAL = "Satori Soluções Comerciais LTDA"
 CNPJ = "63.998.502/0001-73"
 EMAIL = "contato@datalabglobal.com"
