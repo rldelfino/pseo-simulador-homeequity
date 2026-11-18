@@ -9,7 +9,7 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 - **Mensagem agnóstica sobre o parceiro**: "um parceiro de crédito". Sem texto sobre remuneração/comissão e sem citar o nome do parceiro nem de bancos (há teste que barra). Sem ranking.
 - Tom calmo sobre a garantia: aviso curto perto do botão, explicação na seção/página própria. Um valor único de parcela (taxa de referência do parceiro); a média do BCB só na nota "E se a taxa for maior?".
 - Link de conversão do parceiro (`LINK_PARCEIRO` em `gerador_homeequity.py`) só no botão da tela de confirmação. Não copiar o link de outros produtos para cá.
-- Medição: Umami, **ID próprio deste site** (`UMAMI_ID`, hoje vazio = sem script). Eventos: `usou-simulador-homeequity`, `abriu-confirmacao`, `cta-parceiro`, `copiou-link` (só `receber` e `prazo`). Não mandar evento de teste ao Umami (nos testes o Umami é bloqueado).
+- Medição: Umami, **ID próprio deste site** (`UMAMI_ID`, hoje vazio = sem script). Eventos: `usou-simulador-homeequity`, `abriu-confirmacao`, `cta-parceiro`, `copiou-link` (só `receber` e `prazo`), `abriu-amortizacao` (`prazo`), `usou-quitar-divida` (`tipo`: pessoal/cheque/rotativo/outra). Não mandar evento de teste ao Umami (nos testes o Umami é bloqueado).
 - Sem segredo em arquivo/GitHub. Sem identificar modelo de IA em commits/PRs (só as linhas de atribuição que o sistema mandar). Python 3.10 no CI (sem f-string aninhado). Merge só com `pytest` saindo 0. Fluxo: branch → PR → merge.
 - CSP: sem `style=` nem script inline. Barras são SVG com atributos; preenchimento dos sliders usa `data-p` definido por JS.
 - Máximo ~15 páginas indexáveis, cada uma com conteúdo próprio.
@@ -17,7 +17,8 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 
 ## Comandos
 - Gerar: `python gerador_homeequity.py` (saída em `paginas_seo/`, publicada no Cloudflare Pages sem build). O CSS é escrito à mão em `src/estilo.css` (sem Tailwind/npm).
-- Testes: `python -m pytest -q` (64). Navegador de ponta a ponta (Chromium + WebKit, desktop e celular, 160 checagens no total): `python testar_navegador.py` (precisa do Playwright; fora do CI).
+- Testes: `python -m pytest -q` (77). Amortização e "quitar dívida" no navegador: `python testar_amort_quitar.py` (Chromium + WebKit, desktop e celular).
+- Seções da home (18/11): "Para onde vai a sua parcela" (amortização anual recolhível, `calculo.amortizacao_anual`) e "Tem uma dívida cara? Veja se vale trocar" (`calculo.comparar_quitacao`, taxas médias BCB 20742/20741/22022 em `REF`; mesmo prazo do simulador; botão leva o valor ao simulador). Navegador de ponta a ponta (Chromium + WebKit, desktop e celular, 160 checagens no total): `python testar_navegador.py` (precisa do Playwright; fora do CI).
 - Ícones e imagem de compartilhamento: `python gerar_icones.py` (Playwright + Pillow).
 - Taxas do BCB: `python etl_taxas.py` (grava `dados/taxas_referencia.csv`; falha de rede não derruba). Robô semanal em `.github/workflows/atualiza_taxas.yml` (seg 08:00 UTC): taxas, rebuild, pytest, commit, IndexNow.
 - Fontes: `conteudo.py` (textos, títulos ≤ 60), `layout.py` (HTML), `src/simulador.js`, `calculo.py` (conta de referência; `calculo.js` é gerado e os testes comparam as duas via Node).

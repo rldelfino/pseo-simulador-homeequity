@@ -67,6 +67,40 @@ def simular(valor_imovel, receber, saldo, meses, i):
     }
 
 
+def amortizacao_anual(credito, i, meses):
+    """Como a dívida cai ano a ano na parcela fixa (Price): juros pagos, amortização e saldo devedor no fim de cada ano."""
+    parcela = pmt(credito, i, meses)
+    saldo = credito
+    linhas = []
+    restante = meses
+    ano = 0
+    while restante > 0:
+        ano += 1
+        juros = amortizado = 0.0
+        for _ in range(min(12, restante)):
+            j = saldo * i
+            a = parcela - j
+            saldo -= a
+            juros += j
+            amortizado += a
+        restante -= 12
+        linhas.append({"ano": ano, "juros": juros, "amortizacao": amortizado, "saldo": saldo if saldo > 0.005 else 0.0})
+    return linhas
+
+
+def comparar_quitacao(divida, taxa_divida_am, meses, i):
+    """Mesma dívida e mesmo prazo: parcela e total na taxa da dívida (taxa_divida_am em fração ao mês) e no Home Equity (taxa i).
+    juros_mes1 = o que a dívida cobra de juros só no primeiro mês."""
+    atual = pmt(divida, taxa_divida_am, meses)
+    he = pmt(divida, i, meses)
+    return {
+        "divida": divida,
+        "parcela_atual": atual, "total_atual": atual * meses, "juros_mes1": divida * taxa_divida_am,
+        "parcela_he": he, "total_he": he * meses,
+        "economia_mes": atual - he, "economia_total": (atual - he) * meses,
+    }
+
+
 def receber_para_parcela(parcela_alvo, valor_imovel, saldo, meses, i, passo=5000):
     """Maior valor a receber (múltiplo de `passo`) cuja parcela cabe em parcela_alvo; 0 se nem o menor valor cabe."""
     bruto = valor_presente(parcela_alvo, i, meses) - saldo

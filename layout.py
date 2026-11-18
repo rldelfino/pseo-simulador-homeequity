@@ -158,11 +158,52 @@ HOME_MAIN = """  <section class="hero">
     </div>
   </section>
 
+  <section class="blk" aria-labelledby="t-amort">
+    <h2 id="t-amort">Para onde vai a sua parcela</h2>
+    <p class="lead" id="amort-resumo">@@D_AMORT_RESUMO@@</p>
+    <details class="amort" id="det-amort">
+      <summary>Ver a amortização ano a ano</summary>
+      <div class="tw"><table id="tab-amort">
+        <caption>Parcela fixa: juros, amortização e saldo devedor no fim de cada ano</caption>
+        <thead><tr><th scope="col">Ano</th><th scope="col">Juros</th><th scope="col">Amortização</th><th scope="col">Saldo devedor</th></tr></thead>
+        <tbody id="amort-corpo">@@D_AMORT_LINHAS@@</tbody>
+        <tfoot id="amort-rodape">@@D_AMORT_TOTAL@@</tfoot>
+      </table></div>
+      <div class="hint" id="amort-nota">@@D_AMORT_NOTA@@</div>
+    </details>
+  </section>
+
   <section class="blk" aria-labelledby="t-cmp">
     <h2 id="t-cmp">Quanto cada tipo de crédito custa por mês</h2>
     <p class="lead">Com garantia, o juro mensal costuma ser bem menor que o de crédito sem garantia.</p>
     <div class="panel">@@COMPARACAO@@</div>
     <div class="note" id="nota-taxa"><b>E se a taxa for maior?</b> <span id="nota-taxa-texto">@@NOTA_TAXA@@</span></div>
+  </section>
+
+  <section class="blk" aria-labelledby="t-quitar">
+    <h2 id="t-quitar">Tem uma dívida cara? Veja se vale trocar</h2>
+    <p class="lead">A mesma dívida, no mesmo prazo do simulador, na taxa média do mercado e no Home Equity.</p>
+    <div class="panel quitar">
+      <div class="qin">
+        <div class="f">
+          <label for="sel-divida">Tipo de dívida</label>
+          <div class="inp sel"><select id="sel-divida">@@DIVIDA_OPCOES@@</select></div>
+        </div>
+        <div class="f">
+          <label for="campo-divida">Quanto você deve <span>saldo da dívida</span></label>
+          <div class="inp"><span class="pre">R$</span><input id="campo-divida" type="text" inputmode="numeric" autocomplete="off" value="60.000" class="num"></div>
+        </div>
+        <div class="f" id="bloco-taxa-div" hidden>
+          <label for="campo-taxa-div">Taxa da sua dívida <span>% ao mês</span></label>
+          <div class="inp"><input id="campo-taxa-div" type="text" inputmode="decimal" autocomplete="off" value="5" class="num"><em>% a.m.</em></div>
+        </div>
+      </div>
+      <div class="hint warn" id="q-aviso" hidden></div>
+      <div class="alts dois" id="q-cartoes">@@D_Q_CARTOES@@</div>
+      <p class="qtxt" id="q-texto">@@D_Q_TEXTO@@</p>
+      <div class="row2"><button type="button" class="ghost" id="btn-usar-divida">Simular com este valor</button></div>
+      <div class="hint">Conta de comparação: as duas dívidas têm a mesma duração. Cheque especial e rotativo não costumam durar tanto; o ponto é ver quanto o juro pesa por mês. A troca coloca o imóvel como garantia: <a href="/garantia-do-imovel">veja o que muda</a> e <a href="/custos-alem-dos-juros">os custos além dos juros</a>.</div>
+    </div>
   </section>
 
   <section class="blk" id="garantia" aria-labelledby="t-gar">

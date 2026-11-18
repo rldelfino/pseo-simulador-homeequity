@@ -113,12 +113,30 @@ CALCULO_JS = """/* GERADO por gerador_homeequity.py a partir de calculo.py e dad
     return Math.max(0, Math.floor(bruto / passo) * passo);
   }
 
+  function amortizacaoAnual(credito, i, meses) {
+    var parcela = pmt(credito, i, meses), saldo = credito, restante = meses, ano = 0, linhas = [];
+    while (restante > 0) {
+      ano += 1;
+      var juros = 0, amortizado = 0, n = Math.min(12, restante);
+      for (var k = 0; k < n; k++) { var j = saldo * i, a = parcela - j; saldo -= a; juros += j; amortizado += a; }
+      restante -= 12;
+      linhas.push({ ano: ano, juros: juros, amortizacao: amortizado, saldo: saldo > 0.005 ? saldo : 0 });
+    }
+    return linhas;
+  }
+
+  function compararQuitacao(divida, taxaDividaAm, meses, i) {
+    var atual = pmt(divida, taxaDividaAm, meses), he = pmt(divida, i, meses);
+    return { divida: divida, parcelaAtual: atual, totalAtual: atual * meses, jurosMes1: divida * taxaDividaAm,
+             parcelaHe: he, totalHe: he * meses, economiaMes: atual - he, economiaTotal: (atual - he) * meses };
+  }
+
   function brl(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(Math.round(v)); }
   function pct(v) { return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%'; }
 
   var api = { TAXA_PARCEIRO_AM: TAXA_PARCEIRO_AM, LTV_MAX: LTV_MAX, CREDITO_MAX: CREDITO_MAX, PRAZOS_ANOS: PRAZOS_ANOS, IMOVEL_MIN: IMOVEL_MIN, IMOVEL_MAX: IMOVEL_MAX, RECEBER_MIN: RECEBER_MIN,
               ref: REF, ipcaMensal: ipcaMensal, taxaMensal: taxaMensal, pmt: pmt, valorPresente: valorPresente, limiteCredito: limiteCredito,
-              simular: simular, receberParaParcela: receberParaParcela, brl: brl, pct: pct };
+              simular: simular, receberParaParcela: receberParaParcela, amortizacaoAnual: amortizacaoAnual, compararQuitacao: compararQuitacao, brl: brl, pct: pct };
   root.DatalabHomeEquity = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -175,8 +193,16 @@ def referencias():
     gar = tr.ultima(tr.CODIGO_GARANTIA_REAL, linhas)
     if not ipca or not gar:
         raise SystemExit("dados/taxas_referencia.csv sem IPCA ou sem a série 29976: rode python etl_taxas.py")
-    return {"ipca12m": ipca["valor"], "ipcaMes": conteudo.mes_curto(ipca["mes"]), "garantiaRealAm": tr.ao_mes(gar),
-            "garantiaRealMes": conteudo.mes_curto(gar["mes"])}
+    ref = {"ipca12m": ipca["valor"], "ipcaMes": conteudo.mes_curto(ipca["mes"]), "garantiaRealAm": tr.ao_mes(gar),
+           "garantiaRealMes": conteudo.mes_curto(gar["mes"])}
+    # Médias de mercado das dívidas caras (% a.m.), para o cenário "quitar dívida": chave no JS = chave aqui.
+    for chave, codigo in (("pessoal", 20742), ("cheque", 20741), ("rotativo", 22022)):
+        u = tr.ultima(codigo, linhas)
+        if not u:
+            raise SystemExit("dados/taxas_referencia.csv sem a série %d: rode python etl_taxas.py" % codigo)
+        ref[chave + "Am"] = tr.ao_mes(u)
+        ref[chave + "Mes"] = conteudo.mes_curto(u["mes"])
+    return ref
 
 
 def gerar_calculo_js():
@@ -315,7 +341,15 @@ def _valores_padrao():
     dif = r["parcela"] - conforto
     raio = ("Com a estimativa de " + conteudo.brl0(r["parcela"]) + ", este cenário fica " + conteudo.brl0(dif) +
             " acima do valor que você informou. Veja o que muda com a mesma taxa:")
+    amort = calculo.amortizacao_anual(r["credito"], i, 180)
+    taxa_div = ref[conteudo.DIVIDA_TIPO_PADRAO + "Am"]
+    q = calculo.comparar_quitacao(conteudo.DIVIDA_PADRAO, taxa_div / 100, 180, i)
+    opcoes = "".join('<option value="%s"%s>%s (média %s a.m.)</option>' % (k, " selected" if k == conteudo.DIVIDA_TIPO_PADRAO else "", nome, conteudo.pct(ref[k + "Am"]))
+                     for k, nome in conteudo.DIVIDAS) + '<option value="outra">Outra (informo a taxa)</option>'
     return {
+        "D_AMORT_RESUMO": conteudo.amort_resumo(r, amort), "D_AMORT_LINHAS": conteudo.amort_linhas(amort), "D_AMORT_TOTAL": conteudo.amort_total(amort, r["credito"]),
+        "D_AMORT_NOTA": conteudo.amort_nota(ref),
+        "DIVIDA_OPCOES": opcoes, "D_Q_CARTOES": conteudo.quitar_cartoes(q, taxa_div, 15, i * 100), "D_Q_TEXTO": conteudo.quitar_texto(q, 15),
         "D_PARCELA": conteudo.brl0(r["parcela"]), "D_TOTAL": conteudo.brl0(r["total"]),
         "D_SUB": "em 180 meses · taxa de referência " + conteudo.pct(i * 100) + " a.m.",
         "D_CREDITO": conteudo.brl0(r["credito"]) + " · " + str(round(r["ltv"] * 100)) + "%", "D_BARRA": "%.1f" % (r["ltv"] * 100),
