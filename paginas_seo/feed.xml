@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="pt-BR">
+  <title>Home Equity — Datalab Global</title>
+  <subtitle>Atualizações do simulador e taxas de referência do Banco Central</subtitle>
+  <link href="https://homeequity.datalabglobal.com/feed.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://homeequity.datalabglobal.com/" rel="alternate" type="text/html"/>
+  <id>tag:homeequity.datalabglobal.com,2026:feed</id>
+  <updated>2026-11-18T00:00:00Z</updated>
+  <author><name>Datalab Global</name></author>
+  <entry>
+    <title>Atualização de 18/11/2026</title>
+    <link href="https://homeequity.datalabglobal.com/atualizacoes"/>
+    <id>tag:homeequity.datalabglobal.com,2026:atualizacao-2026-11-18-1</id>
+    <updated>2026-11-18T00:00:00Z</updated>
+    <summary type="text">Simulador de Home Equity publicado em homeequity.datalabglobal.com, com parcela estimada, Raio-X da decisão, comparação de custo mensal entre tipos de crédito e guias sobre garantia, custos e taxas.</summary>
+  </entry>
+  <entry>
+    <title>Taxas médias do Banco Central de setembro de 2026</title>
+    <link href="https://homeequity.datalabglobal.com/taxas-de-referencia"/>
+    <id>tag:homeequity.datalabglobal.com,2026:taxas-2026-09</id>
+    <updated>2026-10-01T00:00:00Z</updated>
+    <summary type="text">Média das novas operações em setembro de 2026: crédito com garantia real 2,14% ao mês; crédito pessoal sem garantia 6,42% ao mês; cheque especial 7,53% ao mês; cartão de crédito rotativo 15,29% ao mês.</summary>
+  </entry>
+  <entry>
+    <title>Taxas médias do Banco Central de agosto de 2026</title>
+    <link href="https://homeequity.datalabglobal.com/taxas-de-referencia"/>
+    <id>tag:homeequity.datalabglobal.com,2026:taxas-2026-08</id>
+    <updated>2026-09-01T00:00:00Z</updated>
+    <summary type="text">Média das novas operações em agosto de 2026: crédito com garantia real 2,09% ao mês; crédito pessoal sem garantia 6,39% ao mês; cheque especial 7,43% ao mês; cartão de crédito rotativo 15,18% ao mês.</summary>
+  </entry>
+  <entry>
+    <title>Taxas médias do Banco Central de julho de 2026</title>
+    <link href="https://homeequity.datalabglobal.com/taxas-de-referencia"/>
+    <id>tag:homeequity.datalabglobal.com,2026:taxas-2026-07</id>
+    <updated>2026-08-01T00:00:00Z</updated>
+    <summary type="text">Média das novas operações em julho de 2026: crédito com garantia real 2,05% ao mês; crédito pessoal sem garantia 6,42% ao mês; cheque especial 7,48% ao mês; cartão de crédito rotativo 15,02% ao mês.</summary>
+  </entry>
+  <entry>
+    <title>Taxas médias do Banco Central de junho de 2026</title>
+    <link href="https://homeequity.datalabglobal.com/taxas-de-referencia"/>
+    <id>tag:homeequity.datalabglobal.com,2026:taxas-2026-06</id>
+    <updated>2026-07-01T00:00:00Z</updated>
+    <summary type="text">Média das novas operações em junho de 2026: crédito com garantia real 2,07% ao mês; crédito pessoal sem garantia 6,47% ao mês; cheque especial 7,57% ao mês; cartão de crédito rotativo 15,22% ao mês.</summary>
+  </entry>
+  <entry>
+    <title>Taxas médias do Banco Central de maio de 2026</title>
+    <link href="https://homeequity.datalabglobal.com/taxas-de-referencia"/>
+    <id>tag:homeequity.datalabglobal.com,2026:taxas-2026-05</id>
+    <updated>2026-06-01T00:00:00Z</updated>
+    <summary type="text">Média das novas operações em maio de 2026: crédito com garantia real 1,96% ao mês; crédito pessoal sem garantia 6,63% ao mês; cheque especial 7,47% ao mês; cartão de crédito rotativo 15,11% ao mês.</summary>
+  </entry>
+  <entry>
+    <title>Taxas médias do Banco Central de abril de 2026</title>
+    <link href="https://homeequity.datalabglobal.com/taxas-de-referencia"/>
+    <id>tag:homeequity.datalabglobal.com,2026:taxas-2026-04</id>
+    <updated>2026-05-01T00:00:00Z</updated>
+    <summary type="text">Média das novas operações em abril de 2026: crédito com garantia real 2,03% ao mês; crédito pessoal sem garantia 6,99% ao mês; cheque especial 7,60% ao mês; cartão de crédito rotativo 14,95% ao mês.</summary>
+  </entry>
+</feed>

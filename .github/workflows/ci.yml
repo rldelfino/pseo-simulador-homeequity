@@ -1,0 +1,29 @@
+name: Testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: pip install -r requirements-dev.txt
+      - name: Gerar o site
+        run: python gerador_homeequity.py
+      - name: Datas das páginas em dia (o gerador não pode mudar o arquivo versionado)
+        # Se falhar: rode o gerador, confira e commite dados/datas_paginas.json.
+        run: git diff --exit-code -- dados/datas_paginas.json
+      - name: Testes (a saída do pytest é o critério de merge)
+        run: python -m pytest -q
