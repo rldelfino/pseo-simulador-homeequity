@@ -30,14 +30,14 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 - Domínio previsto: https://homeequity.datalabglobal.com. IndexNow: chave em `indexnow.py`.
 
 ## Estado (18/11/2026)
-- Construído e testado localmente (pytest 53 verdes; navegador Chromium+WebKit desktop e celular sem falhas). **Ainda não** publicado: sem repositório no GitHub, sem Cloudflare Pages, sem DNS, sem site no Umami, sem commit.
+- Construído, testado e **publicado**: repo `rldelfino/pseo-simulador-homeequity` (main), Cloudflare Pages `pseo-simulador-homeequity` (saída `paginas_seo`, sem build), domínio `homeequity.datalabglobal.com` (CNAME criado pelo Cloudflare). CI verde (62 testes).
+- Umami: plano gratuito só permite 1 site ("Website limit reached"), então `UMAMI_ID` usa o ID compartilhado dos irmãos; filtrar por hostname `homeequity.datalabglobal.com`.
 - NÃO verificado: se o formulário do parceiro aceita pré-preenchimento por endereço (hoje abre limpo); iPhone físico; valores mínimo/máximo de crédito do parceiro (o simulador usa mínimo de R$ 50 mil a receber e teto de R$ 3 milhões de crédito como limites de interface, baseados em condições públicas de outras instituições (Creditas R$ 50 mil a R$ 3 mi; Neon até R$ 3 mi), não regra do parceiro); revisão jurídica dos textos.
 
 ## Próximos passos
-1. Dono cria o site "Home Equity" no Umami (ou libera para eu criar) e passa o Website ID → `UMAMI_ID`.
-2. Criar repo `pseo-simulador-homeequity` no GitHub, subir (branch → PR), Cloudflare Pages (saída `paginas_seo`, sem build) e DNS `homeequity.datalabglobal.com`.
-3. Depois de no ar: conferir com `curl` e navegador; Search Console e Bing (sitemap + indexação só das URLs novas); linkar este simulador no rodapé dos irmãos (`OUTROS_SIMULADORES` em 005 e demais).
-4. Só então começar o Auto Equity (007).
+1. Conferir o domínio no ar (`curl -I`), Search Console e Bing (sitemap + indexação só das URLs novas), IndexNow.
+2. Linkar este simulador no rodapé dos irmãos (`OUTROS_SIMULADORES` em 005 e demais).
+3. Só então começar o Auto Equity (007).
 
 ## Testes fora do CI (rodar antes de publicar mudanças no simulador)
 - `python testar_navegador.py` — fluxo de ponta a ponta, Chromium + WebKit, computador e celular.
