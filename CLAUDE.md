@@ -31,6 +31,7 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 
 ## Estado (18/11/2026)
 - Construído, testado e **publicado**: repo `rldelfino/pseo-simulador-homeequity` (main), Cloudflare Pages `pseo-simulador-homeequity` (saída `paginas_seo`, sem build), domínio `homeequity.datalabglobal.com` (CNAME criado pelo Cloudflare). CI verde (62 testes).
+- Cloudflare Pages só publica pushes se o app "Cloudflare Workers and Pages" do GitHub tiver acesso ao repositório (Settings > Applications > Configure > Repository access; é uma lista de repositórios, repo novo precisa ser adicionado).
 - Umami: plano gratuito só permite 1 site ("Website limit reached"), então `UMAMI_ID` usa o ID compartilhado dos irmãos; filtrar por hostname `homeequity.datalabglobal.com`.
 - NÃO verificado: se o formulário do parceiro aceita pré-preenchimento por endereço (hoje abre limpo); iPhone físico; valores mínimo/máximo de crédito do parceiro (o simulador usa mínimo de R$ 50 mil a receber e teto de R$ 3 milhões de crédito como limites de interface, baseados em condições públicas de outras instituições (Creditas R$ 50 mil a R$ 3 mi; Neon até R$ 3 mi), não regra do parceiro); revisão jurídica dos textos.
 
