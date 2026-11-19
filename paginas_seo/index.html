@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#020617">
 <link rel="preload" href="/fonts/playfair-display-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=f5f501ae59">
+<link rel="stylesheet" href="/styles.css?v=7f3e46bfd8">
 <link rel="alternate" type="application/atom+xml" title="Home Equity — Datalab Global" href="/feed.xml">
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://homeequity.datalabglobal.com/#organizacao", "name": "Datalab Global", "legalName": "Satori Soluções Comerciais LTDA", "taxID": "63.998.502/0001-73", "url": "https://www.datalabglobal.com/", "email": "contato@datalabglobal.com", "logo": {"@type": "ImageObject", "url": "https://homeequity.datalabglobal.com/apple-touch-icon.png", "width": 180, "height": 180}}, {"@type": "WebSite", "@id": "https://homeequity.datalabglobal.com/#site", "url": "https://homeequity.datalabglobal.com/", "name": "Home Equity — Datalab Global", "inLanguage": "pt-BR", "publisher": {"@id": "https://homeequity.datalabglobal.com/#organizacao"}}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Posso continuar morando no imóvel?", "acceptedAnswer": {"@type": "Answer", "text": "Sim. No Home Equity o imóvel fica como garantia, mas você continua usando: morando, alugando ou mantendo o negócio nele, conforme o contrato. O que muda é o registro da garantia na matrícula, que sai quando a dívida é quitada. Veja como funciona a garantia."}}, {"@type": "Question", "name": "Posso usar um imóvel que ainda está financiado?", "acceptedAnswer": {"@type": "Answer", "text": "Em geral, sim, conforme a instituição: o novo crédito quita o saldo do financiamento e libera a diferença para você. Por isso o simulador tem a opção \"Ainda financiado\": o saldo entra no total do crédito e conta para o limite de 60% do valor do imóvel (teto de R$ 3 milhões de crédito nesta ferramenta)."}}, {"@type": "Question", "name": "Por que a parcela muda com o IPCA?", "acceptedAnswer": {"@type": "Answer", "text": "Porque a taxa divulgada pelo parceiro é \"a partir de 1,09% ao mês mais IPCA\": além dos juros, o saldo é atualizado pela inflação. O simulador usa o IPCA dos últimos 12 meses e o mantém constante, então a parcela real pode ficar acima ou abaixo da estimativa, conforme a inflação dos próximos anos."}}, {"@type": "Question", "name": "Quanto tempo leva até o dinheiro cair na conta?", "acceptedAnswer": {"@type": "Answer", "text": "Não há um prazo único: depende da análise de crédito, da avaliação do imóvel, da análise jurídica e do registro da garantia em cartório. Cada instituição informa o seu prazo na proposta."}}, {"@type": "Question", "name": "O que acontece se eu atrasar as parcelas?", "acceptedAnswer": {"@type": "Answer", "text": "Atrasos geram encargos previstos no contrato e, se a dívida não for regularizada, a lei prevê um procedimento de cobrança que pode chegar à venda do imóvel dado em garantia. Por isso vale escolher uma parcela que caiba com folga. Detalhes em Garantia do imóvel."}}, {"@type": "Question", "name": "Home Equity é o mesmo que refinanciamento ou portabilidade?", "acceptedAnswer": {"@type": "Answer", "text": "Não. No refinanciamento do imóvel, o novo crédito quita o saldo do financiamento e libera a diferença; é o que a opção \"Ainda financiado\" do simulador calcula. A portabilidade leva uma dívida que você já tem para outra instituição, em geral com taxa menor. Já o Home Equity, também chamado de empréstimo com garantia de imóvel, é um crédito novo com o imóvel em garantia. Veja a comparação."}}, {"@type": "Question", "name": "Quanto da minha renda a parcela pode ocupar?", "acceptedAnswer": {"@type": "Answer", "text": "Não há um percentual único em lei para o Home Equity: cada instituição define na análise de crédito, e o parceiro não divulga o dele. A referência de mercado mais citada é a parcela de até cerca de 30% da renda mensal (algumas aceitam até 35%), uma prática dos bancos, muito citada no crédito imobiliário. Entram na conta a renda comprovada, outras dívidas, o histórico de crédito e a avaliação do imóvel. Veja como funciona."}}, {"@type": "Question", "name": "Posso escolher entre SAC e Price?", "acceptedAnswer": {"@type": "Answer", "text": "No simulador, sim: o Price tem parcela fixa; o SAC começa com a parcela maior e ela cai todo mês, com menos juros no total. Os dois usam a mesma taxa de referência. Quais sistemas estão disponíveis, e com que taxa, o parceiro informa na proposta."}}, {"@type": "Question", "name": "A simulação vale como proposta?", "acceptedAnswer": {"@type": "Answer", "text": "Não. É uma estimativa feita com taxa de referência, sem consultar você nem o imóvel. A taxa, o limite e o prazo finais saem da análise de crédito e da avaliação do imóvel."}}]}</script>
@@ -94,7 +94,7 @@
     </section>
 
     <section class="panel resp" id="resultado" aria-labelledby="t-resultado" aria-live="polite">
-      <h2 class="sr" id="t-resultado">Resultado da simulação</h2>
+      <h2 class="kicker kres" id="t-resultado">Resultado da simulação</h2>
       <div class="res">
         <div>
           <div class="kicker" id="r-kicker">Parcela estimada</div>
@@ -102,7 +102,7 @@
           <div class="dim" id="r-sub">em 180 meses · taxa 1,47% a.m.</div>
           <div class="dim ult" id="r-ultima" hidden></div>
           <hr class="sep">
-          <div class="dim">Total estimado ao final</div>
+          <div class="dim lab">Total estimado ao final</div>
           <div class="mid num" id="r-total">R$ 713.837</div>
           <div class="dim"><a href="/metodologia">Como calculamos</a></div>
         </div>
@@ -115,6 +115,7 @@
           <div class="hint" id="hint-sistema">Parcela igual todo mês.</div>
         </div>
       </div>
+      <div class="callout"><p id="r-resumo">Você pega R$ 250.000 e paga R$ 713.837 no total: R$ 463.837 a mais em juros.</p></div>
       <div class="rosca">
         <svg viewBox="0 0 120 120" width="120" height="120" role="img" id="rosca-svg" aria-label="Do total pago, 65% é juros">
           <circle cx="60" cy="60" r="46" fill="none" stroke="#e3a96b" stroke-width="14"/>
@@ -341,7 +342,7 @@
   </div>
 </footer>
 <script src="/calculo.js?v=cc6d752a33"></script>
-<script src="/simulador.js?v=eca3251c33"></script>
+<script src="/simulador.js?v=bdc82aae19"></script>
 <script defer src="/menu.js?v=ace11e94f9"></script>
 </body>
 </html>

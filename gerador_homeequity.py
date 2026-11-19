@@ -411,6 +411,7 @@ def _valores_padrao():
         "FATO_TAXA": conteudo.pct(calculo.TAXA_PARCEIRO_AM), "FATO_LTV": "%d%%" % round(calculo.LTV_MAX * 100), "FATO_PRAZO": "%d anos" % calculo.PRAZO_MAX_ANOS,
         "PRAZO_MIN": str(calculo.PRAZO_MIN_ANOS), "PRAZO_MAX": str(calculo.PRAZO_MAX_ANOS),
         "D_L_CRED": conteudo.brl0(r["credito"]), "D_L_JUROS": conteudo.brl0(r["juros"]),
+        "D_RESUMO": "Você pega " + conteudo.brl0(r["credito"]) + " e paga " + conteudo.brl0(r["total"]) + " no total: " + conteudo.brl0(r["juros"]) + " a mais em juros.",
         "D_PARCELA": conteudo.brl0(r["parcela"]), "D_TOTAL": conteudo.brl0(r["total"]),
         "D_SUB": "em 180 meses · taxa " + conteudo.pct(i * 100) + " a.m.",
         "D_CREDITO": conteudo.brl0(r["credito"]) + " · " + str(round(r["ltv"] * 100)) + "%", "D_BARRA": "%.1f" % (r["ltv"] * 100),
