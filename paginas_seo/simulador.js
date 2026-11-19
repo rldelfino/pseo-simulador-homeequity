@@ -446,6 +446,7 @@
     $('r-parcela').textContent = semMargem ? '—' : H.brl(r.parcela);
     $('r-sub').textContent = 'em ' + meses + ' meses · taxa ' + H.pct(i * 100) + ' a.m.';
     $('r-total').textContent = semMargem ? '—' : H.brl(r.total);
+    $('r-resumo').textContent = semMargem ? 'Ajuste o valor do imóvel ou o saldo para ver o custo.' : 'Você pega ' + H.brl(r.credito) + ' e paga ' + H.brl(r.total) + ' no total: ' + H.brl(r.juros) + ' a mais em juros.';
     $('c-imovel').textContent = H.brl(estado.imovel);
     var usoPct = Math.min(100, r.ltv * 100);
     $('bar-fill').setAttribute('width', usoPct.toFixed(1) + '%');

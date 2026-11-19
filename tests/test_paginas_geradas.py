@@ -203,3 +203,49 @@ def test_js_nao_mexe_em_estilo_inline():
         js = re.sub(r"//[^\n]*", "", js)
         for proibido in (".style.", "cssText", "setAttribute('style'", 'setAttribute("style"', "insertRule", "innerHTML"):
             assert proibido not in js, (nome, proibido)
+
+
+def _json_ld(html):
+    return [json.loads(b) for b in re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)]
+
+
+def test_organizacao_tem_logo_e_paginas_internas_tem_trilha(site):
+    home = _json_ld(_ler(site, "index.html"))
+    org = [n for blk in home for n in blk.get("@graph", []) if n.get("@type") == "Organization"][0]
+    assert org["logo"]["url"].endswith("/apple-touch-icon.png") and org["logo"]["width"] >= 112
+    for slug in ("como-funciona", "metodologia", "privacidade", "dados-abertos"):
+        trilha = [b for b in _json_ld(_ler(site, slug + ".html")) if b["@type"] == "BreadcrumbList"]
+        assert len(trilha) == 1, slug
+        itens = trilha[0]["itemListElement"]
+        assert [i["position"] for i in itens] == [1, 2] and itens[1]["item"].endswith("/" + slug)
+
+
+def test_dados_abertos_tem_dataset_e_link_para_o_csv(site):
+    html = _ler(site, "dados-abertos.html")
+    ds = [b for b in _json_ld(html) if b["@type"] == "Dataset"]
+    assert len(ds) == 1
+    d = ds[0]
+    assert d["license"].startswith("https://opendatacommons.org/") and d["isAccessibleForFree"] is True
+    assert d["distribution"][0]["contentUrl"] == "https://homeequity.datalabglobal.com/dados/taxas-referencia.csv"
+    assert "/" in d["temporalCoverage"] and d["variableMeasured"]
+    assert 'href="/dados/taxas-referencia.csv"' in html and "ODbL 1.0" in html and "Como citar" in html
+    assert "/dados-abertos" in _ler(site, "sitemap.xml")
+
+
+def test_termos_de_busca_aparecem_onde_o_assunto_ja_e_esse(site):
+    assert "empréstimo com garantia de imóvel" in _ler(site, "como-funciona.html")
+    comp = _ler(site, "home-equity-ou-outro-credito.html")
+    assert "empréstimo com garantia de imóvel" in comp and "refinanciamento" in comp and "portabilidade" in comp
+    assert "crédito com garantia de imóvel" in _ler(site, "como-funciona.html")
+
+
+def test_descricoes_das_paginas_pequenas_nao_sao_curtas(site):
+    for slug in ("sobre", "atualizacoes", "privacidade", "termos"):
+        desc = re.search(r'name="description" content="(.*?)"', _ler(site, slug + ".html")).group(1)
+        assert len(desc) >= 100, (slug, len(desc))
+
+
+def test_js_com_versao_no_endereco_tem_cache_imutavel():
+    for nome in ("calculo.js", "simulador.js", "menu.js"):
+        trecho = g.HEADERS.split("/" + nome)[1].split("\n\n")[0]
+        assert "immutable" in trecho, nome

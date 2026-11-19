@@ -124,7 +124,7 @@ HOME_MAIN = """  <section class="hero">
     </section>
 
     <section class="panel resp" id="resultado" aria-labelledby="t-resultado" aria-live="polite">
-      <h2 class="sr" id="t-resultado">Resultado da simulação</h2>
+      <h2 class="kicker kres" id="t-resultado">Resultado da simulação</h2>
       <div class="res">
         <div>
           <div class="kicker" id="r-kicker">Parcela estimada</div>
@@ -132,7 +132,7 @@ HOME_MAIN = """  <section class="hero">
           <div class="dim" id="r-sub">@@D_SUB@@</div>
           <div class="dim ult" id="r-ultima" hidden></div>
           <hr class="sep">
-          <div class="dim">Total estimado ao final</div>
+          <div class="dim lab">Total estimado ao final</div>
           <div class="mid num" id="r-total">@@D_TOTAL@@</div>
           <div class="dim"><a href="/metodologia">Como calculamos</a></div>
         </div>
@@ -145,9 +145,10 @@ HOME_MAIN = """  <section class="hero">
           <div class="hint" id="hint-sistema">@@D_HINT_SIS@@</div>
         </div>
       </div>
+      <div class="callout"><p id="r-resumo">@@D_RESUMO@@</p></div>
       <div class="rosca">
         <svg viewBox="0 0 120 120" width="120" height="120" role="img" id="rosca-svg" aria-label="Do total pago, @@D_PCT_JUROS@@% é juros">
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#cbd5e1" stroke-width="14"/>
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#e3a96b" stroke-width="14"/>
           <circle id="rosca-cred" cx="60" cy="60" r="46" fill="none" stroke="#4aa3b5" stroke-width="14" stroke-dasharray="@@D_ROSCA_P@@ 289.03" transform="rotate(-90 60 60)"/>
           <text x="60" y="61" text-anchor="middle" class="rc-n" id="rosca-pct">@@D_PCT_JUROS@@%</text>
           <text x="60" y="77" text-anchor="middle" class="rc-t">em juros</text>

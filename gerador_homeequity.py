@@ -65,13 +65,13 @@ HEADERS = """/*
   Cache-Control: public, max-age=31536000, immutable
 
 /calculo.js
-  Cache-Control: public, max-age=3600, must-revalidate
+  Cache-Control: public, max-age=31536000, immutable
 
 /simulador.js
-  Cache-Control: public, max-age=3600, must-revalidate
+  Cache-Control: public, max-age=31536000, immutable
 
 /menu.js
-  Cache-Control: public, max-age=3600, must-revalidate
+  Cache-Control: public, max-age=31536000, immutable
 
 /og-image.png
   Cache-Control: public, max-age=86400, must-revalidate
@@ -295,7 +295,7 @@ def _umami():
 # Navegação: poucos links no cabeçalho, tudo no menu do celular e no rodapé (em colunas).
 DESTAQUES = ["como-funciona", "garantia-do-imovel", "taxas-de-referencia"]
 ENTENDA = ["como-funciona", "garantia-do-imovel", "custos-alem-dos-juros", "home-equity-ou-outro-credito", "quando-nao-vale-a-pena"]
-TRANSPARENCIA = ["taxas-de-referencia", "metodologia", "atualizacoes", "sobre"]
+TRANSPARENCIA = ["taxas-de-referencia", "metodologia", "dados-abertos", "atualizacoes", "sobre"]
 LEGAL = ["privacidade", "termos"]
 ROTULOS = {"atualizacoes": "Atualizações", "privacidade": "Privacidade", "termos": "Termos de uso",
            "home-equity-ou-outro-credito": "Comparar com outros créditos", "taxas-de-referencia": "Taxas do Banco Central",
@@ -356,7 +356,32 @@ def _ctx(hoje):
 
 def _organizacao():
     return {"@type": "Organization", "@id": DOMINIO + "/#organizacao", "name": "Datalab Global", "legalName": RAZAO_SOCIAL,
-            "taxID": CNPJ, "url": HUB + "/", "email": EMAIL}
+            "taxID": CNPJ, "url": HUB + "/", "email": EMAIL, "logo": {"@type": "ImageObject", "url": DOMINIO + "/apple-touch-icon.png", "width": 180, "height": 180}}
+
+
+def _breadcrumb(pg, canonical):
+    """Trilha Início > página, para as páginas internas."""
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home Equity", "item": DOMINIO + "/"},
+        {"@type": "ListItem", "position": 2, "name": pg["h1"], "item": canonical}]}
+
+
+def _dataset(hoje):
+    """Dataset (schema.org) do CSV de taxas da página /dados-abertos."""
+    linhas = tr.ler()
+    meses = sorted({l["mes"] for l in linhas})
+    return {"@context": "https://schema.org", "@type": "Dataset",
+            "name": "Taxas médias de crédito do Banco Central e IPCA (simulador de Home Equity)",
+            "description": "Taxas médias de juros das novas operações de crédito de pessoas físicas (garantia real, crédito pessoal, cheque especial e cartão rotativo) e IPCA acumulado em 12 meses, "
+                           "séries mensais do SGS do Banco Central usadas no simulador de Home Equity.",
+            "url": DOMINIO + "/dados-abertos", "inLanguage": "pt-BR", "isAccessibleForFree": True, "license": "https://opendatacommons.org/licenses/odbl/1-0/",
+            "creator": {"@type": "Organization", "name": "Datalab Global", "url": HUB + "/"}, "publisher": {"@id": DOMINIO + "/#organizacao"},
+            "dateModified": hoje.isoformat(), "keywords": ["crédito", "juros", "Home Equity", "Banco Central", "IPCA", "Brasil"],
+            "isBasedOn": "https://dadosabertos.bcb.gov.br/", "temporalCoverage": meses[0] + "/" + meses[-1],
+            "variableMeasured": [{"@type": "PropertyValue", "name": n, "description": d} for n, d in (
+                ("codigo_serie", "Código da série no SGS do Banco Central"), ("modalidade", "Nome da série"), ("mes_referencia", "Mês de referência (AAAA-MM)"),
+                ("valor", "Valor da série, em %"), ("unidade", "am = % ao mês; aa = % ao ano"))],
+            "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": DOMINIO + "/dados/taxas-referencia.csv"}]}
 
 
 def _valores_padrao():
@@ -386,6 +411,7 @@ def _valores_padrao():
         "FATO_TAXA": conteudo.pct(calculo.TAXA_PARCEIRO_AM), "FATO_LTV": "%d%%" % round(calculo.LTV_MAX * 100), "FATO_PRAZO": "%d anos" % calculo.PRAZO_MAX_ANOS,
         "PRAZO_MIN": str(calculo.PRAZO_MIN_ANOS), "PRAZO_MAX": str(calculo.PRAZO_MAX_ANOS),
         "D_L_CRED": conteudo.brl0(r["credito"]), "D_L_JUROS": conteudo.brl0(r["juros"]),
+        "D_RESUMO": "Você pega " + conteudo.brl0(r["credito"]) + " e paga " + conteudo.brl0(r["total"]) + " no total: " + conteudo.brl0(r["juros"]) + " a mais em juros.",
         "D_PARCELA": conteudo.brl0(r["parcela"]), "D_TOTAL": conteudo.brl0(r["total"]),
         "D_SUB": "em 180 meses · taxa " + conteudo.pct(i * 100) + " a.m.",
         "D_CREDITO": conteudo.brl0(r["credito"]) + " · " + str(round(r["ltv"] * 100)) + "%", "D_BARRA": "%.1f" % (r["ltv"] * 100),
@@ -446,8 +472,11 @@ def _pagina_guia(pg, valores, hoje, ctx):
     artigo = {"@context": "https://schema.org", "@type": "Article", "headline": pg["h1"], "description": pg["desc"], "inLanguage": "pt-BR",
               "dateModified": hoje.isoformat(), "mainEntityOfPage": canonical,
               "author": {"@type": "Organization", "name": "Datalab Global"}, "publisher": _organizacao()}
+    ld = (_ld(artigo) if guia else "") + _ld(_breadcrumb(pg, canonical))
+    if pg["slug"] == "dados-abertos":
+        ld += _ld(_dataset(hoje))
     return _preencher(layout.LAYOUT, dict(valores, TITLE=pg["title"], DESC=pg["desc"], CANONICAL=canonical, ROBOTS="index,follow,max-image-preview:large",
-                                          OGTYPE="article" if guia else "website", JSONLD=_ld(artigo) if guia else "", MAIN=main, SCRIPTS=menu_script()))
+                                          OGTYPE="article" if guia else "website", JSONLD=ld, MAIN=main, SCRIPTS=menu_script()))
 
 
 def _ler_manifesto(caminho):
