@@ -125,8 +125,8 @@ AMORT_LEGENDA = {"price": "Parcela fixa: juros, amortização e saldo devedor no
 # ---------- sistema de amortização e renda (home): mesmos textos que o simulador.js escreve ----------
 def hint_sistema(sistema="price"):
     if sistema == "sac":
-        return "A primeira parcela é a maior e ela cai todo mês. Paga menos juros no total. Se o parceiro oferece SAC, ele informa na proposta."
-    return "Parcela igual todo mês: começa menor que no SAC e paga mais juros no total."
+        return "Cai todo mês e paga menos juros. O parceiro confirma na proposta se oferece."
+    return "Parcela igual todo mês."
 
 
 def renda_texto(parcela, sistema="price"):
@@ -156,23 +156,25 @@ def regra_renda():
 # ---------- "o mesmo crédito em outras modalidades" (home) ----------
 def cm_lead(credito, anos):
     return ("Com o mesmo crédito de " + brl0(credito) + " e o mesmo prazo de " + str(anos) + " anos, veja quanto você pagaria em cada modalidade. "
-            "As taxas das outras modalidades são médias de mercado do Banco Central.")
+            "As outras taxas são médias de mercado do Banco Central.")
 
 
 def cm_sub(credito, anos, he_pct):
     return "crédito de " + brl0(credito) + " · " + str(anos) + " anos · " + pct(he_pct) + " a.m."
 
 
-def cm_gap(ref, credito, meses, he_total):
-    taxa = ref["pessoalAm"] / 100
-    pa = calculo.pmt(credito, taxa, meses)
-    total = pa * meses
-    return ("No crédito pessoal sem garantia (média de " + pct(ref["pessoalAm"]) + " a.m.), o mesmo crédito sairia por " + brl0(pa) + " por mês e " + brl0(total) +
-            " no total: " + brl0(total - he_total) + " a mais que no Home Equity.")
+def cm_gap_valor(ref, credito, meses, he_total):
+    """Quanto a mais o mesmo crédito custaria, no total, no crédito pessoal sem garantia (média de mercado)."""
+    return calculo.pmt(credito, ref["pessoalAm"] / 100, meses) * meses - he_total
+
+
+def cm_gap(ref, credito, meses):
+    pa = calculo.pmt(credito, ref["pessoalAm"] / 100, meses)
+    return ("a mais no crédito pessoal sem garantia (média de " + pct(ref["pessoalAm"]) + " a.m.): " + brl0(pa) + " por mês, " + brl0(pa * meses) + " no total.")
 
 
 def cm_nota(ref):
-    return ("Conta de comparação: mesmo crédito e mesma duração, com parcela fixa nas outras modalidades (o Home Equity segue o sistema escolhido). Cheque especial e rotativo não costumam durar tanto; "
+    return ("Conta de comparação: mesmo crédito e mesma duração, com parcela fixa nas outras modalidades (o Home Equity segue o sistema escolhido). Cheque especial não costuma durar tanto, e o cartão rotativo, menos ainda: "
             "o ponto é ver quanto o juro pesa. O crédito com garantia real mistura imóvel e veículo. Médias de mercado em " + ref["garantiaRealMes"] + " (Banco Central); não são oferta.")
 
 

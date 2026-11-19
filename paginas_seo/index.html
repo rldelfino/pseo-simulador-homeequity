@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#020617">
 <link rel="preload" href="/fonts/playfair-display-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=4158ac1d95">
+<link rel="stylesheet" href="/styles.css?v=644dbfba77">
 <link rel="alternate" type="application/atom+xml" title="Home Equity — Datalab Global" href="/feed.xml">
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://homeequity.datalabglobal.com/#organizacao", "name": "Datalab Global", "legalName": "Satori Soluções Comerciais LTDA", "taxID": "63.998.502/0001-73", "url": "https://www.datalabglobal.com/", "email": "contato@datalabglobal.com"}, {"@type": "WebSite", "@id": "https://homeequity.datalabglobal.com/#site", "url": "https://homeequity.datalabglobal.com/", "name": "Home Equity — Datalab Global", "inLanguage": "pt-BR", "publisher": {"@id": "https://homeequity.datalabglobal.com/#organizacao"}}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Posso continuar morando no imóvel?", "acceptedAnswer": {"@type": "Answer", "text": "Sim. No Home Equity o imóvel fica como garantia, mas você continua usando: morando, alugando ou mantendo o negócio nele, conforme o contrato. O que muda é o registro da garantia na matrícula, que sai quando a dívida é quitada. Veja como funciona a garantia."}}, {"@type": "Question", "name": "Posso usar um imóvel que ainda está financiado?", "acceptedAnswer": {"@type": "Answer", "text": "Em geral, sim, conforme a instituição: o novo crédito quita o saldo do financiamento e libera a diferença para você. Por isso o simulador tem a opção \"Ainda financiado\": o saldo entra no total do crédito e conta para o limite de 60% do valor do imóvel (teto de R$ 3 milhões de crédito nesta ferramenta)."}}, {"@type": "Question", "name": "Por que a parcela muda com o IPCA?", "acceptedAnswer": {"@type": "Answer", "text": "Porque a taxa divulgada pelo parceiro é \"a partir de 1,09% ao mês mais IPCA\": além dos juros, o saldo é atualizado pela inflação. O simulador usa o IPCA dos últimos 12 meses e o mantém constante, então a parcela real pode ficar acima ou abaixo da estimativa, conforme a inflação dos próximos anos."}}, {"@type": "Question", "name": "Quanto tempo leva até o dinheiro cair na conta?", "acceptedAnswer": {"@type": "Answer", "text": "Não há um prazo único: depende da análise de crédito, da avaliação do imóvel, da análise jurídica e do registro da garantia em cartório. Cada instituição informa o seu prazo na proposta."}}, {"@type": "Question", "name": "O que acontece se eu atrasar as parcelas?", "acceptedAnswer": {"@type": "Answer", "text": "Atrasos geram encargos previstos no contrato e, se a dívida não for regularizada, a lei prevê um procedimento de cobrança que pode chegar à venda do imóvel dado em garantia. Por isso vale escolher uma parcela que caiba com folga. Detalhes em Garantia do imóvel."}}, {"@type": "Question", "name": "Quanto da minha renda a parcela pode ocupar?", "acceptedAnswer": {"@type": "Answer", "text": "Não há um percentual único em lei para o Home Equity: cada instituição define na análise de crédito, e o parceiro não divulga o dele. A referência de mercado mais citada é a parcela de até cerca de 30% da renda mensal (algumas aceitam até 35%), uma prática dos bancos, muito citada no crédito imobiliário. Entram na conta a renda comprovada, outras dívidas, o histórico de crédito e a avaliação do imóvel. Veja como funciona."}}, {"@type": "Question", "name": "Posso escolher entre SAC e Price?", "acceptedAnswer": {"@type": "Answer", "text": "No simulador, sim: o Price tem parcela fixa; o SAC começa com a parcela maior e ela cai todo mês, com menos juros no total. Os dois usam a mesma taxa de referência. Quais sistemas estão disponíveis, e com que taxa, o parceiro informa na proposta."}}, {"@type": "Question", "name": "A simulação vale como proposta?", "acceptedAnswer": {"@type": "Answer", "text": "Não. É uma estimativa feita com taxa de referência, sem consultar você nem o imóvel. A taxa, o limite e o prazo finais saem da análise de crédito e da avaliação do imóvel."}}]}</script>
@@ -91,14 +91,6 @@
         <div class="slabel"><span>2 anos</span><span>20 anos</span></div>
         <div class="hint warn" id="msg-prazo" hidden></div>
       </div>
-      <div class="f">
-        <div class="lb" id="lb-sistema">Como a parcela é calculada <span>sistema de amortização</span></div>
-        <div class="seg s2" role="radiogroup" aria-labelledby="lb-sistema">
-          <input type="radio" name="sistema" id="sis-price" value="price" checked><label for="sis-price">Price <small>parcela fixa</small></label>
-          <input type="radio" name="sistema" id="sis-sac" value="sac"><label for="sis-sac">SAC <small>parcela que cai</small></label>
-        </div>
-        <div class="hint" id="hint-sistema">Parcela igual todo mês: começa menor que no SAC e paga mais juros no total.</div>
-      </div>
     </section>
 
     <section class="panel resp" id="resultado" aria-labelledby="t-resultado" aria-live="polite">
@@ -107,21 +99,20 @@
         <div>
           <div class="kicker" id="r-kicker">Parcela estimada</div>
           <div class="big num"><span id="r-parcela">R$ 3.966</span> <small>/mês</small></div>
-          <div class="dim" id="r-sub">em 180 meses · taxa de referência 1,47% a.m.</div>
+          <div class="dim" id="r-sub">em 180 meses · taxa 1,47% a.m.</div>
           <div class="dim ult" id="r-ultima" hidden></div>
           <hr class="sep">
           <div class="dim">Total estimado ao final</div>
           <div class="mid num" id="r-total">R$ 713.837</div>
           <div class="dim"><a href="/metodologia">Como calculamos</a></div>
         </div>
-        <div class="ctx">
-          <div class="t">Valor do imóvel</div>
-          <div class="v num" id="c-imovel">R$ 800.000</div>
-          <svg class="bar" id="bar-ltv" width="100%" height="12" role="img" aria-label="Quanto do valor do imóvel o crédito usa">
-            <rect width="100%" height="12" rx="6" fill="rgba(255,255,255,.1)"/><rect id="bar-fill" width="31.2%" height="12" rx="6" fill="#4aa3b5"/><rect id="bar-mark" x="60%" y="-3" width="2" height="18" fill="#e2e8f0"/>
-          </svg>
-          <div class="lg"><span><s></s>Crédito (<span id="c-ltv-rot">você recebe</span>)</span><b class="num" id="c-credito">R$ 250.000 · 31%</b></div>
-          <div class="lg"><span><s class="lim"></s><span id="c-limite-rot">Limite (60%)</span></span><b class="num" id="c-limite">R$ 480.000</b></div>
+        <div class="ctx sis">
+          <div class="t" id="lb-sistema">Tipo de parcela</div>
+          <div class="seg s2" role="radiogroup" aria-labelledby="lb-sistema">
+            <input type="radio" name="sistema" id="sis-price" value="price" checked><label for="sis-price">Price <small>parcela fixa</small></label>
+            <input type="radio" name="sistema" id="sis-sac" value="sac"><label for="sis-sac">SAC <small>parcela cai</small></label>
+          </div>
+          <div class="hint" id="hint-sistema">Parcela igual todo mês.</div>
         </div>
       </div>
       <div class="rosca">
@@ -137,10 +128,6 @@
           <div class="lg"><span><s class="jr"></s>Juros</span><b class="num" id="rosca-juros-v">R$ 463.837</b></div>
         </div>
       </div>
-      <div class="renda-mini">
-        <div><div class="kicker">Renda de referência</div><div class="dim">se a parcela ocupar 30% dela · <a href="#t-raio">entenda</a></div></div>
-        <b class="num" id="r-renda">R$ 13.219</b>
-      </div>
       <div class="rodape-res">
         <div class="cta">
           <div><strong>Faça sua proposta</strong><span class="s">Com um parceiro de crédito · sem compromisso</span></div>
@@ -150,6 +137,17 @@
         <div class="copiar"><button type="button" id="btn-copiar">Copiar o link desta simulação</button><span id="msg-copiado" role="status"></span></div>
       </div>
     </section>
+  </div>
+
+  <div class="uso" aria-label="Quanto do valor do imóvel o crédito usa">
+    <div class="uso-t"><span class="t">Valor do imóvel</span><b class="v num" id="c-imovel">R$ 800.000</b></div>
+    <div class="uso-b"><svg class="bar" id="bar-ltv" width="100%" height="12" role="img" aria-label="Quanto do valor do imóvel o crédito usa">
+            <rect width="100%" height="12" rx="6" fill="rgba(255,255,255,.1)"/><rect id="bar-fill" width="31.2%" height="12" rx="6" fill="#4aa3b5"/><rect id="bar-mark" x="60%" y="-3" width="2" height="18" fill="#e2e8f0"/>
+          </svg></div>
+    <div class="uso-l">
+      <div class="lg"><span><s></s>Crédito (<span id="c-ltv-rot">você recebe</span>)</span><b class="num" id="c-credito">R$ 250.000 · 31%</b></div>
+      <div class="lg"><span><s class="lim"></s><span id="c-limite-rot">Limite (60%)</span></span><b class="num" id="c-limite">R$ 480.000</b></div>
+    </div>
   </div>
 
   <section class="band fatos" aria-label="Condições divulgadas por um parceiro de crédito">
@@ -225,28 +223,16 @@
   <section class="blk" aria-labelledby="t-cmpmod">
     <div class="kicker">Comparativo</div>
     <h2 id="t-cmpmod">O mesmo crédito em outras modalidades</h2>
-    <p class="lead" id="cm-lead">Com o mesmo crédito de R$ 250.000 e o mesmo prazo de 15 anos, veja quanto você pagaria em cada modalidade. As taxas das outras modalidades são médias de mercado do Banco Central.</p>
-    <div class="cmpgrid">
-      <div class="panel hecard">
-        <div class="kicker">Seu Home Equity</div>
-        <div class="big num"><span id="cm-parcela">R$ 3.966</span> <small>/mês</small></div>
-        <div class="dim" id="cm-sub">crédito de R$ 250.000 · 15 anos · 1,47% a.m.</div>
-        <hr class="sep">
-        <div class="dim">Total pago ao final</div>
-        <div class="mid num" id="cm-total">R$ 713.837</div>
-        <div class="dim cm-j">Juros no total</div>
-        <div class="mid num" id="cm-juros">R$ 463.837</div>
-        <p class="cm-gap" id="cm-gap">No crédito pessoal sem garantia (média de 6,42% a.m.), o mesmo crédito sairia por R$ 16.044 por mês e R$ 2.887.936 no total: R$ 2.174.099 a mais que no Home Equity.</p>
-      </div>
-      <div class="panel graf cmpviz">
-        <div class="kicker">Quanto você terá pago ao longo do tempo</div>
-        <div class="leg" id="cm-leg"></div>
-        <svg id="cm-linha" viewBox="0 0 640 220" preserveAspectRatio="none" role="img" aria-label="Gráfico de linhas: total pago ao longo do tempo no Home Equity e em outras modalidades"></svg>
-        <div class="eixo"><span>Início</span><span id="cm-eixo-fim">Ano 15</span></div>
-        <div class="qviz" id="cm-barras"></div>
+    <p class="lead" id="cm-lead">Com o mesmo crédito de R$ 250.000 e o mesmo prazo de 15 anos, veja quanto você pagaria em cada modalidade. As outras taxas são médias de mercado do Banco Central.</p>
+    <div class="panel cmpx">
+      <div class="cmleg"><span><s class="cr"></s>O que você recebe</span><span><s class="jr2"></s>Juros pagos até o fim</span></div>
+      <div class="cmrows" id="cm-linhas"></div>
+      <div class="cmgap">
+        <div class="gv num" id="cm-gap-v">R$ 2.174.099</div>
+        <p id="cm-gap">a mais no crédito pessoal sem garantia (média de 6,42% a.m.): R$ 16.044 por mês, R$ 2.887.936 no total.</p>
       </div>
     </div>
-    <div class="hint" id="cm-nota">Conta de comparação: mesmo crédito e mesma duração, com parcela fixa nas outras modalidades (o Home Equity segue o sistema escolhido). Cheque especial e rotativo não costumam durar tanto; o ponto é ver quanto o juro pesa. O crédito com garantia real mistura imóvel e veículo. Médias de mercado em set/2026 (Banco Central); não são oferta.</div>
+    <div class="hint" id="cm-nota">Conta de comparação: mesmo crédito e mesma duração, com parcela fixa nas outras modalidades (o Home Equity segue o sistema escolhido). Cheque especial não costuma durar tanto, e o cartão rotativo, menos ainda: o ponto é ver quanto o juro pesa. O crédito com garantia real mistura imóvel e veículo. Médias de mercado em set/2026 (Banco Central); não são oferta.</div>
   </section>
 
   <section class="band" aria-labelledby="t-quitar">
@@ -355,7 +341,7 @@
   </div>
 </footer>
 <script src="/calculo.js?v=cc6d752a33"></script>
-<script src="/simulador.js?v=92c8cc3dcc"></script>
-<script defer src="/menu.js?v=42ec8de3ac"></script>
+<script src="/simulador.js?v=eca3251c33"></script>
+<script defer src="/menu.js?v=ace11e94f9"></script>
 </body>
 </html>

@@ -288,80 +288,53 @@
   }
 
   // "O mesmo crédito em outras modalidades": o Home Equity (no sistema escolhido) contra médias de mercado (parcela fixa), com o mesmo crédito e prazo.
+  // Cada linha é uma barra do total pago: a parte clara é o crédito que você recebe e a parte colorida são os juros.
   var MODALIDADES = [
-    { k: 'he', nome: 'Home Equity', cls: 'c-he' },
-    { k: 'gar', nome: 'Garantia real (média)', cls: 'c-gar', taxa: function () { return H.ref.garantiaRealAm; }, linha: 'l-gar' },
-    { k: 'pessoal', nome: 'Crédito pessoal', cls: 'c-pes', taxa: function () { return H.ref.pessoalAm; }, linha: 'l-pes' },
-    { k: 'cheque', nome: 'Cheque especial', cls: 'c-che', taxa: function () { return H.ref.chequeAm; } },
-    { k: 'rotativo', nome: 'Cartão rotativo', cls: 'c-rot', taxa: function () { return H.ref.rotativoAm; } }
+    { k: 'he', nome: 'Home Equity' },
+    { k: 'gar', nome: 'Garantia real (média)', taxa: function () { return H.ref.garantiaRealAm; } },
+    { k: 'pessoal', nome: 'Crédito pessoal', taxa: function () { return H.ref.pessoalAm; } },
+    { k: 'cheque', nome: 'Cheque especial', taxa: function () { return H.ref.chequeAm; } }
   ];
 
-  function barrasModalidades(titulo, itens) {
-    var g = el('div', 'qg');
-    g.appendChild(el('h4', '', titulo));
-    var max = 1;
-    itens.forEach(function (x) { if (x.v > max) max = x.v; });
-    itens.forEach(function (x) {
-      var linha = el('div', 'r' + (x.k === 'he' ? ' us' : ''));
-      linha.appendChild(el('span', '', x.nome));
-      var s = svgEl('svg', { width: '100%', height: 12, role: 'img', 'aria-label': titulo + ', ' + x.nome + ': ' + H.brl(x.v) });
-      s.appendChild(svgEl('rect', { width: '100%', height: 12, rx: 6, fill: 'rgba(255,255,255,.07)' }));
-      s.appendChild(svgEl('rect', { width: Math.max(1.5, (x.v / max) * 100).toFixed(1) + '%', height: 12, rx: 6, fill: COR[x.k] }));
-      linha.appendChild(s);
-      linha.appendChild(el('span', 'vv num', H.brl(x.v)));
-      g.appendChild(linha);
-    });
-    return g;
+  function linhaModalidade(x, max, credito) {
+    var l = el('div', 'mrow' + (x.k === 'he' ? ' us' : ''));
+    var nome = el('div', 'mn');
+    if (x.k === 'he') nome.appendChild(el('span', 'tg', 'Seu cenário'));
+    nome.appendChild(el('b', '', x.nome));
+    nome.appendChild(el('span', 'chip', H.pct(x.taxa * 100) + ' a.m.'));
+    l.appendChild(nome);
+    var barra = el('div', 'mb');
+    var s = svgEl('svg', { width: '100%', height: 16, role: 'img',
+      'aria-label': x.nome + ': você recebe ' + H.brl(credito) + ' e paga ' + H.brl(x.v - credito) + ' de juros, ' + H.brl(x.v) + ' no total' });
+    s.appendChild(svgEl('rect', { width: '100%', height: 16, rx: 8, fill: 'rgba(255,255,255,.06)' }));
+    s.appendChild(svgEl('rect', { width: Math.max(2, (x.v / max) * 100).toFixed(1) + '%', height: 16, rx: 8, fill: COR[x.k] }));
+    s.appendChild(svgEl('rect', { width: Math.max(1.5, (credito / max) * 100).toFixed(1) + '%', height: 16, rx: 8, fill: '#e2e8f0' }));
+    barra.appendChild(s);
+    l.appendChild(barra);
+    var val = el('div', 'mv');
+    val.appendChild(el('b', 'num', H.brl(x.v)));
+    val.appendChild(el('small', 'num', H.brl(x.parcela) + ' /mês' + (x.k === 'he' && sac() ? ' (1ª)' : '')));
+    l.appendChild(val);
+    return l;
   }
 
   function desenharComparativo(r, i, meses, semMargem) {
-    var g = $('cm-linha'), leg = $('cm-leg'), barras = $('cm-barras');
-    limpar(g); limpar(leg); limpar(barras);
+    var alvo = $('cm-linhas');
+    limpar(alvo);
     $('cm-lead').textContent = 'Com o mesmo crédito de ' + H.brl(r.credito) + ' e o mesmo prazo de ' + estado.anos + ' anos, veja quanto você pagaria em cada modalidade. ' +
-      'As taxas das outras modalidades são médias de mercado do Banco Central.';
-    if (semMargem) {
-      $('cm-parcela').textContent = '—'; $('cm-total').textContent = '—'; $('cm-juros').textContent = '—'; $('cm-sub').textContent = ''; $('cm-gap').textContent = '';
-      return;
-    }
-    $('cm-parcela').textContent = H.brl(r.parcela);
-    $('cm-total').textContent = H.brl(r.total);
-    $('cm-juros').textContent = H.brl(r.juros);
-    $('cm-sub').textContent = 'crédito de ' + H.brl(r.credito) + ' · ' + estado.anos + ' anos · ' + H.pct(i * 100) + ' a.m.' + (sac() ? ' · 1ª parcela, no SAC' : '');
+      'As outras taxas são médias de mercado do Banco Central.';
+    if (semMargem) { $('cm-gap-v').textContent = '—'; $('cm-gap').textContent = ''; return; }
     var itens = MODALIDADES.map(function (m) {
       var taxaM = m.k === 'he' ? i : m.taxa() / 100;
       var pl = H.plano(r.credito, taxaM, meses, m.k === 'he' ? estado.sistema : 'price');
-      return { k: m.k, nome: m.nome, cls: m.cls, linha: m.linha, taxa: taxaM, parcela: pl[0], v: pl[2] };
+      return { k: m.k, nome: m.nome, taxa: taxaM, parcela: pl[0], v: pl[2] };
     });
-    var pes = itens[2];
-    $('cm-gap').textContent = 'No crédito pessoal sem garantia (média de ' + H.pct(H.ref.pessoalAm) + ' a.m.), o mesmo crédito sairia por ' + H.brl(pes.parcela) + ' por mês e ' + H.brl(pes.v) +
-      ' no total: ' + H.brl(pes.v - r.total) + ' a mais que no Home Equity.';
-
-    // linhas: total pago até cada mês (Home Equity, garantia real e crédito pessoal; cheque e rotativo só entram nas barras, senão a escala some com as outras)
-    var W = 640, Hh = 220, topo = 10, base = Hh - 4, util = base - topo;
-    var series = itens.filter(function (x) { return x.linha || x.k === 'he'; }).map(function (x) {
-      return { x: x, pts: H.acumuladoMensal(r.credito, x.taxa, meses, x.k === 'he' ? estado.sistema : 'price') };
-    });
-    var maxV = 1;
-    series.forEach(function (sr) { var u = sr.pts[sr.pts.length - 1]; if (u > maxV) maxV = u; });
-    var ordem = series.slice().sort(function (a, b) { return (a.x.k === 'he') - (b.x.k === 'he'); }); // o Home Equity por último, na frente
-    ordem.forEach(function (sr) {
-      var passo = Math.max(1, Math.floor(meses / 120));
-      var pontos = [];
-      for (var m = 0; m <= meses; m += passo) pontos.push((m / meses * W).toFixed(1) + ',' + (base - (sr.pts[m] / maxV) * util).toFixed(1));
-      if ((meses % passo) !== 0) pontos.push(W + ',' + (base - (sr.pts[meses] / maxV) * util).toFixed(1));
-      g.appendChild(svgEl('polyline', { 'class': 'lin ' + (sr.x.k === 'he' ? 'l-he' : sr.x.linha), points: pontos.join(' ') }));
-    });
-    series.forEach(function (sr) {
-      var s = el('span');
-      s.appendChild(el('s', sr.x.cls));
-      s.appendChild(document.createTextNode(sr.x.nome + ' · ' + H.brl(sr.x.v)));
-      leg.appendChild(s);
-    });
-    $('cm-eixo-fim').textContent = 'Ano ' + estado.anos;
-    g.setAttribute('aria-label', 'Gráfico de linhas: total pago em ' + estado.anos + ' anos. ' + series.map(function (sr) { return sr.x.nome + ' ' + H.brl(sr.x.v); }).join('; ') + '.');
-
-    barras.appendChild(barrasModalidades('Total pago em ' + estado.anos + ' anos', itens.map(function (x) { return { k: x.k, nome: x.nome, v: x.v }; })));
-    barras.appendChild(barrasModalidades(sac() ? 'Parcela por mês (1ª, no Home Equity SAC)' : 'Parcela por mês', itens.map(function (x) { return { k: x.k, nome: x.nome, v: x.parcela }; })));
+    var max = 1;
+    itens.forEach(function (x) { if (x.v > max) max = x.v; });
+    itens.forEach(function (x) { alvo.appendChild(linhaModalidade(x, max, r.credito)); });
+    var pa = H.pmt(r.credito, H.ref.pessoalAm / 100, meses);
+    $('cm-gap-v').textContent = H.brl(pa * meses - r.total);
+    $('cm-gap').textContent = 'a mais no crédito pessoal sem garantia (média de ' + H.pct(H.ref.pessoalAm) + ' a.m.): ' + H.brl(pa) + ' por mês, ' + H.brl(pa * meses) + ' no total.';
   }
 
   // Endereço compartilhável: só números. O canonical da página continua sendo a home.
@@ -451,7 +424,7 @@
     preencherRange(rp, estado.anos);
     $('div-' + estado.tipoDiv).checked = true;
     $('sis-' + estado.sistema).checked = true;
-    $('hint-sistema').textContent = sac() ? 'A primeira parcela é a maior e ela cai todo mês. Paga menos juros no total. Se o parceiro oferece SAC, ele informa na proposta.' : 'Parcela igual todo mês: começa menor que no SAC e paga mais juros no total.';
+    $('hint-sistema').textContent = sac() ? 'Cai todo mês e paga menos juros. O parceiro confirma na proposta se oferece.' : 'Parcela igual todo mês.';
     if (foco !== 'divida') $('campo-divida').value = BRL_NUM.format(estado.divida);
     if (foco !== 'taxadiv') $('campo-taxa-div').value = String(estado.taxaDiv).replace('.', ',');
     preencherRange($('range-imovel'), estado.imovel);
@@ -471,8 +444,7 @@
     ult.hidden = !(sac() && !semMargem);
     if (!ult.hidden) ult.textContent = 'A parcela cai todo mês, até ' + H.brl(r.parcelaFinal) + ' na última.';
     $('r-parcela').textContent = semMargem ? '—' : H.brl(r.parcela);
-    $('r-renda').textContent = semMargem ? '—' : H.brl(H.rendaParaParcela(r.parcela));
-    $('r-sub').textContent = 'em ' + meses + ' meses · taxa de referência ' + H.pct(i * 100) + ' a.m.';
+    $('r-sub').textContent = 'em ' + meses + ' meses · taxa ' + H.pct(i * 100) + ' a.m.';
     $('r-total').textContent = semMargem ? '—' : H.brl(r.total);
     $('c-imovel').textContent = H.brl(estado.imovel);
     var usoPct = Math.min(100, r.ltv * 100);

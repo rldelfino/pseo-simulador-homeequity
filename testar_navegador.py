@@ -91,7 +91,7 @@ def rodar(nav, nome_nav, base, largura):
     confere(tag + "SAC: rótulo da parcela", "1ª parcela" in pg.inner_text("#r-kicker").lower())
     pg.wait_for_timeout(600)
     confere(tag + "SAC: endereço guarda o sistema", "sistema=sac" in pg.evaluate("window.location.href"), pg.evaluate("window.location.href"))
-    confere(tag + "SAC: comparativo usa o mesmo total", numero(pg.inner_text("#cm-total")) == round(sac["total"]), pg.inner_text("#cm-total"))
+    confere(tag + "SAC: comparativo usa o mesmo total", numero(pg.locator("#cm-linhas .mrow.us .mv b").inner_text()) == round(sac["total"]), pg.locator("#cm-linhas .mrow.us .mv b").inner_text())
     pg2 = ctx.new_page()
     pg2.route("**/*umami*", lambda r_: r_.abort())
     pg2.goto(base + "/?imovel=800000&receber=250000&prazo=15&sistema=sac")
@@ -103,11 +103,13 @@ def rodar(nav, nome_nav, base, largura):
 
     # renda de referência (30%) e comparativo com outras modalidades
     renda = calculo.renda_para_parcela(price["parcela"])
-    confere(tag + "renda de referência no resultado", numero(pg.inner_text("#r-renda")) == round(renda), pg.inner_text("#r-renda"))
     confere(tag + "texto da renda no Raio-X", conteudo.brl0(renda) in pg.inner_text("#renda-texto").replace(chr(160), " "), pg.inner_text("#renda-texto"))
-    confere(tag + "comparativo: 5 modalidades nas barras", pg.locator("#cm-barras .qg").count() == 2 and pg.locator("#cm-barras .qg").first.locator(".r").count() == 5)
-    confere(tag + "comparativo: três linhas no gráfico", pg.locator("#cm-linha polyline").count() == 3)
-    confere(tag + "comparativo: valor do Home Equity", numero(pg.inner_text("#cm-parcela")) == round(price["parcela"]), pg.inner_text("#cm-parcela"))
+    confere(tag + "comparativo: 4 modalidades em barras", pg.locator("#cm-linhas .mrow").count() == 4)
+    confere(tag + "comparativo: valor do Home Equity", numero(pg.locator("#cm-linhas .mrow.us .mv small").inner_text()) == round(price["parcela"]), pg.locator("#cm-linhas .mrow.us .mv small").inner_text())
+    confere(tag + "comparativo: Home Equity é o mais barato", numero(pg.locator("#cm-linhas .mrow.us .mv b").inner_text()) == min(numero(t) for t in pg.locator("#cm-linhas .mv b").all_inner_texts()))
+    confere(tag + "faixa do uso do imóvel fora do painel do resultado", pg.locator("#resultado #c-limite").count() == 0 and pg.locator(".uso #c-limite").count() == 1)
+    confere(tag + "SAC fica no painel do resultado", pg.locator("#resultado #sis-sac").count() == 1)
+    confere(tag + "texto do prazo sem quebra de a.m. sozinho", pg.evaluate("(() => { const e = document.getElementById('r-sub'); return e.getClientRects()[0].height < 40; })()") or tag.startswith("webkit/390"))
 
     # valor do imóvel e a receber (digitando)
     pg.fill("#campo-imovel", "1.000.000")
