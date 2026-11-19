@@ -70,6 +70,24 @@
     return saida;
   }
 
+  // Pagar a mais: extraMensal em toda parcela e/ou unico no começo do mês mesUnico (0 = antes da 1ª parcela). modo "prazo" (parcela igual, acaba antes) ou "parcela" (recalcula depois do valor único).
+  function amortizarAntes(credito, i, meses, sistema, extraMensal, unico, mesUnico, modo) {
+    var saldo = credito, parcela = pmt(credito, i, meses), am = credito / meses, total = 0, nova = null;
+    for (var m = 0; m < meses; m++) {
+      if (m === mesUnico && unico > 0) {
+        var u = Math.min(unico, saldo);
+        saldo -= u; total += u;
+        if (modo === 'parcela' && saldo > 0.005) { parcela = pmt(saldo, i, meses - m); am = saldo / (meses - m); }
+      }
+      if (saldo <= 0.005) return { meses: m, total: total, juros: total - credito, parcelaNova: nova };
+      var j = saldo * i, pago = (sistema === 'sac' ? am + j : parcela) + extraMensal;
+      pago = Math.min(pago, saldo + j);
+      if (m === mesUnico && nova === null) nova = sistema === 'sac' ? am + j : parcela;
+      saldo -= pago - j; total += pago;
+    }
+    return { meses: meses, total: total, juros: total - credito, parcelaNova: nova };
+  }
+
   function compararQuitacao(divida, taxaDividaAm, meses, i, sistema) {
     var atual = pmt(divida, taxaDividaAm, meses), pl = plano(divida, i, meses, sistema);
     return { divida: divida, parcelaAtual: atual, totalAtual: atual * meses, jurosMes1: divida * taxaDividaAm,
@@ -81,7 +99,7 @@
 
   var api = { TAXA_PARCEIRO_AM: TAXA_PARCEIRO_AM, LTV_MAX: LTV_MAX, CREDITO_MAX: CREDITO_MAX, PRAZO_MIN_ANOS: PRAZO_MIN_ANOS, PRAZO_MAX_ANOS: PRAZO_MAX_ANOS, IMOVEL_MIN: IMOVEL_MIN, IMOVEL_MAX: IMOVEL_MAX, RECEBER_MIN: RECEBER_MIN, RENDA_REFERENCIA: RENDA_REFERENCIA,
               ref: REF, ipcaMensal: ipcaMensal, taxaMensal: taxaMensal, pmt: pmt, valorPresente: valorPresente, valorPresenteSac: valorPresenteSac, plano: plano, rendaParaParcela: rendaParaParcela, limiteCredito: limiteCredito,
-              simular: simular, receberParaParcela: receberParaParcela, amortizacaoAnual: amortizacaoAnual, acumuladoMensal: acumuladoMensal, compararQuitacao: compararQuitacao, brl: brl, pct: pct };
+              simular: simular, receberParaParcela: receberParaParcela, amortizacaoAnual: amortizacaoAnual, acumuladoMensal: acumuladoMensal, amortizarAntes: amortizarAntes, compararQuitacao: compararQuitacao, brl: brl, pct: pct };
   root.DatalabHomeEquity = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

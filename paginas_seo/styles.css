@@ -579,3 +579,39 @@ input[type=range]:hover::-webkit-slider-thumb,input[type=range]:active::-webkit-
   .resp .rosca{flex-direction:column;align-items:flex-start}
   .resp .rosca .rc-l{width:100%}
 }
+
+/* v5 (19/11): seção de amortização com objetivo claro: por que, quanto poupa, quando e o que checar. */
+.amsec>.lead.amlead{color:var(--tx);font-size:16px;max-width:760px;margin:6px 0 26px}
+.sub{display:flex;align-items:center;gap:12px;font-family:'Inter',system-ui,sans-serif;font-size:17px;font-weight:700;color:var(--tx);margin:0 0 6px}
+.sub .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--acsoft);border:1px solid var(--acline);color:var(--ac);display:grid;place-items:center;font-weight:700;font-size:13px}
+.amwhy{margin-bottom:22px}
+.amwhy .giga{margin:10px 0 8px}
+.amx,.amtempo{margin-top:22px}
+.amsub{color:var(--tx2);font-size:14px;margin:0 0 16px}
+.amin{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.amin .f{margin:0;background:rgba(30,41,59,.4);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px}
+.amin .f>label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2);flex-direction:column;gap:2px;margin-bottom:10px}
+.amin .f>label span{font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--tx3)}
+.amin .inp input{font-size:22px;font-weight:600;text-align:right}
+.amin .f>input[type=range]{margin:12px 0 4px}
+.amcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:20px}
+.amc{position:relative;background:rgba(2,6,23,.55);border:1px solid var(--ln);border-radius:14px;padding:16px 18px}
+.amc.best{border-color:var(--acline);background:linear-gradient(135deg,rgba(74,163,181,.14),rgba(2,6,23,.55))}
+.amc .tg{position:absolute;top:-10px;right:14px;background:var(--ac);color:#04222a;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 10px}
+.amc h4{font-family:'Inter',system-ui,sans-serif;font-size:12px;font-weight:600;color:var(--tx2);margin:0 0 8px;line-height:1.35;min-height:32px}
+.amc .big{font-size:30px;font-weight:700;color:var(--aclt);line-height:1.1}
+.amc .bl{font-size:12px;color:var(--tx3);margin-bottom:10px}
+.amc ul{list-style:none;display:grid;gap:4px;font-size:13px;color:#cbd5e1}
+.amc li::before{content:"✓ ";color:var(--ac)}
+#am-texto{font-size:12.5px;color:var(--tx3);margin-top:14px}
+#am-tempo{display:block;width:100%;height:150px}
+.amdicas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
+.amd{background:rgba(30,41,59,.4);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 18px}
+.amd h4{font-family:'Inter',system-ui,sans-serif;font-size:14px;font-weight:700;color:var(--tx);margin:0 0 6px}
+.amd p{font-size:13px;color:var(--tx2);line-height:1.55}
+.amd b{color:#e3a96b}
+@media(max-width:860px){
+  .amin,.amdicas{grid-template-columns:minmax(0,1fr)}
+  .amin .inp input{min-width:0;width:100%}
+}
+.amin .f>label{min-height:44px;justify-content:center}
