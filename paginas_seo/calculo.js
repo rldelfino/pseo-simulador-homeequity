@@ -15,7 +15,7 @@
   var REF = {"chequeAm": 7.5316195526967, "chequeMes": "set/2026", "garantiaRealAm": 2.14, "garantiaRealMes": "set/2026", "ipca12m": 4.63, "ipcaMes": "out/2026", "pessoalAm": 6.417547301774995, "pessoalMes": "set/2026", "rotativoAm": 15.294671960948625, "rotativoMes": "set/2026"};
 
   function ipcaMensal(ipca12m) { return Math.pow(1 + ipca12m / 100, 1 / 12) - 1; }
-  function taxaMensal(ipca12m) { return (1 + TAXA_PARCEIRO_AM / 100) * (1 + ipcaMensal(ipca12m)) - 1; }
+  function taxaMensal(ipca12m, baseAm) { return (1 + (baseAm === undefined ? TAXA_PARCEIRO_AM : baseAm) / 100) * (1 + ipcaMensal(ipca12m)) - 1; }
   function pmt(principal, i, n) { return i === 0 ? principal / n : principal * i / (1 - Math.pow(1 + i, -n)); }
   function valorPresente(parcela, i, n) { return i === 0 ? parcela * n : parcela * (1 - Math.pow(1 + i, -n)) / i; }
   function valorPresenteSac(primeira, i, n) { return primeira / (1 / n + i); }

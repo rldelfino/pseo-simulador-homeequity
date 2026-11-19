@@ -615,3 +615,20 @@ input[type=range]:hover::-webkit-slider-thumb,input[type=range]:active::-webkit-
   .amin .inp input{min-width:0;width:100%}
 }
 .amin .f>label{min-height:44px;justify-content:center}
+
+/* v6 (19/11, benchmark): faixa de três números, taxa da proposta. */
+.outra{margin-top:4px;background:rgba(30,41,59,.4);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:0 20px}
+.outra summary{cursor:pointer;min-height:48px;display:flex;align-items:center;color:var(--aclt);font-weight:600;font-size:14px}
+.outra .oi{padding:0 0 16px}
+.outra .oi>label:first-child{display:flex;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx2);margin-bottom:8px}
+.outra .oi>label span{font-weight:400;letter-spacing:0;text-transform:none;color:var(--tx3)}
+.outra .inp input{font-size:22px;font-weight:600;text-align:right}
+.outra .ck{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px;color:var(--tx2);cursor:pointer}
+.outra .ck input{width:20px;height:20px;accent-color:#4aa3b5;flex:none}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.kp{background:rgba(30,41,59,.4);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px 18px;display:grid;gap:2px}
+.kp .t{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2)}
+.kp b{font-size:26px;font-weight:700;color:var(--tx);line-height:1.15}
+.kp small{font-size:12px;color:var(--tx3)}
+.kpn{margin-top:8px}
+@media(max-width:700px){.kpis{grid-template-columns:minmax(0,1fr)}.kp{grid-template-columns:1fr auto;align-items:center}.kp .t{grid-column:1}.kp b{grid-column:2;grid-row:1/3;font-size:22px}.kp small{grid-column:1}}
