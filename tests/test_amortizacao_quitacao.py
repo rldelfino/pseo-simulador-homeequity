@@ -98,7 +98,18 @@ def test_home_traz_o_cenario_de_quitar_divida_padrao(home):
     q = c.comparar_quitacao(conteudo.DIVIDA_PADRAO, ref["pessoalAm"] / 100, 180, i)
     assert conteudo.quitar_cartoes(q, ref["pessoalAm"], 15, i * 100) in home
     assert conteudo.quitar_texto(q, 15) in home
-    for rotulo in ("Crédito pessoal sem garantia", "Cheque especial", "Cartão de crédito rotativo", "Outra (informo a taxa)"):
+    for rotulo in ("Crédito pessoal sem garantia", "Cheque especial", "Cartão de crédito rotativo", "Outra <small>informo a taxa</small>"):
         assert rotulo in home
-    assert 'id="btn-usar-divida"' in home and 'for="campo-divida"' in home and 'for="sel-divida"' in home
+    assert 'id="btn-usar-divida"' in home and 'for="campo-divida"' in home and 'id="lb-tipodiv"' in home
     assert 'id="bloco-taxa-div" hidden' in home
+
+
+def test_home_traz_rosca_graficos_faixa_e_prazo_livre(home):
+    ref = g.referencias()
+    i = c.taxa_mensal(ref["ipca12m"])
+    r = c.simular(800_000, 250_000, 0, 180, i)
+    assert 'id="rosca-cred"' in home and 'stroke-dasharray="%.1f 289.03"' % (r["credito"] / r["total"] * 289.0265) in home
+    assert ("%d%%" % round(r["juros"] / r["total"] * 100)) in home and conteudo.brl0(r["juros"]) in home
+    assert 'id="amort-graf"' in home and 'id="q-grafico"' in home and 'class="band fatos"' in home
+    assert 'id="campo-prazo"' in home and 'id="range-prazo"' in home and "<select" not in home
+    assert 'min="%d" max="%d"' % (c.PRAZO_MIN_ANOS, c.PRAZO_MAX_ANOS) in home

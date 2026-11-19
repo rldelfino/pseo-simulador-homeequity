@@ -117,7 +117,7 @@ def varrer(pw, nome_nav, dispositivo, base):
     pg.wait_for_selector("#alts .alt")
     pg.fill("#campo-receber", "300.000")
     pg.press("#campo-receber", "Enter")
-    pg.select_option("#sel-prazo", "10")
+    pg.fill("#campo-prazo", "10"); pg.press("#campo-prazo", "Enter")
     pg.wait_for_timeout(500)
     esperado = pg.inner_text("#r-parcela")
     pg.evaluate("window.scrollTo({top:1400,behavior:\"instant\"})")

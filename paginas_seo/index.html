@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#020617">
 <link rel="preload" href="/fonts/playfair-display-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=ff780a641f">
+<link rel="stylesheet" href="/styles.css?v=b2473df01a">
 <link rel="alternate" type="application/atom+xml" title="Home Equity — Datalab Global" href="/feed.xml">
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://homeequity.datalabglobal.com/#organizacao", "name": "Datalab Global", "legalName": "Satori Soluções Comerciais LTDA", "taxID": "63.998.502/0001-73", "url": "https://www.datalabglobal.com/", "email": "contato@datalabglobal.com"}, {"@type": "WebSite", "@id": "https://homeequity.datalabglobal.com/#site", "url": "https://homeequity.datalabglobal.com/", "name": "Home Equity — Datalab Global", "inLanguage": "pt-BR", "publisher": {"@id": "https://homeequity.datalabglobal.com/#organizacao"}}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Posso continuar morando no imóvel?", "acceptedAnswer": {"@type": "Answer", "text": "Sim. No Home Equity o imóvel fica como garantia, mas você continua usando: morando, alugando ou mantendo o negócio nele, conforme o contrato. O que muda é o registro da garantia na matrícula, que sai quando a dívida é quitada. Veja como funciona a garantia."}}, {"@type": "Question", "name": "Posso usar um imóvel que ainda está financiado?", "acceptedAnswer": {"@type": "Answer", "text": "Em geral, sim, conforme a instituição: o novo crédito quita o saldo do financiamento e libera a diferença para você. Por isso o simulador tem a opção \"Ainda financiado\": o saldo entra no total do crédito e conta para o limite de 60% do valor do imóvel (teto de R$ 3 milhões de crédito nesta ferramenta)."}}, {"@type": "Question", "name": "Por que a parcela muda com o IPCA?", "acceptedAnswer": {"@type": "Answer", "text": "Porque a taxa divulgada pelo parceiro é \"a partir de 1,09% ao mês mais IPCA\": além dos juros, o saldo é atualizado pela inflação. O simulador usa o IPCA dos últimos 12 meses e o mantém constante, então a parcela real pode ficar acima ou abaixo da estimativa, conforme a inflação dos próximos anos."}}, {"@type": "Question", "name": "Quanto tempo leva até o dinheiro cair na conta?", "acceptedAnswer": {"@type": "Answer", "text": "Não há um prazo único: depende da análise de crédito, da avaliação do imóvel, da análise jurídica e do registro da garantia em cartório. Cada instituição informa o seu prazo na proposta."}}, {"@type": "Question", "name": "O que acontece se eu atrasar as parcelas?", "acceptedAnswer": {"@type": "Answer", "text": "Atrasos geram encargos previstos no contrato e, se a dívida não for regularizada, a lei prevê um procedimento de cobrança que pode chegar à venda do imóvel dado em garantia. Por isso vale escolher uma parcela que caiba com folga. Detalhes em Garantia do imóvel."}}, {"@type": "Question", "name": "A simulação vale como proposta?", "acceptedAnswer": {"@type": "Answer", "text": "Não. É uma estimativa feita com taxa de referência, sem consultar você nem o imóvel. A taxa, o limite e o prazo finais saem da análise de crédito e da avaliação do imóvel."}}]}</script>
@@ -80,12 +80,15 @@
         <div class="hint warn" id="msg-ajuste" hidden></div>
       </div>
       <div class="f">
-        <label for="sel-prazo">Prazo <span>até 20 anos</span></label>
-        <div class="inp sel"><select id="sel-prazo"><option value="5">5 anos</option><option value="8">8 anos</option><option value="10">10 anos</option><option value="12">12 anos</option><option value="15" selected>15 anos</option><option value="18">18 anos</option><option value="20">20 anos</option></select></div>
+        <label for="campo-prazo">Prazo <span>de 2 a 20 anos</span></label>
+        <div class="inp"><input id="campo-prazo" type="text" inputmode="numeric" autocomplete="off" value="15" class="num" aria-describedby="msg-prazo"><em>anos</em></div>
+        <input id="range-prazo" type="range" aria-label="Prazo em anos, controle deslizante" min="2" max="20" step="1" value="15">
+        <div class="slabel"><span>2 anos</span><span>20 anos</span></div>
+        <div class="hint warn" id="msg-prazo" hidden></div>
       </div>
     </section>
 
-    <section class="panel" id="resultado" aria-labelledby="t-resultado" aria-live="polite">
+    <section class="panel resp" id="resultado" aria-labelledby="t-resultado" aria-live="polite">
       <h2 class="sr" id="t-resultado">Resultado da simulação</h2>
       <div class="res">
         <div>
@@ -107,14 +110,39 @@
           <div class="lg"><span><s class="lim"></s><span id="c-limite-rot">Limite (60%)</span></span><b class="num" id="c-limite">R$ 480.000</b></div>
         </div>
       </div>
-      <div class="cta">
-        <div><strong>Faça sua proposta</strong><span class="s">Com um parceiro de crédito · sem compromisso</span></div>
-        <button type="button" class="btn" id="btn-cta">Consultar opções →</button>
+      <div class="rosca">
+        <svg viewBox="0 0 120 120" width="120" height="120" role="img" id="rosca-svg" aria-label="Do total pago, 65% é juros">
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#cbd5e1" stroke-width="14"/>
+          <circle id="rosca-cred" cx="60" cy="60" r="46" fill="none" stroke="#4aa3b5" stroke-width="14" stroke-dasharray="101.2 289.03" transform="rotate(-90 60 60)"/>
+          <text x="60" y="61" text-anchor="middle" class="rc-n" id="rosca-pct">65%</text>
+          <text x="60" y="77" text-anchor="middle" class="rc-t">em juros</text>
+        </svg>
+        <div class="rc-l">
+          <div class="kicker">Para onde vai o total</div>
+          <div class="lg"><span><s></s>Crédito</span><b class="num" id="rosca-cred-v">R$ 250.000</b></div>
+          <div class="lg"><span><s class="jr"></s>Juros</span><b class="num" id="rosca-juros-v">R$ 463.837</b></div>
+        </div>
       </div>
-      <div class="fine2">Estimativa: a taxa final depende da análise. O imóvel fica como garantia da operação — <a href="#garantia">entenda abaixo</a>.</div>
-      <div class="copiar"><button type="button" id="btn-copiar">Copiar o link desta simulação</button><span id="msg-copiado" role="status"></span></div>
+      <div class="rodape-res">
+        <div class="cta">
+          <div><strong>Faça sua proposta</strong><span class="s">Com um parceiro de crédito · sem compromisso</span></div>
+          <button type="button" class="btn" id="btn-cta">Consultar opções →</button>
+        </div>
+        <div class="fine2">Estimativa: a taxa final depende da análise. O imóvel fica como garantia da operação — <a href="#garantia">entenda abaixo</a>.</div>
+        <div class="copiar"><button type="button" id="btn-copiar">Copiar o link desta simulação</button><span id="msg-copiado" role="status"></span></div>
+      </div>
     </section>
   </div>
+
+  <section class="band fatos" aria-label="Condições divulgadas por um parceiro de crédito">
+    <div class="fatos-g">
+      <div><b class="num">1,09%</b><span>ao mês + IPCA, a partir de</span></div>
+      <div><b class="num">60%</b><span>do valor do imóvel, no máximo</span></div>
+      <div><b class="num">20 anos</b><span>de prazo, no máximo</span></div>
+      <div><b class="num">R$ 0</b><span>e sem cadastro para simular</span></div>
+    </div>
+    <p class="hint">Condições divulgadas por um parceiro de crédito. A taxa final e o limite saem da análise do pedido.</p>
+  </section>
 
   <section class="blk" aria-labelledby="t-raio">
     <div class="raio">
@@ -129,8 +157,21 @@
   </section>
 
   <section class="blk" aria-labelledby="t-amort">
-    <h2 id="t-amort">Para onde vai a sua parcela</h2>
-    <p class="lead" id="amort-resumo">No primeiro ano, R$ 43.868 dos R$ 47.589 que você paga são juros (92%). A parcela é fixa: com o tempo ela amortiza mais a dívida e os juros caem.</p>
+    <div class="split">
+      <div class="split-t">
+        <div class="kicker">Amortização</div>
+        <h2 id="t-amort">Para onde vai a sua parcela</h2>
+        <div class="giga num"><span id="amort-pct">92%</span><small>do 1º ano é juros</small></div>
+        <p class="lead" id="amort-resumo">No primeiro ano, R$ 43.868 dos R$ 47.589 que você paga são juros (92%). A parcela é fixa: com o tempo ela amortiza mais a dívida e os juros caem.</p>
+      </div>
+      <div class="panel graf">
+        <div class="leg">
+          <span><s class="jr"></s>Juros do ano</span><span><s></s>Amortização do ano</span><span><s class="ln"></s>Saldo devedor</span>
+        </div>
+        <svg id="amort-graf" viewBox="0 0 640 220" preserveAspectRatio="none" role="img" aria-label="Gráfico: juros e amortização de cada ano e saldo devedor"></svg>
+        <div class="eixo"><span>Ano 1</span><span id="amort-ano-fim">Ano 15</span></div>
+      </div>
+    </div>
     <details class="amort" id="det-amort">
       <summary>Ver a amortização ano a ano</summary>
       <div class="tw"><table id="tab-amort">
@@ -144,20 +185,22 @@
   </section>
 
   <section class="blk" aria-labelledby="t-cmp">
+    <div class="kicker">Taxas</div>
     <h2 id="t-cmp">Quanto cada tipo de crédito custa por mês</h2>
     <p class="lead">Com garantia, o juro mensal costuma ser bem menor que o de crédito sem garantia.</p>
     <div class="panel"><div class="cmp"><div class="r us"><span>Crédito com garantia real</span><svg width="100%" height="12" role="img" aria-label="Crédito com garantia real: 2,14% ao mês"><rect width="100%" height="12" rx="6" fill="rgba(255,255,255,.07)"/><rect width="14.0%" height="12" rx="6" fill="#4aa3b5"/></svg><span class="vv num">2,14% a.m.</span></div><div class="r"><span>Crédito pessoal sem garantia</span><svg width="100%" height="12" role="img" aria-label="Crédito pessoal sem garantia: 6,42% ao mês"><rect width="100%" height="12" rx="6" fill="rgba(255,255,255,.07)"/><rect width="42.0%" height="12" rx="6" fill="#475569"/></svg><span class="vv num">6,42% a.m.</span></div><div class="r"><span>Cheque especial</span><svg width="100%" height="12" role="img" aria-label="Cheque especial: 7,53% ao mês"><rect width="100%" height="12" rx="6" fill="rgba(255,255,255,.07)"/><rect width="49.2%" height="12" rx="6" fill="#475569"/></svg><span class="vv num">7,53% a.m.</span></div><div class="r"><span>Cartão de crédito rotativo</span><svg width="100%" height="12" role="img" aria-label="Cartão de crédito rotativo: 15,29% ao mês"><rect width="100%" height="12" rx="6" fill="rgba(255,255,255,.07)"/><rect width="100.0%" height="12" rx="6" fill="#475569"/></svg><span class="vv num">15,29% a.m.</span></div></div><div class="hint">Médias do mercado em set/2026 (Banco Central, séries SGS 29976, 20742, 20741 e 22022). É referência, não a taxa que você vai receber. <a href="/taxas-de-referencia">Veja as fontes</a>.</div></div>
     <div class="note" id="nota-taxa"><b>E se a taxa for maior?</b> <span id="nota-taxa-texto">A estimativa usa a taxa de referência do parceiro (1,09% a.m. + IPCA, cerca de 1,47% a.m.). A média do Banco Central para crédito com garantia real é 2,14% a.m. (set/2026): nessa taxa, a parcela do cenário acima seria de R$ 5.471. A taxa final vem da análise.</span></div>
   </section>
 
-  <section class="blk" aria-labelledby="t-quitar">
+  <section class="band" aria-labelledby="t-quitar">
+    <div class="kicker">Dívida cara</div>
     <h2 id="t-quitar">Tem uma dívida cara? Veja se vale trocar</h2>
     <p class="lead">A mesma dívida, no mesmo prazo do simulador, na taxa média do mercado e no Home Equity.</p>
-    <div class="panel quitar">
-      <div class="qin">
+    <div class="qgrid">
+      <div class="panel quitar">
         <div class="f">
-          <label for="sel-divida">Tipo de dívida</label>
-          <div class="inp sel"><select id="sel-divida"><option value="pessoal" selected>Crédito pessoal sem garantia (média 6,42% a.m.)</option><option value="cheque">Cheque especial (média 7,53% a.m.)</option><option value="rotativo">Cartão de crédito rotativo (média 15,29% a.m.)</option><option value="outra">Outra (informo a taxa)</option></select></div>
+          <div class="lb" id="lb-tipodiv">Tipo de dívida</div>
+          <div class="seg s2" role="radiogroup" aria-labelledby="lb-tipodiv"><input type="radio" name="tipodiv" id="div-pessoal" value="pessoal" checked><label for="div-pessoal">Crédito pessoal sem garantia <small>média 6,42% a.m.</small></label><input type="radio" name="tipodiv" id="div-cheque" value="cheque"><label for="div-cheque">Cheque especial <small>média 7,53% a.m.</small></label><input type="radio" name="tipodiv" id="div-rotativo" value="rotativo"><label for="div-rotativo">Cartão de crédito rotativo <small>média 15,29% a.m.</small></label><input type="radio" name="tipodiv" id="div-outra" value="outra"><label for="div-outra">Outra <small>informo a taxa</small></label></div>
         </div>
         <div class="f">
           <label for="campo-divida">Quanto você deve <span>saldo da dívida</span></label>
@@ -167,33 +210,42 @@
           <label for="campo-taxa-div">Taxa da sua dívida <span>% ao mês</span></label>
           <div class="inp"><input id="campo-taxa-div" type="text" inputmode="decimal" autocomplete="off" value="5" class="num"><em>% a.m.</em></div>
         </div>
+        <div class="row2"><button type="button" class="ghost" id="btn-usar-divida">Simular com este valor</button></div>
       </div>
-      <div class="hint warn" id="q-aviso" hidden></div>
-      <div class="alts dois" id="q-cartoes"><div class="alt"><h3>Na taxa média (6,42% a.m.)</h3><div class="p num">R$ 3.851</div><div class="d">Só de juros: R$ 3.851 no 1º mês<br>Total em 15 anos: R$ 693.105</div></div><div class="alt cur"><h3>No Home Equity (1,47% a.m.)</h3><div class="p num">R$ 952</div><div class="d">Total em 15 anos: R$ 171.321<br><span class="dn">R$ 2.899 a menos por mês</span></div></div></div>
-      <p class="qtxt" id="q-texto">Trocar esta dívida reduziria a parcela em R$ 2.899 por mês e o total pago em cerca de R$ 521.784, com a mesma duração (15 anos). Avaliação, registro e seguros não entram na conta e reduzem essa economia.</p>
-      <div class="row2"><button type="button" class="ghost" id="btn-usar-divida">Simular com este valor</button></div>
-      <div class="hint">Conta de comparação: as duas dívidas têm a mesma duração. Cheque especial e rotativo não costumam durar tanto; o ponto é ver quanto o juro pesa por mês. A troca coloca o imóvel como garantia: <a href="/garantia-do-imovel">veja o que muda</a> e <a href="/custos-alem-dos-juros">os custos além dos juros</a>.</div>
+      <div class="panel qres">
+        <div class="hint warn" id="q-aviso" hidden></div>
+        <div class="alts dois" id="q-cartoes"><div class="alt"><h3>Na taxa média (6,42% a.m.)</h3><div class="p num">R$ 3.851</div><div class="d">Só de juros: R$ 3.851 no 1º mês<br>Total em 15 anos: R$ 693.105</div></div><div class="alt cur"><h3>No Home Equity (1,47% a.m.)</h3><div class="p num">R$ 952</div><div class="d">Total em 15 anos: R$ 171.321<br><span class="dn">R$ 2.899 a menos por mês</span></div></div></div>
+        <div class="qviz" id="q-grafico"></div>
+        <p class="qtxt" id="q-texto">Trocar esta dívida reduziria a parcela em R$ 2.899 por mês e o total pago em cerca de R$ 521.784, com a mesma duração (15 anos). Avaliação, registro e seguros não entram na conta e reduzem essa economia.</p>
+      </div>
     </div>
+    <div class="hint">Conta de comparação: as duas dívidas têm a mesma duração. Cheque especial e rotativo não costumam durar tanto; o ponto é ver quanto o juro pesa por mês. A troca coloca o imóvel como garantia: <a href="/garantia-do-imovel">veja o que muda</a> e <a href="/custos-alem-dos-juros">os custos além dos juros</a>.</div>
   </section>
 
   <section class="blk" id="garantia" aria-labelledby="t-gar">
-    <h2 id="t-gar">Como funciona a garantia do imóvel</h2>
-    <p class="lead">Entender isso antes ajuda a escolher uma parcela que caiba com folga.</p>
-    <div class="cols3">
-      <div class="card"><h4>O que muda para você</h4><ul><li>Você continua morando ou usando o imóvel</li><li>A garantia é o que permite juros menores</li></ul></div>
-      <div class="card"><h4>O que fica registrado</h4><ul><li>O imóvel é dado em garantia à instituição, com registro em cartório</li><li>O registro sai quando a dívida é quitada</li></ul></div>
-      <div class="card"><h4>Para ficar tranquilo</h4><ul><li>Escolha uma parcela que caiba com folga</li><li>Em atraso prolongado, a instituição pode seguir o que o contrato prevê</li></ul></div>
+    <div class="split gar">
+      <div class="split-t">
+        <div class="kicker">Garantia</div>
+        <h2 id="t-gar">Como funciona a garantia do imóvel</h2>
+        <p class="lead">Entender isso antes ajuda a escolher uma parcela que caiba com folga.</p>
+        <p class="hint"><a href="/garantia-do-imovel">Leia o guia completo sobre a garantia</a></p>
+      </div>
+      <div class="lista3">
+        <div class="li3"><span class="n" aria-hidden="true">1</span><div><h4>O que muda para você</h4><ul><li>Você continua morando ou usando o imóvel</li><li>A garantia é o que permite juros menores</li></ul></div></div>
+        <div class="li3"><span class="n" aria-hidden="true">2</span><div><h4>O que fica registrado</h4><ul><li>O imóvel é dado em garantia à instituição, com registro em cartório</li><li>O registro sai quando a dívida é quitada</li></ul></div></div>
+        <div class="li3"><span class="n" aria-hidden="true">3</span><div><h4>Para ficar tranquilo</h4><ul><li>Escolha uma parcela que caiba com folga</li><li>Em atraso prolongado, a instituição pode seguir o que o contrato prevê</li></ul></div></div>
+      </div>
     </div>
-    <p class="hint"><a href="/garantia-do-imovel">Leia o guia completo sobre a garantia</a></p>
   </section>
 
-  <section class="blk" aria-labelledby="t-pede">
+  <section class="band" aria-labelledby="t-pede">
+    <div class="kicker">Documentos</div>
     <h2 id="t-pede">O que o parceiro costuma pedir</h2>
     <p class="lead">Cada instituição tem a sua lista. Em geral, para Home Equity:</p>
-    <div class="cols3">
-      <div class="card"><h4>Sobre você</h4><ul><li>Documento e estado civil</li><li>Comprovante de renda ou extratos</li><li>Cônjuge ou sócios, se entrarem</li></ul></div>
-      <div class="card"><h4>Sobre o imóvel</h4><ul><li>Matrícula atualizada</li><li>Avaliação do imóvel</li><li>Pode ser financiado, comercial ou de terceiros, conforme a instituição</li></ul></div>
-      <div class="card"><h4>Etapas até receber</h4><ul><li>Análise de crédito</li><li>Avaliação e análise jurídica</li><li>Contrato e registro em cartório</li></ul></div>
+    <div class="steps">
+      <div class="st"><span class="sn" aria-hidden="true">01</span><h4>Sobre você</h4><ul><li>Documento e estado civil</li><li>Comprovante de renda ou extratos</li><li>Cônjuge ou sócios, se entrarem</li></ul></div>
+      <div class="st"><span class="sn" aria-hidden="true">02</span><h4>Sobre o imóvel</h4><ul><li>Matrícula atualizada</li><li>Avaliação do imóvel</li><li>Pode ser financiado, comercial ou de terceiros, conforme a instituição</li></ul></div>
+      <div class="st"><span class="sn" aria-hidden="true">03</span><h4>Etapas até receber</h4><ul><li>Análise de crédito</li><li>Avaliação e análise jurídica</li><li>Contrato e registro em cartório</li></ul></div>
     </div>
   </section>
 
@@ -202,8 +254,11 @@
     <div class="cols3"><a class="card" href="/como-funciona"><h4>Como funciona o Home Equity</h4>Entenda o crédito com imóvel em garantia: quanto libera, em quanto tempo se paga, o que o parceiro analisa e as etapas até receber.<span class="go">Ler →</span></a><a class="card" href="/garantia-do-imovel"><h4>A garantia do imóvel</h4>O que muda quando o imóvel fica como garantia: uso, registro em cartório, o que acontece em caso de atraso e como escolher uma parcela com folga.<span class="go">Ler →</span></a><a class="card" href="/custos-alem-dos-juros"><h4>Custos além dos juros</h4>IOF, avaliação, registro, seguros e atualização pelo IPCA: o que pode somar à parcela e por que pedir o CET da proposta.<span class="go">Ler →</span></a><a class="card" href="/home-equity-ou-outro-credito"><h4>Home Equity ou outro crédito</h4>A mesma conta para Home Equity, crédito pessoal, cheque especial e cartão rotativo, com as médias do Banco Central.<span class="go">Ler →</span></a><a class="card" href="/quando-nao-vale-a-pena"><h4>Quando não vale a pena</h4>Situações em que vale pensar duas vezes antes de dar o imóvel em garantia, e as em que o crédito pode fazer sentido.<span class="go">Ler →</span></a><a class="card" href="/taxas-de-referencia"><h4>Taxas do Banco Central</h4>A taxa do parceiro (1,09% ao mês mais IPCA) e as médias do Banco Central usadas no simulador, com o mês e a fonte de cada uma.<span class="go">Ler →</span></a></div>
   </section>
 
-  <section class="blk" aria-labelledby="t-faq">
-    <h2 id="t-faq">Perguntas frequentes</h2>
+  <section class="blk split faqs" aria-labelledby="t-faq">
+    <div class="split-t">
+      <div class="kicker">Dúvidas</div>
+      <h2 id="t-faq">Perguntas frequentes</h2>
+    </div>
     <div class="faq"><details><summary>Posso continuar morando no imóvel?</summary><p>Sim. No Home Equity o imóvel fica como garantia, mas você continua usando: morando, alugando ou mantendo o negócio nele, conforme o contrato. O que muda é o registro da garantia na matrícula, que sai quando a dívida é quitada. Veja <a href="/garantia-do-imovel">como funciona a garantia</a>.</p></details><details><summary>Posso usar um imóvel que ainda está financiado?</summary><p>Em geral, sim, conforme a instituição: o novo crédito quita o saldo do financiamento e libera a diferença para você. Por isso o simulador tem a opção "Ainda financiado": o saldo entra no total do crédito e conta para o limite de 60% do valor do imóvel (teto de R$ 3 milhões de crédito nesta ferramenta).</p></details><details><summary>Por que a parcela muda com o IPCA?</summary><p>Porque a taxa divulgada pelo parceiro é "a partir de 1,09% ao mês mais IPCA": além dos juros, o saldo é atualizado pela inflação. O simulador usa o IPCA dos últimos 12 meses e o mantém constante, então a parcela real pode ficar acima ou abaixo da estimativa, conforme a inflação dos próximos anos.</p></details><details><summary>Quanto tempo leva até o dinheiro cair na conta?</summary><p>Não há um prazo único: depende da análise de crédito, da avaliação do imóvel, da análise jurídica e do registro da garantia em cartório. Cada instituição informa o seu prazo na proposta.</p></details><details><summary>O que acontece se eu atrasar as parcelas?</summary><p>Atrasos geram encargos previstos no contrato e, se a dívida não for regularizada, a lei prevê um procedimento de cobrança que pode chegar à venda do imóvel dado em garantia. Por isso vale escolher uma parcela que caiba com folga. Detalhes em <a href="/garantia-do-imovel">Garantia do imóvel</a>.</p></details><details><summary>A simulação vale como proposta?</summary><p>Não. É uma estimativa feita com taxa de referência, sem consultar você nem o imóvel. A taxa, o limite e o prazo finais saem da análise de crédito e da avaliação do imóvel.</p></details></div>
   </section>
 
@@ -242,8 +297,8 @@
     </div>
   </div>
 </footer>
-<script src="/calculo.js?v=ead867923b"></script>
-<script src="/simulador.js?v=38678370e2"></script>
+<script src="/calculo.js?v=1085343f9e"></script>
+<script src="/simulador.js?v=1a1bad18fb"></script>
 <script defer src="/menu.js?v=36b6b9cf6d"></script>
 </body>
 </html>

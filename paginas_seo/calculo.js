@@ -5,7 +5,8 @@
   var TAXA_PARCEIRO_AM = 1.09;
   var LTV_MAX = 0.6;
   var CREDITO_MAX = 3000000;
-  var PRAZOS_ANOS = [5, 8, 10, 12, 15, 18, 20];
+  var PRAZO_MIN_ANOS = 2;
+  var PRAZO_MAX_ANOS = 20;
   var IMOVEL_MIN = 100000;
   var IMOVEL_MAX = 20000000;
   var RECEBER_MIN = 50000;
@@ -52,7 +53,7 @@
   function brl(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(Math.round(v)); }
   function pct(v) { return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%'; }
 
-  var api = { TAXA_PARCEIRO_AM: TAXA_PARCEIRO_AM, LTV_MAX: LTV_MAX, CREDITO_MAX: CREDITO_MAX, PRAZOS_ANOS: PRAZOS_ANOS, IMOVEL_MIN: IMOVEL_MIN, IMOVEL_MAX: IMOVEL_MAX, RECEBER_MIN: RECEBER_MIN,
+  var api = { TAXA_PARCEIRO_AM: TAXA_PARCEIRO_AM, LTV_MAX: LTV_MAX, CREDITO_MAX: CREDITO_MAX, PRAZO_MIN_ANOS: PRAZO_MIN_ANOS, PRAZO_MAX_ANOS: PRAZO_MAX_ANOS, IMOVEL_MIN: IMOVEL_MIN, IMOVEL_MAX: IMOVEL_MAX, RECEBER_MIN: RECEBER_MIN,
               ref: REF, ipcaMensal: ipcaMensal, taxaMensal: taxaMensal, pmt: pmt, valorPresente: valorPresente, limiteCredito: limiteCredito,
               simular: simular, receberParaParcela: receberParaParcela, amortizacaoAnual: amortizacaoAnual, compararQuitacao: compararQuitacao, brl: brl, pct: pct };
   root.DatalabHomeEquity = api;

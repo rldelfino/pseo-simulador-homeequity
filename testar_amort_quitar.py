@@ -61,7 +61,7 @@ def rodar(nav, nome_nav, base, largura):
     confere(tag + ": tabela igual ao calculo.py", ok, lin[0])
     confere(tag + ": saldo final zero", n(lin[-1][3]) == 0)
     # muda prazo e valor: a tabela acompanha
-    pg.select_option("#sel-prazo", "8")
+    pg.fill("#campo-prazo", "8"); pg.press("#campo-prazo", "Enter")
     pg.fill("#campo-receber", "180.000")
     pg.press("#campo-receber", "Enter")
     pg.wait_for_timeout(300)
@@ -75,6 +75,22 @@ def rodar(nav, nome_nav, base, largura):
     rodape = pg.inner_text("#amort-rodape")
     confere(tag + ": total de juros no rodapé", n(rodape.split("\t")[1]) == round(sum(e["juros"] for e in esp2)), rodape)
 
+    # --- prazo livre, rosca e gráficos
+    for anos in (3, 14, 16):
+        pg.fill("#campo-prazo", str(anos))
+        pg.wait_for_timeout(120)
+        rr = calculo.simular(800_000, 180_000, 0, anos * 12, I)
+        confere(tag + ": prazo digitado de %d anos" % anos, str(anos * 12) + " meses" in pg.inner_text("#r-sub") and n(pg.inner_text("#r-parcela")) == round(rr["parcela"]) and
+                pg.locator("#amort-graf .g-a").count() == anos, pg.inner_text("#r-sub"))
+        confere(tag + ": rosca acompanha o prazo de %d anos" % anos, pg.text_content("#rosca-pct") == "%d%%" % round(rr["juros"] / rr["total"] * 100) and
+                n(pg.inner_text("#rosca-juros-v")) == round(rr["juros"]), pg.text_content("#rosca-pct"))
+    pg.fill("#campo-prazo", "25")
+    pg.press("#campo-prazo", "Enter")
+    confere(tag + ": prazo acima do máximo vira 20 e avisa", pg.input_value("#campo-prazo") == "20" and "20 anos" in pg.inner_text("#msg-prazo") and pg.is_visible("#msg-prazo"))
+    pg.evaluate("(()=>{const r=document.getElementById('range-prazo');r.value='7';r.dispatchEvent(new Event('input',{bubbles:true}));})()")
+    confere(tag + ": controle deslizante do prazo", pg.input_value("#campo-prazo") == "7" and "84 meses" in pg.inner_text("#r-sub") and pg.locator("#amort-graf .g-a").count() == 7)
+    confere(tag + ": painéis de cenário e resultado com a mesma altura", abs(pg.evaluate("document.querySelector('.grid>.panel').offsetHeight - document.getElementById('resultado').offsetHeight")) <= 1 or largura < 900)
+
     # --- quitar dívida
     pg.goto(base + "/")
     pg.wait_for_selector("#q-cartoes .alt")
@@ -83,11 +99,12 @@ def rodar(nav, nome_nav, base, largura):
     confere(tag + ": padrão mostra a parcela na taxa média e no Home Equity", str(round(q["parcela_atual"])) in re.sub(r"[^\d\n]", "", cartoes.replace(".", "")) and
             str(round(q["parcela_he"])) in cartoes.replace(".", ""), cartoes[:120])
     for tipo, chave in (("cheque", "chequeAm"), ("rotativo", "rotativoAm"), ("pessoal", "pessoalAm")):
-        pg.select_option("#sel-divida", tipo)
+        pg.click("label[for=div-" + tipo + "]")
         pg.wait_for_timeout(150)
         qq = calculo.comparar_quitacao(60_000, REF[chave] / 100, 180, I)
         txt = pg.inner_text("#q-cartoes").replace(".", "")
         confere(tag + ": tipo " + tipo, str(round(qq["parcela_atual"])) in txt and str(round(qq["parcela_he"])) in txt, txt[:90])
+    confere(tag + ": gráfico de barras da dívida (4 barras)", pg.locator("#q-grafico .r").count() == 4, pg.locator("#q-grafico .r").count())
     # valor da dívida
     pg.fill("#campo-divida", "120.000")
     pg.press("#campo-divida", "Enter")
@@ -96,7 +113,7 @@ def rodar(nav, nome_nav, base, largura):
     txt = pg.inner_text("#q-cartoes").replace(".", "")
     confere(tag + ": valor da dívida", str(round(q3["parcela_atual"])) in txt and str(round(q3["parcela_he"])) in txt)
     # taxa própria
-    pg.select_option("#sel-divida", "outra")
+    pg.click("label[for=div-outra]")
     confere(tag + ": campo de taxa aparece", pg.is_visible("#campo-taxa-div"))
     pg.fill("#campo-taxa-div", "3,5")
     pg.press("#campo-taxa-div", "Enter")

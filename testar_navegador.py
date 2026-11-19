@@ -54,11 +54,11 @@ def rodar(nav, nome_nav, base, largura):
     confere(tag + "três cartões no Raio-X", pg.locator("#alts .alt").count() == 3)
 
     # prazo
-    pg.select_option("#sel-prazo", "20")
+    pg.fill("#campo-prazo", "20"); pg.press("#campo-prazo", "Enter")
     r = esperado(800_000, 250_000, 0, 20)
     confere(tag + "prazo 20 anos", numero(pg.inner_text("#r-parcela")) == round(r["parcela"]), pg.inner_text("#r-parcela"))
     confere(tag + "texto do prazo", "240 meses" in pg.inner_text("#r-sub"))
-    pg.select_option("#sel-prazo", "15")
+    pg.fill("#campo-prazo", "15"); pg.press("#campo-prazo", "Enter")
 
     # valor do imóvel e a receber (digitando)
     pg.fill("#campo-imovel", "1.000.000")
