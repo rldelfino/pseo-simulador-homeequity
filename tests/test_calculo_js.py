@@ -43,3 +43,31 @@ def test_calculo_js_tem_as_referencias_do_bcb(tmp_path):
     texto = g.gerar_calculo_js()
     assert "ipca12m" in texto and "garantiaRealAm" in texto
     assert "@@" not in texto
+
+
+@pytest.mark.parametrize("caso", CASOS)
+def test_sac_js_igual_ao_python(tmp_path, caso):
+    """SAC: primeira e última parcela, total, amortização anual, acumulado mensal, valor a receber e quitação iguais nas duas contas."""
+    im, re_, sa, me = caso
+    js = tmp_path / "calculo.js"
+    js.write_text(g.gerar_calculo_js(), encoding="utf-8")
+    prog = ("const H=require(%s);const i=H.taxaMensal(4.63);const [im,re,sa,me]=%s;const cr=re+sa;"
+            "console.log(JSON.stringify({r:H.simular(im,re,sa,me,i,'sac'),a:H.amortizacaoAnual(cr,i,me,'sac'),ac:H.acumuladoMensal(cr,i,me,'sac'),acp:H.acumuladoMensal(cr,i,me,'price'),"
+            "alvo:H.receberParaParcela(9000,sa,me,i,5000,'sac'),q:H.compararQuitacao(60000,0.0642,me,i,'sac'),renda:H.rendaParaParcela(3000)}))") % (json.dumps(str(js)), json.dumps(caso))
+    out = json.loads(subprocess.run([NODE, "-e", prog], capture_output=True, text=True, check=True, timeout=30).stdout)
+    i = c.taxa_mensal(4.63)
+    py = c.simular(im, re_, sa, me, i, "sac")
+    for k_js, k_py in (("credito", "credito"), ("parcela", "parcela"), ("parcelaFinal", "parcela_final"), ("total", "total"), ("juros", "juros")):
+        assert out["r"][k_js] == pytest.approx(py[k_py], rel=1e-9)
+    assert py["parcela"] > py["parcela_final"]
+    for x, y in zip(out["a"], c.amortizacao_anual(re_ + sa, i, me, "sac")):
+        for k in ("juros", "amortizacao", "saldo"):
+            assert x[k] == pytest.approx(y[k], rel=1e-8, abs=1e-6)
+    assert out["ac"] == pytest.approx(c.acumulado_mensal(re_ + sa, i, me, "sac"), rel=1e-9)
+    assert out["acp"] == pytest.approx(c.acumulado_mensal(re_ + sa, i, me, "price"), rel=1e-9)
+    assert out["ac"][-1] == pytest.approx(py["total"], rel=1e-9)
+    assert out["alvo"] == c.receber_para_parcela(9000, im, sa, me, i, sistema="sac")
+    q = c.comparar_quitacao(60000, 0.0642, me, i, "sac")
+    for k_js, k_py in (("parcelaHe", "parcela_he"), ("totalHe", "total_he"), ("economiaMes", "economia_mes"), ("economiaTotal", "economia_total")):
+        assert out["q"][k_js] == pytest.approx(q[k_py], rel=1e-9)
+    assert out["renda"] == pytest.approx(c.renda_para_parcela(3000))

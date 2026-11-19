@@ -28,7 +28,7 @@ def estado(pg):
     return pg.evaluate("""() => ({
       imovel: document.getElementById('campo-imovel').value, saldo: document.getElementById('campo-saldo').value,
       receber: document.getElementById('campo-receber').value, anos: document.getElementById('campo-prazo').value,
-      fin: document.getElementById('sit-financiado').checked,
+      fin: document.getElementById('sit-financiado').checked, sac: document.getElementById('sis-sac').checked,
       parcela: document.getElementById('r-parcela').textContent, total: document.getElementById('r-total').textContent,
       credito: document.getElementById('c-credito').textContent, limite: document.getElementById('c-limite').textContent,
       rotLim: document.getElementById('c-limite-rot').textContent,
@@ -49,6 +49,7 @@ def invariantes(pg, passo, acao):
     e = estado(pg)
     im, sa, rc, an = num(e["imovel"]), num(e["saldo"]) or 0, num(e["receber"]), int(e["anos"])
     t = "[%s] %s | " % (passo, acao)
+    sis = "sac" if e["sac"] else "price"
     for k in ("parcela", "total", "credito", "limite", "ctav"):
         confere(t + "sem NaN em " + k, "NaN" not in e[k] and "Infinity" not in e[k] and "undefined" not in e[k], e[k])
     confere(t + "imóvel dentro da faixa", calculo.IMOVEL_MIN <= im <= calculo.IMOVEL_MAX, im)
@@ -64,11 +65,11 @@ def invariantes(pg, passo, acao):
     confere(t + "botão liberado", not e["btnOff"])
     confere(t + "a receber dentro do limite", rc + sa <= lim + 1, (rc, sa, lim))
     confere(t + "a receber >= mínimo ou limite", rc >= min(calculo.RECEBER_MIN, lim - sa) - 1, (rc, lim - sa))
-    r = calculo.simular(im, rc, sa, an * 12, I)
+    r = calculo.simular(im, rc, sa, an * 12, I, sis)
     confere(t + "parcela", abs(num(e["parcela"]) - round(r["parcela"])) <= 1, (e["parcela"], r["parcela"]))
     confere(t + "total", abs(num(e["total"]) - round(r["total"])) <= 1, (e["total"], r["total"]))
     pct = int(re.search(r"(\d+)%", e["credito"]).group(1))
-    confere(t + "percentual do crédito", pct == round(r["ltv"] * 100), (e["credito"], r["ltv"] * 100))
+    confere(t + "percentual do crédito", pct == int(r["ltv"] * 100 + 0.5), (e["credito"], r["ltv"] * 100))  # o JS arredonda .5 para cima; round() do Python arredonda para o par
     confere(t + "barra de uso", abs(float(e["barra"].rstrip("%")) - min(100, r["ltv"] * 100)) < 0.2, (e["barra"], r["ltv"] * 100))
     confere(t + "crédito exibido", abs(num(e["credito"].split("·")[0]) - round(r["credito"])) <= 1, e["credito"])
     # cartões do Raio-X: três e coerentes
@@ -79,19 +80,19 @@ def invariantes(pg, passo, acao):
         m = re.search(r"Receber (?:menos|mais): R\$\s?([\d.]+)", e["alts"][1] if len(e["alts"]) > 1 else "")
         if m:
             v = int(m.group(1).replace(".", ""))
-            r2 = calculo.simular(im, v, sa, an * 12, I)
+            r2 = calculo.simular(im, v, sa, an * 12, I, sis)
             p2 = num(e["alts"][1].split("\n")[1])
             confere(t + "cartão 2 = conta", abs(p2 - round(r2["parcela"])) <= 1, (p2, r2["parcela"]))
             confere(t + "cartão 2 dentro do limite e do mínimo", calculo.RECEBER_MIN <= v and v + sa <= lim + 1, (v, lim))
         m3 = re.search(r"Prazo (?:maior|menor): (\d+) anos", e["alts"][-1])
         if m3:
-            r3 = calculo.simular(im, rc, sa, int(m3.group(1)) * 12, I)
+            r3 = calculo.simular(im, rc, sa, int(m3.group(1)) * 12, I, sis)
             p3 = num(e["alts"][-1].split("\n")[1])
             confere(t + "cartão 3 = conta", abs(p3 - round(r3["parcela"])) <= 1, (p3, r3["parcela"]))
     # nota da taxa maior
     mm = re.search(r"seria de R\$\s?([\d.]+)", e["nota"])
     if mm:
-        rm = calculo.simular(im, rc, sa, an * 12, 0.0214)
+        rm = calculo.simular(im, rc, sa, an * 12, 0.0214, sis)
         confere(t + "nota taxa maior", abs(int(mm.group(1).replace(".", "")) - round(rm["parcela"])) <= 1, (mm.group(1), rm["parcela"]))
     # o endereço compartilhável reabre igual (depois do atraso do replaceState)
     return e
@@ -109,7 +110,7 @@ def rodar(nav, nome, seed, passos):
     pg.wait_for_selector("#alts .alt")
     histor = []
     for k in range(passos):
-        a = rnd.choice(["imovel", "imovel", "receber", "receber", "saldo", "prazo", "fin", "quit", "slider_i", "slider_r", "conforto", "sujo"])
+        a = rnd.choice(["imovel", "imovel", "receber", "receber", "saldo", "prazo", "fin", "quit", "slider_i", "slider_r", "conforto", "sujo", "sis", "sis"])
         if a == "imovel":
             v = rnd.choice([100000, 150000, 480000, 800000, 1234567, 3000000, 5555000, 20000000, 99999, rnd.randint(100000, 9000000)])
             pg.fill("#campo-imovel", f"{v:,}".replace(",", ".")); pg.press("#campo-imovel", "Enter"); d = "imovel=%d" % v
@@ -133,6 +134,8 @@ def rodar(nav, nome, seed, passos):
         elif a == "slider_r":
             v = rnd.randint(50000, 3000000)
             pg.evaluate("v=>{const r=document.getElementById('range-receber');r.value=v;r.dispatchEvent(new Event('input',{bubbles:true}))}", v); d = "slider receber %d" % v
+        elif a == "sis":
+            alvo_sis = rnd.choice(["price", "sac"]); pg.click("label[for=sis-%s]" % alvo_sis); d = "sistema=" + alvo_sis
         elif a == "conforto":
             v = rnd.choice([0, 1, 500, 3000, 9000, 50000]); pg.fill("#campo-conforto", str(v)); pg.press("#campo-conforto", "Enter"); d = "conforto=%d" % v
         else:
@@ -148,7 +151,7 @@ def rodar(nav, nome, seed, passos):
     pg2.goto(e["url"])
     pg2.wait_for_selector("#resultado .big"); pg2.wait_for_timeout(500)
     e2 = estado(pg2)
-    for k in ("parcela", "total", "credito", "imovel", "receber", "anos"):
+    for k in ("parcela", "total", "credito", "imovel", "receber", "anos", "sac"):
         confere("[%s] link compartilhado reabre igual: %s" % (nome, k), e[k] == e2[k], (e[k], e2[k]))
     confere("[%s] sem erro de JS" % nome, not erros, erros[:3])
     ctx.close()

@@ -61,3 +61,33 @@ def test_teto_de_credito_da_ferramenta():
     assert c.limite_credito(10_000_000) == 3_000_000       # acima, o teto vale
     assert c.receber_maximo(10_000_000, 500_000) == 2_500_000
     assert c.simular(10_000_000, 3_100_000, 0, 180, 0.0147)["acima_limite"] is True
+
+
+def test_sac_fecha_a_conta():
+    i = c.taxa_mensal(4.5)
+    cred, n = 250_000, 180
+    r = c.simular(800_000, cred, 0, n, i, "sac")
+    assert r["parcela"] == pytest.approx(cred / n + cred * i)
+    assert r["parcela_final"] == pytest.approx(cred / n * (1 + i))
+    # o total do SAC é a soma das parcelas mês a mês
+    acum = c.acumulado_mensal(cred, i, n, "sac")
+    assert acum[-1] == pytest.approx(r["total"]) and len(acum) == n + 1
+    # mesma taxa e prazo: SAC paga menos juros no total que o Price, e começa com parcela maior
+    p = c.simular(800_000, cred, 0, n, i)
+    assert r["total"] < p["total"] and r["parcela"] > p["parcela"] and r["parcela_final"] < p["parcela"]
+    # o Price continua sendo o padrão e com parcela final igual
+    assert p["parcela_final"] == pytest.approx(p["parcela"])
+    # inverso: o valor que gera a primeira parcela
+    assert c.valor_presente_sac(r["parcela"], i, n) == pytest.approx(cred)
+
+
+def test_receber_para_parcela_sac_cabe_na_parcela():
+    i = c.taxa_mensal(4.5)
+    alvo = c.receber_para_parcela(6000, 800_000, 0, 120, i, sistema="sac")
+    assert alvo > 0
+    assert c.simular(800_000, alvo, 0, 120, i, "sac")["parcela"] <= 6000
+    assert c.simular(800_000, alvo + 5000, 0, 120, i, "sac")["parcela"] > 6000
+
+
+def test_renda_para_parcela_usa_30_por_cento():
+    assert c.renda_para_parcela(3000) == pytest.approx(10_000)

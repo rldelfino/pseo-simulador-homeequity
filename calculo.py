@@ -1,6 +1,7 @@
 """Conta do simulador de Home Equity (referência em Python; src/simulador.js usa a mesma conta, gerada em calculo.js, e os testes comparam as duas).
 
-Modelo: parcela fixa (tabela Price) sobre o crédito total, com taxa de referência = taxa do parceiro + IPCA.
+Modelo: parcela fixa (tabela Price, padrão) ou parcelas que caem (SAC) sobre o crédito total, com taxa de referência = taxa do parceiro + IPCA.
+O SAC é uma opção de simulação na mesma taxa: o parceiro confirma na proposta quais sistemas oferece.
   - taxa do parceiro: "a partir de 1,09% a.m. + IPCA" (página pública do parceiro, conferida em 18/11/2026);
   - IPCA: o acumulado em 12 meses do IBGE (série SGS 13522 do Banco Central), convertido em taxa mensal e mantido constante na simulação;
   - limite: o parceiro divulga que libera "até 60% do valor do imóvel" e prazo "até 20 anos".
@@ -16,6 +17,8 @@ PRAZO_MAX_ANOS = 20
 IMOVEL_MIN = 100_000
 IMOVEL_MAX = 20_000_000
 RECEBER_MIN = 50_000
+SISTEMAS = ("price", "sac")  # price = parcela fixa; sac = amortização constante, parcela que cai
+RENDA_REFERENCIA = 0.30      # referência de mercado (política de crédito das instituições), não regra do parceiro nem norma específica de Home Equity
 
 
 def ipca_mensal(ipca_12m):
@@ -44,6 +47,41 @@ def valor_presente(parcela, i, n):
     return parcela * (1 - (1 + i) ** -n) / i
 
 
+def valor_presente_sac(primeira_parcela, i, n):
+    """Crédito cuja PRIMEIRA parcela no SAC é primeira_parcela (primeira = credito/n + credito*i)."""
+    return primeira_parcela / (1 / n + i)
+
+
+def plano(credito, i, meses, sistema="price"):
+    """(primeira parcela, última parcela, total pago). No Price as duas parcelas são iguais; no SAC a parcela cai todo mês."""
+    if sistema == "sac":
+        amort = credito / meses
+        return amort + credito * i, amort * (1 + i), credito + credito * i * (meses + 1) / 2
+    p = pmt(credito, i, meses)
+    return p, p, p * meses
+
+
+def acumulado_mensal(credito, i, meses, sistema="price"):
+    """Total pago até o fim de cada mês (índice 0 = 0). Dá a linha do gráfico 'quanto você terá pago ao longo do tempo'."""
+    saida = [0.0]
+    total = 0.0
+    if sistema == "sac":
+        amort = credito / meses
+        saldo = credito
+        for _ in range(meses):
+            total += amort + saldo * i
+            saldo -= amort
+            saida.append(total)
+        return saida
+    p = pmt(credito, i, meses)
+    return [p * k for k in range(meses + 1)]
+
+
+def renda_para_parcela(parcela, fracao=RENDA_REFERENCIA):
+    """Renda mensal em que a parcela ocupa a fração dada (referência de 30%)."""
+    return parcela / fracao
+
+
 def limite_credito(valor_imovel):
     return min(LTV_MAX * valor_imovel, CREDITO_MAX)
 
@@ -52,14 +90,14 @@ def receber_maximo(valor_imovel, saldo):
     return max(0.0, limite_credito(valor_imovel) - saldo)
 
 
-def simular(valor_imovel, receber, saldo, meses, i):
-    """Devolve parcela, total, juros e a relação crédito/imóvel. credito = o que você recebe + o saldo do financiamento que o novo crédito quita."""
+def simular(valor_imovel, receber, saldo, meses, i, sistema="price"):
+    """Devolve parcela (a primeira, no SAC), última parcela, total, juros e a relação crédito/imóvel. credito = o que você recebe + o saldo do financiamento que o novo crédito quita."""
     credito = receber + saldo
-    parcela = pmt(credito, i, meses)
-    total = parcela * meses
+    parcela, ultima, total = plano(credito, i, meses, sistema)
     return {
         "credito": credito,
         "parcela": parcela,
+        "parcela_final": ultima,
         "total": total,
         "juros": total - credito,
         "ltv": credito / valor_imovel if valor_imovel > 0 else 0.0,
@@ -68,9 +106,10 @@ def simular(valor_imovel, receber, saldo, meses, i):
     }
 
 
-def amortizacao_anual(credito, i, meses):
-    """Como a dívida cai ano a ano na parcela fixa (Price): juros pagos, amortização e saldo devedor no fim de cada ano."""
+def amortizacao_anual(credito, i, meses, sistema="price"):
+    """Como a dívida cai ano a ano (Price: parcela fixa; SAC: amortização constante): juros pagos, amortização e saldo devedor no fim de cada ano."""
     parcela = pmt(credito, i, meses)
+    amort_sac = credito / meses
     saldo = credito
     linhas = []
     restante = meses
@@ -80,7 +119,7 @@ def amortizacao_anual(credito, i, meses):
         juros = amortizado = 0.0
         for _ in range(min(12, restante)):
             j = saldo * i
-            a = parcela - j
+            a = amort_sac if sistema == "sac" else parcela - j
             saldo -= a
             juros += j
             amortizado += a
@@ -89,20 +128,20 @@ def amortizacao_anual(credito, i, meses):
     return linhas
 
 
-def comparar_quitacao(divida, taxa_divida_am, meses, i):
-    """Mesma dívida e mesmo prazo: parcela e total na taxa da dívida (taxa_divida_am em fração ao mês) e no Home Equity (taxa i).
-    juros_mes1 = o que a dívida cobra de juros só no primeiro mês."""
+def comparar_quitacao(divida, taxa_divida_am, meses, i, sistema="price"):
+    """Mesma dívida e mesmo prazo: parcela e total na taxa da dívida (taxa_divida_am em fração ao mês, sempre parcela fixa) e no Home Equity (taxa i, no sistema escolhido).
+    Com SAC, a parcela do Home Equity é a primeira. juros_mes1 = o que a dívida cobra de juros só no primeiro mês."""
     atual = pmt(divida, taxa_divida_am, meses)
-    he = pmt(divida, i, meses)
+    he, _, total_he = plano(divida, i, meses, sistema)
     return {
         "divida": divida,
         "parcela_atual": atual, "total_atual": atual * meses, "juros_mes1": divida * taxa_divida_am,
-        "parcela_he": he, "total_he": he * meses,
-        "economia_mes": atual - he, "economia_total": (atual - he) * meses,
+        "parcela_he": he, "total_he": total_he,
+        "economia_mes": atual - he, "economia_total": atual * meses - total_he,
     }
 
 
-def receber_para_parcela(parcela_alvo, valor_imovel, saldo, meses, i, passo=5000):
-    """Maior valor a receber (múltiplo de `passo`) cuja parcela cabe em parcela_alvo; 0 se nem o menor valor cabe."""
-    bruto = valor_presente(parcela_alvo, i, meses) - saldo
+def receber_para_parcela(parcela_alvo, valor_imovel, saldo, meses, i, passo=5000, sistema="price"):
+    """Maior valor a receber (múltiplo de `passo`) cuja parcela (a primeira, no SAC) cabe em parcela_alvo; 0 se nem o menor valor cabe."""
+    bruto = (valor_presente_sac(parcela_alvo, i, meses) if sistema == "sac" else valor_presente(parcela_alvo, i, meses)) - saldo
     return max(0, int(bruto // passo) * passo)
