@@ -17,7 +17,7 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 
 ## Comandos
 - Gerar: `python gerador_homeequity.py` (saída em `paginas_seo/`, publicada no Cloudflare Pages sem build). O CSS é escrito à mão em `src/estilo.css` (sem Tailwind/npm).
-- Testes: `python -m pytest -q` (77). Amortização e "quitar dívida" no navegador: `python testar_amort_quitar.py` (Chromium + WebKit, desktop e celular).
+- Testes: `python -m pytest -q` (78). Amortização e "quitar dívida" no navegador: `python testar_amort_quitar.py` (Chromium + WebKit, desktop e celular).
 - Seções da home (18/11): "Para onde vai a sua parcela" (amortização anual recolhível, `calculo.amortizacao_anual`) e "Tem uma dívida cara? Veja se vale trocar" (`calculo.comparar_quitacao`, taxas médias BCB 20742/20741/22022 em `REF`; mesmo prazo do simulador; botão leva o valor ao simulador). Navegador de ponta a ponta (Chromium + WebKit, desktop e celular, 160 checagens no total): `python testar_navegador.py` (precisa do Playwright; fora do CI).
 - Ícones e imagem de compartilhamento: `python gerar_icones.py` (Playwright + Pillow).
 - Taxas do BCB: `python etl_taxas.py` (grava `dados/taxas_referencia.csv`; falha de rede não derruba). Robô semanal em `.github/workflows/atualiza_taxas.yml` (seg 08:00 UTC): taxas, rebuild, pytest, commit, IndexNow.
@@ -38,6 +38,8 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 
 - Linkado no hub (cartão PT/EN, rodapé, llms.txt) e no rodapé de 002, 003 e 005. Search Console/Bing/IndexNow feitos; DuckDuckGo não tem sitemap (usa o índice do Bing e o rastreador próprio).
 - Auditoria e benchmark (18/11): `../_plano-equity-condominio/AUDITORIA-HOME-EQUITY.md`. Conta bate com exemplo público da Creditas (R$ 150 mil, 48 m, IPCA 4,22% → R$ 4.349 / R$ 208,7 mil). Corrigidos: `#simulador` na barra de endereço (Safari voltava ao topo do simulador) e tabelas viram cartões no celular (`data-l` + CSS).
+
+- v2 da home (18/11, feedback do dono): prazo livre de 2 a 20 anos (campo + controle deslizante, `PRAZO_MIN_ANOS`/`PRAZO_MAX_ANOS`; o mínimo de 2 anos é limite da interface, não do parceiro); sem `<select>` (tipo de dívida virou botões); painel do resultado com a mesma altura do cenário e rosca (crédito x juros do total); gráficos SVG feitos no JS (barras juros/amortização + linha do saldo; barras parcela e total na troca de dívida); seções com ritmo variado (faixas de largura total `.band`, números grandes, divisão em duas colunas, passos numerados). Gráficos usam classes CSS (`.g-a`, `.g-j`, `.g-s`), nunca `style`.
 
 ## Próximos passos
 1. Decidir melhorias do benchmark: tabela de amortização, custos estimados (só com fonte), renda mínima estimada, "quitar dívida cara".

@@ -87,7 +87,8 @@ CALCULO_JS = """/* GERADO por gerador_homeequity.py a partir de calculo.py e dad
   var TAXA_PARCEIRO_AM = @@TAXA_PARCEIRO@@;
   var LTV_MAX = @@LTV@@;
   var CREDITO_MAX = @@CREDITO_MAX@@;
-  var PRAZOS_ANOS = @@PRAZOS@@;
+  var PRAZO_MIN_ANOS = @@PRAZO_MIN@@;
+  var PRAZO_MAX_ANOS = @@PRAZO_MAX@@;
   var IMOVEL_MIN = @@IMOVEL_MIN@@;
   var IMOVEL_MAX = @@IMOVEL_MAX@@;
   var RECEBER_MIN = @@RECEBER_MIN@@;
@@ -134,7 +135,7 @@ CALCULO_JS = """/* GERADO por gerador_homeequity.py a partir de calculo.py e dad
   function brl(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(Math.round(v)); }
   function pct(v) { return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%'; }
 
-  var api = { TAXA_PARCEIRO_AM: TAXA_PARCEIRO_AM, LTV_MAX: LTV_MAX, CREDITO_MAX: CREDITO_MAX, PRAZOS_ANOS: PRAZOS_ANOS, IMOVEL_MIN: IMOVEL_MIN, IMOVEL_MAX: IMOVEL_MAX, RECEBER_MIN: RECEBER_MIN,
+  var api = { TAXA_PARCEIRO_AM: TAXA_PARCEIRO_AM, LTV_MAX: LTV_MAX, CREDITO_MAX: CREDITO_MAX, PRAZO_MIN_ANOS: PRAZO_MIN_ANOS, PRAZO_MAX_ANOS: PRAZO_MAX_ANOS, IMOVEL_MIN: IMOVEL_MIN, IMOVEL_MAX: IMOVEL_MAX, RECEBER_MIN: RECEBER_MIN,
               ref: REF, ipcaMensal: ipcaMensal, taxaMensal: taxaMensal, pmt: pmt, valorPresente: valorPresente, limiteCredito: limiteCredito,
               simular: simular, receberParaParcela: receberParaParcela, amortizacaoAnual: amortizacaoAnual, compararQuitacao: compararQuitacao, brl: brl, pct: pct };
   root.DatalabHomeEquity = api;
@@ -208,7 +209,7 @@ def referencias():
 def gerar_calculo_js():
     refs = json.dumps(referencias(), ensure_ascii=False, sort_keys=True)
     return _preencher(CALCULO_JS, {
-        "TAXA_PARCEIRO": repr(calculo.TAXA_PARCEIRO_AM), "LTV": repr(calculo.LTV_MAX), "CREDITO_MAX": str(calculo.CREDITO_MAX), "PRAZOS": json.dumps(calculo.PRAZOS_ANOS),
+        "TAXA_PARCEIRO": repr(calculo.TAXA_PARCEIRO_AM), "LTV": repr(calculo.LTV_MAX), "CREDITO_MAX": str(calculo.CREDITO_MAX), "PRAZO_MIN": str(calculo.PRAZO_MIN_ANOS), "PRAZO_MAX": str(calculo.PRAZO_MAX_ANOS),
         "IMOVEL_MIN": str(calculo.IMOVEL_MIN), "IMOVEL_MAX": str(calculo.IMOVEL_MAX), "RECEBER_MIN": str(calculo.RECEBER_MIN), "REFERENCIAS": refs})
 
 
@@ -344,12 +345,18 @@ def _valores_padrao():
     amort = calculo.amortizacao_anual(r["credito"], i, 180)
     taxa_div = ref[conteudo.DIVIDA_TIPO_PADRAO + "Am"]
     q = calculo.comparar_quitacao(conteudo.DIVIDA_PADRAO, taxa_div / 100, 180, i)
-    opcoes = "".join('<option value="%s"%s>%s (média %s a.m.)</option>' % (k, " selected" if k == conteudo.DIVIDA_TIPO_PADRAO else "", nome, conteudo.pct(ref[k + "Am"]))
-                     for k, nome in conteudo.DIVIDAS) + '<option value="outra">Outra (informo a taxa)</option>'
+    opcoes = "".join('<input type="radio" name="tipodiv" id="div-%s" value="%s"%s><label for="div-%s">%s <small>média %s a.m.</small></label>'
+                     % (k, k, " checked" if k == conteudo.DIVIDA_TIPO_PADRAO else "", k, nome, conteudo.pct(ref[k + "Am"])) for k, nome in conteudo.DIVIDAS)
+    opcoes += '<input type="radio" name="tipodiv" id="div-outra" value="outra"><label for="div-outra">Outra <small>informo a taxa</small></label>'
     return {
         "D_AMORT_RESUMO": conteudo.amort_resumo(r, amort), "D_AMORT_LINHAS": conteudo.amort_linhas(amort), "D_AMORT_TOTAL": conteudo.amort_total(amort, r["credito"]),
         "D_AMORT_NOTA": conteudo.amort_nota(ref),
         "DIVIDA_OPCOES": opcoes, "D_Q_CARTOES": conteudo.quitar_cartoes(q, taxa_div, 15, i * 100), "D_Q_TEXTO": conteudo.quitar_texto(q, 15),
+        "D_ROSCA_P": "%.1f" % (r["credito"] / r["total"] * 289.0265), "D_PCT_JUROS": str(round(r["juros"] / r["total"] * 100)),
+        "D_AMORT_PCT": str(round(amort[0]["juros"] / (r["parcela"] * 12) * 100)),
+        "FATO_TAXA": conteudo.pct(calculo.TAXA_PARCEIRO_AM), "FATO_LTV": "%d%%" % round(calculo.LTV_MAX * 100), "FATO_PRAZO": "%d anos" % calculo.PRAZO_MAX_ANOS,
+        "PRAZO_MIN": str(calculo.PRAZO_MIN_ANOS), "PRAZO_MAX": str(calculo.PRAZO_MAX_ANOS),
+        "D_L_CRED": conteudo.brl0(r["credito"]), "D_L_JUROS": conteudo.brl0(r["juros"]),
         "D_PARCELA": conteudo.brl0(r["parcela"]), "D_TOTAL": conteudo.brl0(r["total"]),
         "D_SUB": "em 180 meses · taxa de referência " + conteudo.pct(i * 100) + " a.m.",
         "D_CREDITO": conteudo.brl0(r["credito"]) + " · " + str(round(r["ltv"] * 100)) + "%", "D_BARRA": "%.1f" % (r["ltv"] * 100),
@@ -388,8 +395,7 @@ def _pagina_home(valores, hoje):
         {"@type": "WebSite", "@id": DOMINIO + "/#site", "url": DOMINIO + "/", "name": "Home Equity — Datalab Global", "inLanguage": "pt-BR",
          "publisher": {"@id": DOMINIO + "/#organizacao"}},
     ]}
-    prazos = "".join('<option value="%d"%s>%d anos</option>' % (a, " selected" if a == 15 else "", a) for a in calculo.PRAZOS_ANOS)
-    main = _preencher(layout.HOME_MAIN, dict(valores, PRAZOS=prazos, COMPARACAO=_comparacao_html(), CARTOES=_cartoes_html(), FAQ=_faq_html(),
+    main = _preencher(layout.HOME_MAIN, dict(valores, COMPARACAO=_comparacao_html(), CARTOES=_cartoes_html(), FAQ=_faq_html(),
                                              PARCEIRO=LINK_PARCEIRO, **_valores_padrao()))
     return _preencher(layout.LAYOUT, dict(valores, TITLE=HOME_TITLE, DESC=HOME_DESC, CANONICAL=DOMINIO + "/", ROBOTS="index,follow,max-image-preview:large",
                                           OGTYPE="website", JSONLD=_ld(site) + _ld(faq), MAIN=main, SCRIPTS=home_scripts()))

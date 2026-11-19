@@ -110,12 +110,15 @@ HOME_MAIN = """  <section class="hero">
         <div class="hint warn" id="msg-ajuste" hidden></div>
       </div>
       <div class="f">
-        <label for="sel-prazo">Prazo <span>até 20 anos</span></label>
-        <div class="inp sel"><select id="sel-prazo">@@PRAZOS@@</select></div>
+        <label for="campo-prazo">Prazo <span>de @@PRAZO_MIN@@ a @@PRAZO_MAX@@ anos</span></label>
+        <div class="inp"><input id="campo-prazo" type="text" inputmode="numeric" autocomplete="off" value="15" class="num" aria-describedby="msg-prazo"><em>anos</em></div>
+        <input id="range-prazo" type="range" aria-label="Prazo em anos, controle deslizante" min="@@PRAZO_MIN@@" max="@@PRAZO_MAX@@" step="1" value="15">
+        <div class="slabel"><span>@@PRAZO_MIN@@ anos</span><span>@@PRAZO_MAX@@ anos</span></div>
+        <div class="hint warn" id="msg-prazo" hidden></div>
       </div>
     </section>
 
-    <section class="panel" id="resultado" aria-labelledby="t-resultado" aria-live="polite">
+    <section class="panel resp" id="resultado" aria-labelledby="t-resultado" aria-live="polite">
       <h2 class="sr" id="t-resultado">Resultado da simulação</h2>
       <div class="res">
         <div>
@@ -137,14 +140,39 @@ HOME_MAIN = """  <section class="hero">
           <div class="lg"><span><s class="lim"></s><span id="c-limite-rot">Limite (60%)</span></span><b class="num" id="c-limite">@@D_LIMITE@@</b></div>
         </div>
       </div>
-      <div class="cta">
-        <div><strong>Faça sua proposta</strong><span class="s">Com um parceiro de crédito · sem compromisso</span></div>
-        <button type="button" class="btn" id="btn-cta">Consultar opções →</button>
+      <div class="rosca">
+        <svg viewBox="0 0 120 120" width="120" height="120" role="img" id="rosca-svg" aria-label="Do total pago, @@D_PCT_JUROS@@% é juros">
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#cbd5e1" stroke-width="14"/>
+          <circle id="rosca-cred" cx="60" cy="60" r="46" fill="none" stroke="#4aa3b5" stroke-width="14" stroke-dasharray="@@D_ROSCA_P@@ 289.03" transform="rotate(-90 60 60)"/>
+          <text x="60" y="61" text-anchor="middle" class="rc-n" id="rosca-pct">@@D_PCT_JUROS@@%</text>
+          <text x="60" y="77" text-anchor="middle" class="rc-t">em juros</text>
+        </svg>
+        <div class="rc-l">
+          <div class="kicker">Para onde vai o total</div>
+          <div class="lg"><span><s></s>Crédito</span><b class="num" id="rosca-cred-v">@@D_L_CRED@@</b></div>
+          <div class="lg"><span><s class="jr"></s>Juros</span><b class="num" id="rosca-juros-v">@@D_L_JUROS@@</b></div>
+        </div>
       </div>
-      <div class="fine2">Estimativa: a taxa final depende da análise. O imóvel fica como garantia da operação — <a href="#garantia">entenda abaixo</a>.</div>
-      <div class="copiar"><button type="button" id="btn-copiar">Copiar o link desta simulação</button><span id="msg-copiado" role="status"></span></div>
+      <div class="rodape-res">
+        <div class="cta">
+          <div><strong>Faça sua proposta</strong><span class="s">Com um parceiro de crédito · sem compromisso</span></div>
+          <button type="button" class="btn" id="btn-cta">Consultar opções →</button>
+        </div>
+        <div class="fine2">Estimativa: a taxa final depende da análise. O imóvel fica como garantia da operação — <a href="#garantia">entenda abaixo</a>.</div>
+        <div class="copiar"><button type="button" id="btn-copiar">Copiar o link desta simulação</button><span id="msg-copiado" role="status"></span></div>
+      </div>
     </section>
   </div>
+
+  <section class="band fatos" aria-label="Condições divulgadas por um parceiro de crédito">
+    <div class="fatos-g">
+      <div><b class="num">@@FATO_TAXA@@</b><span>ao mês + IPCA, a partir de</span></div>
+      <div><b class="num">@@FATO_LTV@@</b><span>do valor do imóvel, no máximo</span></div>
+      <div><b class="num">@@FATO_PRAZO@@</b><span>de prazo, no máximo</span></div>
+      <div><b class="num">R$ 0</b><span>e sem cadastro para simular</span></div>
+    </div>
+    <p class="hint">Condições divulgadas por um parceiro de crédito. A taxa final e o limite saem da análise do pedido.</p>
+  </section>
 
   <section class="blk" aria-labelledby="t-raio">
     <div class="raio">
@@ -159,8 +187,21 @@ HOME_MAIN = """  <section class="hero">
   </section>
 
   <section class="blk" aria-labelledby="t-amort">
-    <h2 id="t-amort">Para onde vai a sua parcela</h2>
-    <p class="lead" id="amort-resumo">@@D_AMORT_RESUMO@@</p>
+    <div class="split">
+      <div class="split-t">
+        <div class="kicker">Amortização</div>
+        <h2 id="t-amort">Para onde vai a sua parcela</h2>
+        <div class="giga num"><span id="amort-pct">@@D_AMORT_PCT@@%</span><small>do 1º ano é juros</small></div>
+        <p class="lead" id="amort-resumo">@@D_AMORT_RESUMO@@</p>
+      </div>
+      <div class="panel graf">
+        <div class="leg">
+          <span><s class="jr"></s>Juros do ano</span><span><s></s>Amortização do ano</span><span><s class="ln"></s>Saldo devedor</span>
+        </div>
+        <svg id="amort-graf" viewBox="0 0 640 220" preserveAspectRatio="none" role="img" aria-label="Gráfico: juros e amortização de cada ano e saldo devedor"></svg>
+        <div class="eixo"><span>Ano 1</span><span id="amort-ano-fim">Ano 15</span></div>
+      </div>
+    </div>
     <details class="amort" id="det-amort">
       <summary>Ver a amortização ano a ano</summary>
       <div class="tw"><table id="tab-amort">
@@ -174,20 +215,22 @@ HOME_MAIN = """  <section class="hero">
   </section>
 
   <section class="blk" aria-labelledby="t-cmp">
+    <div class="kicker">Taxas</div>
     <h2 id="t-cmp">Quanto cada tipo de crédito custa por mês</h2>
     <p class="lead">Com garantia, o juro mensal costuma ser bem menor que o de crédito sem garantia.</p>
     <div class="panel">@@COMPARACAO@@</div>
     <div class="note" id="nota-taxa"><b>E se a taxa for maior?</b> <span id="nota-taxa-texto">@@NOTA_TAXA@@</span></div>
   </section>
 
-  <section class="blk" aria-labelledby="t-quitar">
+  <section class="band" aria-labelledby="t-quitar">
+    <div class="kicker">Dívida cara</div>
     <h2 id="t-quitar">Tem uma dívida cara? Veja se vale trocar</h2>
     <p class="lead">A mesma dívida, no mesmo prazo do simulador, na taxa média do mercado e no Home Equity.</p>
-    <div class="panel quitar">
-      <div class="qin">
+    <div class="qgrid">
+      <div class="panel quitar">
         <div class="f">
-          <label for="sel-divida">Tipo de dívida</label>
-          <div class="inp sel"><select id="sel-divida">@@DIVIDA_OPCOES@@</select></div>
+          <div class="lb" id="lb-tipodiv">Tipo de dívida</div>
+          <div class="seg s2" role="radiogroup" aria-labelledby="lb-tipodiv">@@DIVIDA_OPCOES@@</div>
         </div>
         <div class="f">
           <label for="campo-divida">Quanto você deve <span>saldo da dívida</span></label>
@@ -197,33 +240,42 @@ HOME_MAIN = """  <section class="hero">
           <label for="campo-taxa-div">Taxa da sua dívida <span>% ao mês</span></label>
           <div class="inp"><input id="campo-taxa-div" type="text" inputmode="decimal" autocomplete="off" value="5" class="num"><em>% a.m.</em></div>
         </div>
+        <div class="row2"><button type="button" class="ghost" id="btn-usar-divida">Simular com este valor</button></div>
       </div>
-      <div class="hint warn" id="q-aviso" hidden></div>
-      <div class="alts dois" id="q-cartoes">@@D_Q_CARTOES@@</div>
-      <p class="qtxt" id="q-texto">@@D_Q_TEXTO@@</p>
-      <div class="row2"><button type="button" class="ghost" id="btn-usar-divida">Simular com este valor</button></div>
-      <div class="hint">Conta de comparação: as duas dívidas têm a mesma duração. Cheque especial e rotativo não costumam durar tanto; o ponto é ver quanto o juro pesa por mês. A troca coloca o imóvel como garantia: <a href="/garantia-do-imovel">veja o que muda</a> e <a href="/custos-alem-dos-juros">os custos além dos juros</a>.</div>
+      <div class="panel qres">
+        <div class="hint warn" id="q-aviso" hidden></div>
+        <div class="alts dois" id="q-cartoes">@@D_Q_CARTOES@@</div>
+        <div class="qviz" id="q-grafico"></div>
+        <p class="qtxt" id="q-texto">@@D_Q_TEXTO@@</p>
+      </div>
     </div>
+    <div class="hint">Conta de comparação: as duas dívidas têm a mesma duração. Cheque especial e rotativo não costumam durar tanto; o ponto é ver quanto o juro pesa por mês. A troca coloca o imóvel como garantia: <a href="/garantia-do-imovel">veja o que muda</a> e <a href="/custos-alem-dos-juros">os custos além dos juros</a>.</div>
   </section>
 
   <section class="blk" id="garantia" aria-labelledby="t-gar">
-    <h2 id="t-gar">Como funciona a garantia do imóvel</h2>
-    <p class="lead">Entender isso antes ajuda a escolher uma parcela que caiba com folga.</p>
-    <div class="cols3">
-      <div class="card"><h4>O que muda para você</h4><ul><li>Você continua morando ou usando o imóvel</li><li>A garantia é o que permite juros menores</li></ul></div>
-      <div class="card"><h4>O que fica registrado</h4><ul><li>O imóvel é dado em garantia à instituição, com registro em cartório</li><li>O registro sai quando a dívida é quitada</li></ul></div>
-      <div class="card"><h4>Para ficar tranquilo</h4><ul><li>Escolha uma parcela que caiba com folga</li><li>Em atraso prolongado, a instituição pode seguir o que o contrato prevê</li></ul></div>
+    <div class="split gar">
+      <div class="split-t">
+        <div class="kicker">Garantia</div>
+        <h2 id="t-gar">Como funciona a garantia do imóvel</h2>
+        <p class="lead">Entender isso antes ajuda a escolher uma parcela que caiba com folga.</p>
+        <p class="hint"><a href="/garantia-do-imovel">Leia o guia completo sobre a garantia</a></p>
+      </div>
+      <div class="lista3">
+        <div class="li3"><span class="n" aria-hidden="true">1</span><div><h4>O que muda para você</h4><ul><li>Você continua morando ou usando o imóvel</li><li>A garantia é o que permite juros menores</li></ul></div></div>
+        <div class="li3"><span class="n" aria-hidden="true">2</span><div><h4>O que fica registrado</h4><ul><li>O imóvel é dado em garantia à instituição, com registro em cartório</li><li>O registro sai quando a dívida é quitada</li></ul></div></div>
+        <div class="li3"><span class="n" aria-hidden="true">3</span><div><h4>Para ficar tranquilo</h4><ul><li>Escolha uma parcela que caiba com folga</li><li>Em atraso prolongado, a instituição pode seguir o que o contrato prevê</li></ul></div></div>
+      </div>
     </div>
-    <p class="hint"><a href="/garantia-do-imovel">Leia o guia completo sobre a garantia</a></p>
   </section>
 
-  <section class="blk" aria-labelledby="t-pede">
+  <section class="band" aria-labelledby="t-pede">
+    <div class="kicker">Documentos</div>
     <h2 id="t-pede">O que o parceiro costuma pedir</h2>
     <p class="lead">Cada instituição tem a sua lista. Em geral, para Home Equity:</p>
-    <div class="cols3">
-      <div class="card"><h4>Sobre você</h4><ul><li>Documento e estado civil</li><li>Comprovante de renda ou extratos</li><li>Cônjuge ou sócios, se entrarem</li></ul></div>
-      <div class="card"><h4>Sobre o imóvel</h4><ul><li>Matrícula atualizada</li><li>Avaliação do imóvel</li><li>Pode ser financiado, comercial ou de terceiros, conforme a instituição</li></ul></div>
-      <div class="card"><h4>Etapas até receber</h4><ul><li>Análise de crédito</li><li>Avaliação e análise jurídica</li><li>Contrato e registro em cartório</li></ul></div>
+    <div class="steps">
+      <div class="st"><span class="sn" aria-hidden="true">01</span><h4>Sobre você</h4><ul><li>Documento e estado civil</li><li>Comprovante de renda ou extratos</li><li>Cônjuge ou sócios, se entrarem</li></ul></div>
+      <div class="st"><span class="sn" aria-hidden="true">02</span><h4>Sobre o imóvel</h4><ul><li>Matrícula atualizada</li><li>Avaliação do imóvel</li><li>Pode ser financiado, comercial ou de terceiros, conforme a instituição</li></ul></div>
+      <div class="st"><span class="sn" aria-hidden="true">03</span><h4>Etapas até receber</h4><ul><li>Análise de crédito</li><li>Avaliação e análise jurídica</li><li>Contrato e registro em cartório</li></ul></div>
     </div>
   </section>
 
@@ -232,8 +284,11 @@ HOME_MAIN = """  <section class="hero">
     <div class="cols3">@@CARTOES@@</div>
   </section>
 
-  <section class="blk" aria-labelledby="t-faq">
-    <h2 id="t-faq">Perguntas frequentes</h2>
+  <section class="blk split faqs" aria-labelledby="t-faq">
+    <div class="split-t">
+      <div class="kicker">Dúvidas</div>
+      <h2 id="t-faq">Perguntas frequentes</h2>
+    </div>
     <div class="faq">@@FAQ@@</div>
   </section>
 

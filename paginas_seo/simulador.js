@@ -70,6 +70,44 @@
     return d;
   }
 
+  var NS = 'http://www.w3.org/2000/svg';
+  var CIRC = 289.0265; // circunferência da rosca (raio 46)
+  function svgEl(tag, atributos) {
+    var e = document.createElementNS(NS, tag);
+    Object.keys(atributos).forEach(function (k) { e.setAttribute(k, String(atributos[k])); });
+    return e;
+  }
+
+  // Rosca: do total pago, quanto é crédito e quanto é juros.
+  function desenharRosca(r, semMargem) {
+    var pj = !semMargem && r.total > 0 ? r.juros / r.total : 0;
+    $('rosca-cred').setAttribute('stroke-dasharray', (semMargem ? 0 : (1 - pj) * CIRC).toFixed(1) + ' ' + CIRC.toFixed(2));
+    $('rosca-pct').textContent = semMargem ? '—' : Math.round(pj * 100) + '%';
+    $('rosca-cred-v').textContent = semMargem ? '—' : H.brl(r.credito);
+    $('rosca-juros-v').textContent = semMargem ? '—' : H.brl(r.juros);
+    $('rosca-svg').setAttribute('aria-label', semMargem ? 'Sem simulação' : 'Do total pago, ' + Math.round(pj * 100) + '% é juros');
+  }
+
+  // Gráfico anual: barras (juros em cima, amortização embaixo) e linha do saldo devedor.
+  function desenharGrafAmort(linhas, credito, parcelaAno) {
+    var g = $('amort-graf');
+    limpar(g);
+    var n = linhas.length, W = 640, Hh = 220, topo = 12, base = Hh - 4, util = base - topo;
+    var slot = W / n, larg = Math.max(4, slot * 0.68);
+    var pontos = ['0,' + (base - util).toFixed(1)];
+    linhas.forEach(function (x, k) {
+      var x0 = k * slot + (slot - larg) / 2;
+      var hA = (x.amortizacao / parcelaAno) * util, hJ = (x.juros / parcelaAno) * util;
+      g.appendChild(svgEl('rect', { 'class': 'g-a', x: x0.toFixed(1), y: (base - hA).toFixed(1), width: larg.toFixed(1), height: Math.max(0, hA).toFixed(1) }));
+      g.appendChild(svgEl('rect', { 'class': 'g-j', x: x0.toFixed(1), y: (base - hA - hJ).toFixed(1), width: larg.toFixed(1), height: Math.max(0, hJ).toFixed(1) }));
+      pontos.push(((k + 1) * slot).toFixed(1) + ',' + (base - (x.saldo / credito) * util).toFixed(1));
+    });
+    g.appendChild(svgEl('polyline', { 'class': 'g-s', points: pontos.join(' ') }));
+    $('amort-ano-fim').textContent = 'Ano ' + n;
+    g.setAttribute('aria-label', 'Gráfico: no ano 1, ' + H.brl(linhas[0].juros) + ' de juros e ' + H.brl(linhas[0].amortizacao) + ' de amortização; no ano ' + n + ', ' +
+      H.brl(linhas[n - 1].juros) + ' de juros e ' + H.brl(linhas[n - 1].amortizacao) + ' de amortização. O saldo devedor cai até zero.');
+  }
+
   function desenharRaio(r, i, meses) {
     var c = estado.conforto;
     var txt;
@@ -108,7 +146,6 @@
         alvo.appendChild(cartaoAlt('Receber mais: ' + H.brl(mais), r4.parcela, ['Total: ' + H.brl(r4.total)], false, { cls: 'up', texto: 'parcela maior, mesmo prazo' }));
       }
     }
-    alvo.className = 'alts' + (alvo.children.length === 2 ? ' dois' : '');
 
     // prazo diferente
     var longo = estado.anos < 20;
@@ -116,6 +153,7 @@
     var r3 = H.simular(estado.imovel, rec(), estado.saldo, anos3 * 12, i);
     alvo.appendChild(cartaoAlt((longo ? 'Prazo maior: ' : 'Prazo menor: ') + anos3 + ' anos', r3.parcela, ['Total: ' + H.brl(r3.total)], false,
       longo ? { cls: 'up', texto: 'parcela menor, mais juros no total' } : { cls: 'up', texto: 'parcela maior, menos juros no total' }));
+    alvo.className = 'alts' + (alvo.children.length === 2 ? ' dois' : '');
   }
 
   function desenharNota(i, meses) {
@@ -139,11 +177,15 @@
     if (semMargem) {
       $('amort-resumo').textContent = 'Ajuste o saldo ou o valor do imóvel para ver a amortização.';
       $('amort-nota').textContent = '';
+      $('amort-pct').textContent = '—';
+      limpar($('amort-graf'));
       return;
     }
     var linhas = H.amortizacaoAnual(r.credito, i, meses);
     var pago = r.parcela * 12;
     var j1 = linhas[0].juros;
+    $('amort-pct').textContent = Math.round((j1 / pago) * 100) + '%';
+    desenharGrafAmort(linhas, r.credito, pago);
     $('amort-resumo').textContent = 'No primeiro ano, ' + H.brl(j1) + ' dos ' + H.brl(pago) + ' que você paga são juros (' + Math.round((j1 / pago) * 100) +
       '%). A parcela é fixa: com o tempo ela amortiza mais a dívida e os juros caem.';
     var juros = 0;
@@ -169,6 +211,31 @@
   // "Quitar dívida cara": a mesma dívida e o mesmo prazo na taxa média da dívida e no Home Equity (conteudo.py: quitar_cartoes/quitar_texto).
   function taxaDivida() { return estado.tipoDiv === 'outra' ? estado.taxaDiv : H.ref[estado.tipoDiv + 'Am']; }
 
+  // Barras lado a lado: parcela por mês e total pago, dívida atual x Home Equity.
+  function grupoBarras(titulo, valA, valB, nomeA) {
+    var g = el('div', 'qg');
+    g.appendChild(el('h4', '', titulo));
+    var max = Math.max(valA, valB, 1);
+    [[nomeA, valA, '#64748b'], ['Home Equity', valB, '#4aa3b5']].forEach(function (b) {
+      var linha = el('div', 'r');
+      linha.appendChild(el('span', '', b[0]));
+      var s = svgEl('svg', { width: '100%', height: 12, role: 'img', 'aria-label': titulo + ', ' + b[0] + ': ' + H.brl(b[1]) });
+      s.appendChild(svgEl('rect', { width: '100%', height: 12, rx: 6, fill: 'rgba(255,255,255,.07)' }));
+      s.appendChild(svgEl('rect', { width: Math.max(1.5, (b[1] / max) * 100).toFixed(1) + '%', height: 12, rx: 6, fill: b[2] }));
+      linha.appendChild(s);
+      linha.appendChild(el('span', 'vv num', H.brl(b[1])));
+      g.appendChild(linha);
+    });
+    return g;
+  }
+
+  function desenharGrafQuitar(c, nomeA) {
+    var alvo = $('q-grafico');
+    limpar(alvo);
+    alvo.appendChild(grupoBarras('Parcela por mês', c.parcelaAtual, c.parcelaHe, nomeA));
+    alvo.appendChild(grupoBarras('Total pago em ' + estado.anos + ' anos', c.totalAtual, c.totalHe, nomeA));
+  }
+
   function desenharQuitar(i, meses, rmax) {
     var outra = estado.tipoDiv === 'outra';
     var t = taxaDivida();
@@ -181,7 +248,7 @@
     else if (rmax < 1) erro = 'O saldo devedor do imóvel já usa o limite: não sobra valor para quitar outra dívida.';
     if (erro) {
       aviso.hidden = false; aviso.textContent = erro;
-      limpar(cartoes); texto.textContent = ''; usar.disabled = true;
+      limpar(cartoes); limpar($('q-grafico')); texto.textContent = ''; usar.disabled = true;
       return;
     }
     usar.disabled = false;
@@ -196,6 +263,7 @@
       ['Só de juros: ' + H.brl(c.jurosMes1) + ' no 1º mês', 'Total em ' + estado.anos + ' anos: ' + H.brl(c.totalAtual)], false));
     var dest = c.economiaMes > 0 ? { cls: 'dn', texto: H.brl(c.economiaMes) + ' a menos por mês' } : { cls: 'up', texto: 'sem redução de parcela nesta conta' };
     cartoes.appendChild(cartaoAlt('No Home Equity (' + H.pct(i * 100) + ' a.m.)', c.parcelaHe, ['Total em ' + estado.anos + ' anos: ' + H.brl(c.totalHe)], true, dest));
+    desenharGrafQuitar(c, outra ? 'Sua dívida' : 'Dívida (média)');
     texto.textContent = c.economiaMes > 0
       ? 'Trocar esta dívida reduziria a parcela em ' + H.brl(c.economiaMes) + ' por mês e o total pago em cerca de ' + H.brl(c.economiaTotal) + ', com a mesma duração (' + estado.anos +
         ' anos). Avaliação, registro e seguros não entram na conta e reduzem essa economia.'
@@ -212,7 +280,7 @@
       if (num('saldo') > 0) { estado.saldo = num('saldo'); estado.financiado = true; }
       if (num('receber') > 0) estado.receber = num('receber');
       var a = Math.round(num('prazo'));
-      if (H.PRAZOS_ANOS.indexOf(a) >= 0) estado.anos = a;
+      if (a >= H.PRAZO_MIN_ANOS && a <= H.PRAZO_MAX_ANOS) estado.anos = a;
       if (q.get('conforto') !== null) estado.conforto = num('conforto');
     } catch (e) { /* endereço estranho: usa os valores padrão */ }
   }
@@ -274,8 +342,11 @@
     if (foco !== 'saldo') $('campo-saldo').value = BRL_NUM.format(estado.saldo);
     if (foco !== 'receber') $('campo-receber').value = BRL_NUM.format(rec());
     if (foco !== 'conforto') $('campo-conforto').value = estado.conforto > 0 ? BRL_NUM.format(estado.conforto) : '';
-    $('sel-prazo').value = String(estado.anos);
-    $('sel-divida').value = estado.tipoDiv;
+    if (foco !== 'prazo') $('campo-prazo').value = String(estado.anos);
+    var rp = $('range-prazo');
+    rp.min = String(H.PRAZO_MIN_ANOS); rp.max = String(H.PRAZO_MAX_ANOS);
+    preencherRange(rp, estado.anos);
+    $('div-' + estado.tipoDiv).checked = true;
     if (foco !== 'divida') $('campo-divida').value = BRL_NUM.format(estado.divida);
     if (foco !== 'taxadiv') $('campo-taxa-div').value = String(estado.taxaDiv).replace('.', ',');
     preencherRange($('range-imovel'), estado.imovel);
@@ -302,6 +373,7 @@
     $('c-limite-rot').textContent = limiteTeto() ? 'Limite (teto de crédito)' : 'Limite (60%)';
     $('bar-mark').setAttribute('x', Math.min(99, (r.limite / estado.imovel) * 100).toFixed(1) + '%');
     $('btn-cta').disabled = semMargem;
+    desenharRosca(r, semMargem);
 
     if (!semMargem) { desenharRaio(r, i, meses); } else { limpar($('alts')); $('raio-texto').textContent = 'Ajuste o saldo ou o valor do imóvel para ver as comparações.'; }
     desenharNota(i, meses);
@@ -339,6 +411,26 @@
     c.addEventListener('keydown', function (e) { if (e.key === 'Enter') e.target.blur(); });
   }
 
+  // Prazo livre em anos inteiros (de PRAZO_MIN_ANOS a PRAZO_MAX_ANOS): campo de texto e controle deslizante.
+  function ligarPrazo() {
+    var c = $('campo-prazo'), msg = $('msg-prazo'), min = H.PRAZO_MIN_ANOS, max = H.PRAZO_MAX_ANOS;
+    c.addEventListener('input', function (e) {
+      var v = Math.round(lerNumero(e.target.value));
+      if (v >= min && v <= max) { estado.anos = v; msg.hidden = true; interagiu(); desenhar('prazo'); }
+    });
+    c.addEventListener('blur', function (e) {
+      var v = Math.round(lerNumero(e.target.value));
+      if (v >= min && v <= max) msg.hidden = true;
+      else {
+        v = clamp(v > 0 ? v : estado.anos, min, max);
+        msg.hidden = false; msg.textContent = 'O prazo vai de ' + min + ' a ' + max + ' anos. Ajustamos para ' + v + ' anos.';
+      }
+      estado.anos = v; interagiu(); desenhar();
+    });
+    c.addEventListener('keydown', function (e) { if (e.key === 'Enter') e.target.blur(); });
+    $('range-prazo').addEventListener('input', function (e) { estado.anos = Number(e.target.value); msg.hidden = true; interagiu(); desenhar(); });
+  }
+
   function iniciar() {
     lerEndereco();
     $('sit-quitado').addEventListener('change', function () { estado.financiado = false; estado.saldo = 0; interagiu(); desenhar(); });
@@ -353,12 +445,14 @@
     ligarCampo('campo-conforto', 'conforto', 1, 'conforto');
     $('range-imovel').addEventListener('input', function (e) { estado.imovel = Number(e.target.value); interagiu(); desenhar(); });
     $('range-receber').addEventListener('input', function (e) { estado.receber = Number(e.target.value); interagiu(); desenhar(); });
-    $('sel-prazo').addEventListener('change', function (e) { estado.anos = Number(e.target.value); interagiu(); desenhar(); });
+    ligarPrazo();
     $('btn-copiar').addEventListener('click', copiarLink);
 
     ligarCampo('campo-divida', 'divida', 1, 'divida', mexeuQuitar);
     ligarCampo('campo-taxa-div', 'taxaDiv', 0.01, 'taxadiv', mexeuQuitar);
-    $('sel-divida').addEventListener('change', function (e) { estado.tipoDiv = e.target.value; mexeuQuitar(); desenhar(); });
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="tipodiv"]'), function (rd) {
+      rd.addEventListener('change', function (e) { estado.tipoDiv = e.target.value; mexeuQuitar(); desenhar(); });
+    });
     $('btn-usar-divida').addEventListener('click', function () {
       estado.receber = Math.min(estado.divida, maxReceber());
       interagiu(); desenhar();

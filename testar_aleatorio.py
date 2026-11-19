@@ -27,7 +27,7 @@ class H(http.server.SimpleHTTPRequestHandler):
 def estado(pg):
     return pg.evaluate("""() => ({
       imovel: document.getElementById('campo-imovel').value, saldo: document.getElementById('campo-saldo').value,
-      receber: document.getElementById('campo-receber').value, anos: document.getElementById('sel-prazo').value,
+      receber: document.getElementById('campo-receber').value, anos: document.getElementById('campo-prazo').value,
       fin: document.getElementById('sit-financiado').checked,
       parcela: document.getElementById('r-parcela').textContent, total: document.getElementById('r-total').textContent,
       credito: document.getElementById('c-credito').textContent, limite: document.getElementById('c-limite').textContent,
@@ -122,7 +122,7 @@ def rodar(nav, nome, seed, passos):
             v = rnd.choice([0, 1000, 100000, 200000, 480000, 2000000, rnd.randint(0, 900000)])
             pg.fill("#campo-saldo", f"{v:,}".replace(",", ".")); pg.press("#campo-saldo", "Enter"); d = "saldo=%d" % v
         elif a == "prazo":
-            v = rnd.choice([5, 8, 10, 12, 15, 18, 20]); pg.select_option("#sel-prazo", str(v)); d = "prazo=%d" % v
+            v = rnd.randint(2, 20); pg.fill("#campo-prazo", str(v)); pg.press("#campo-prazo", "Enter"); d = "prazo=%d" % v
         elif a == "fin":
             pg.click("label[for=sit-financiado]"); d = "financiado"
         elif a == "quit":
@@ -146,7 +146,7 @@ def rodar(nav, nome, seed, passos):
     e = estado(pg)
     pg2 = ctx.new_page()
     pg2.goto(e["url"])
-    pg2.wait_for_selector("#alts .alt")
+    pg2.wait_for_selector("#resultado .big"); pg2.wait_for_timeout(500)
     e2 = estado(pg2)
     for k in ("parcela", "total", "credito", "imovel", "receber", "anos"):
         confere("[%s] link compartilhado reabre igual: %s" % (nome, k), e[k] == e2[k], (e[k], e2[k]))
@@ -176,7 +176,7 @@ def casos_fixos(nav):
     pg.click("label[for=sit-quitado]")
     e = estado(pg); confere("voltar a quitado devolve limite cheio, receber pedido 400k", num(e["receber"]) == 400_000 and num(e["saldo"]) == 0, (e["receber"], e["saldo"]))
     # prazo não mexe em receber
-    pg.select_option("#sel-prazo", "5")
+    pg.fill("#campo-prazo", "5"); pg.press("#campo-prazo", "Enter")
     e = estado(pg); confere("prazo não altera o valor a receber", num(e["receber"]) == 400_000, e["receber"])
     # teto de R$ 3 mi
     setv("#campo-imovel", 10_000_000); setv("#campo-receber", 3_500_000)

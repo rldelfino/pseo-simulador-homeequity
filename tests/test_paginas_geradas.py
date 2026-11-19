@@ -173,7 +173,7 @@ def test_tem_acessibilidade_basica(site):
     html = _ler(site, "index.html")
     assert 'class="skip"' in html
     assert html.count("<main") == 1
-    for rotulo in ("campo-imovel", "campo-receber", "sel-prazo", "campo-conforto", "campo-saldo"):
+    for rotulo in ("campo-imovel", "campo-receber", "campo-prazo", "campo-conforto", "campo-saldo"):
         assert 'for="' + rotulo + '"' in html, rotulo
     assert '<dialog id="dlg-confirma" aria-labelledby="dlg-titulo">' in html
 

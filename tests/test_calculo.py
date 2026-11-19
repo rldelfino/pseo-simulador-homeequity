@@ -52,7 +52,7 @@ def test_prazo_invalido():
 def test_limites_do_parceiro_divulgados():
     assert c.LTV_MAX == 0.60
     assert c.PRAZO_MAX_MESES == 240
-    assert max(c.PRAZOS_ANOS) * 12 == c.PRAZO_MAX_MESES
+    assert c.PRAZO_MAX_ANOS * 12 == c.PRAZO_MAX_MESES and 1 <= c.PRAZO_MIN_ANOS < c.PRAZO_MAX_ANOS
 
 
 def test_teto_de_credito_da_ferramenta():
