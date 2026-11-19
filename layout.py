@@ -121,6 +121,15 @@ HOME_MAIN = """  <section class="hero">
         <div class="slabel"><span>@@PRAZO_MIN@@ anos</span><span>@@PRAZO_MAX@@ anos</span></div>
         <div class="hint warn" id="msg-prazo" hidden></div>
       </div>
+      <details class="outra" id="det-taxa">
+        <summary>Já tem uma proposta? Use a taxa dela</summary>
+        <div class="oi">
+          <label for="campo-taxa-prop">Taxa da proposta <span>% ao mês</span></label>
+          <div class="inp"><input id="campo-taxa-prop" type="text" inputmode="decimal" autocomplete="off" placeholder="ex.: 1,09" class="num" aria-describedby="msg-taxa-prop"><em>% a.m.</em></div>
+          <label class="ck" for="ck-taxa-ipca"><input type="checkbox" id="ck-taxa-ipca"> A taxa já inclui o IPCA</label>
+          <div class="hint" id="msg-taxa-prop">Deixe em branco para usar a taxa de referência. Se a proposta diz “X% + IPCA”, digite só o X.</div>
+        </div>
+      </details>
     </section>
 
     <section class="panel resp" id="resultado" aria-labelledby="t-resultado" aria-live="polite">
@@ -181,6 +190,13 @@ HOME_MAIN = """  <section class="hero">
     </div>
   </div>
 
+  <div class="kpis" aria-label="Três números para ler o custo">
+    <div class="kp"><span class="t">Quita por volta de</span><b class="num" id="k-quita">—</b><small id="k-quita-s"></small></div>
+    <div class="kp"><span class="t">Cada R$ 1 de crédito custa</span><b class="num" id="k-juro1">—</b><small>de juros até o fim</small></div>
+    <div class="kp"><span class="t">Taxa equivalente ao ano</span><b class="num" id="k-aa">—</b><small id="k-aa-s">para comparar com outras taxas</small></div>
+  </div>
+  <p class="hint kpn" id="k-nota">Estimativa, não é oferta. Taxa do parceiro conferida em 18/11/2026.</p>
+
   <section class="band fatos" aria-label="Condições divulgadas por um parceiro de crédito">
     <div class="fatos-g">
       <div><b class="num">@@FATO_TAXA@@</b><span>ao mês + IPCA, a partir de</span></div>
@@ -231,7 +247,7 @@ HOME_MAIN = """  <section class="hero">
     </div>
 
     <div class="panel amx">
-      <h3 class="sub"><span class="n" aria-hidden="true">2</span>Quanto você poupa pagando a mais</h3>
+      <h3 class="sub"><span class="n" aria-hidden="true">2</span>Amortização: quanto você poupa pagando a mais</h3>
       <p class="amsub">Escolha o valor e o momento. Quanto mais cedo, maior a economia.</p>
       <div class="amin">
         <div class="f">

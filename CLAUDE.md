@@ -50,6 +50,8 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 - v4 (19/11, visual do Pix aplicado, só aparência): cartões por campo, número grande à direita, controle com botão brilhante, painel de resultado escuro, frase-resumo âmbar (`r-resumo`), moldura de vidro. Juros em âmbar `#e3a96b`, crédito em azul-petróleo.
 - v5 (19/11, benchmark Creditas/NerdWallet/Bankrate): seção "Amortização" (`#amortizacao`) virou "Pagar antes pode poupar milhares de reais": (1) juros vêm primeiro (gráfico anual), (2) simulador de pagar a mais (extra mensal e/ou valor único, em qual ano, reduzindo prazo ou parcela; `calculo.amortizar_antes` = `H.amortizarAntes`, testado Python x JS), (3) gráfico "mesmo valor em momentos diferentes", e três avisos (prazo ou parcela, contrato/CDC art. 52 §2º, comparar com outro uso do dinheiro). Texto jurídico NÃO revisado. Números em reais de hoje, sem custo de oportunidade nem tarifas.
 
+- v6 (19/11): faixa de 3 números abaixo do simulador (quita por volta de, juros por R$ 1 de crédito, taxa equivalente ao ano, com nota do IPCA/BCB) e campo recolhido "Já tem uma proposta? Use a taxa dela" (X% + IPCA, ou "já inclui o IPCA"; válido de 0,3 a 5% a.m.; params `taxa` e `ipca=1` no link; evento `usou-taxa-propria` com `prazo`). Título do passo 2 da amortização: "Amortização: quanto você poupa pagando a mais".
+
 ## Próximos passos
 1. Decidir melhorias do benchmark: tabela de amortização, custos estimados (só com fonte), renda mínima estimada, "quitar dívida cara".
 2. Ver indexação no Google/Bing em alguns dias (`site:homeequity.datalabglobal.com`).

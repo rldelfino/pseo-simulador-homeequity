@@ -5,11 +5,12 @@
   var H = window.DatalabHomeEquity;
   if (!H) return;
 
-  var estado = { sistema: 'price', financiado: false, imovel: 800000, saldo: 0, receber: 250000, anos: 15, conforto: 3000, divida: 60000, tipoDiv: 'pessoal', taxaDiv: 5, extra: 500, unico: 20000, quando: 1 };
+  var estado = { sistema: 'price', financiado: false, imovel: 800000, saldo: 0, receber: 250000, anos: 15, conforto: 3000, divida: 60000, tipoDiv: 'pessoal', taxaDiv: 5, extra: 500, unico: 20000, quando: 1, taxaProp: 0, taxaIpca: false };
   var usou = false;
   var usouQuitar = false;
   var abriuAmort = false;
   var usouAmortExtra = false;
+  var usouTaxaProp = false;
   var desenhos = 0;
   var timerUrl = null;
   var timerCopiado = null;
@@ -40,7 +41,12 @@
   function maxReceber() { return Math.max(0, H.limiteCredito(estado.imovel) - estado.saldo); }
   function limiteTeto() { return H.LTV_MAX * estado.imovel > H.CREDITO_MAX; }
   function minReceber() { return Math.min(H.RECEBER_MIN, maxReceber()); }
-  function taxa() { return H.taxaMensal(H.ref.ipca12m); }
+  // Taxa da proposta (opcional): "X% + IPCA" soma o IPCA como a taxa de referência; "já inclui o IPCA" usa o valor como está.
+  function taxaPropria() { return estado.taxaProp >= 0.3 && estado.taxaProp <= 5; }
+  function taxa() {
+    if (taxaPropria()) return estado.taxaIpca ? estado.taxaProp / 100 : H.taxaMensal(H.ref.ipca12m, estado.taxaProp);
+    return H.taxaMensal(H.ref.ipca12m);
+  }
 
   // estado.receber é o que a pessoa pediu; rec() é o que vale na conta (dentro do limite). O pedido só muda quando ela mexe no campo.
   function rec() { return clamp(estado.receber, minReceber(), maxReceber()); }
@@ -440,6 +446,8 @@
       if (a >= H.PRAZO_MIN_ANOS && a <= H.PRAZO_MAX_ANOS) estado.anos = a;
       if (q.get('conforto') !== null) estado.conforto = num('conforto');
       if (q.get('sistema') === 'sac') estado.sistema = 'sac';
+      var tp = num('taxa');
+      if (tp >= 0.3 && tp <= 5) { estado.taxaProp = tp; estado.taxaIpca = q.get('ipca') === '1'; }
     } catch (e) { /* endereço estranho: usa os valores padrão */ }
   }
 
@@ -453,6 +461,7 @@
     q.set('prazo', String(estado.anos));
     if (estado.conforto > 0) q.set('conforto', String(Math.round(estado.conforto)));
     if (sac()) q.set('sistema', 'sac');
+    if (taxaPropria()) { q.set('taxa', String(estado.taxaProp).replace('.', ',')); if (estado.taxaIpca) q.set('ipca', '1'); }
     return window.location.origin + window.location.pathname + '?' + q.toString() + (comAncora ? '#simulador' : '');
   }
 
@@ -536,7 +545,13 @@
     ult.hidden = !(sac() && !semMargem);
     if (!ult.hidden) ult.textContent = 'A parcela cai todo mês, até ' + H.brl(r.parcelaFinal) + ' na última.';
     $('r-parcela').textContent = semMargem ? '—' : H.brl(r.parcela);
-    $('r-sub').textContent = 'em ' + meses + ' meses · taxa ' + H.pct(i * 100) + ' a.m.';
+    $('r-sub').textContent = 'em ' + meses + ' meses · taxa ' + H.pct(i * 100) + ' a.m.' + (taxaPropria() ? ' (sua proposta)' : '');
+    desenharFaixa(r, i, meses, semMargem);
+    if (foco !== 'taxaprop') $('campo-taxa-prop').value = estado.taxaProp > 0 ? String(estado.taxaProp).replace('.', ',') : '';
+    $('ck-taxa-ipca').checked = estado.taxaIpca;
+    if (estado.taxaProp > 0 && !taxaPropria()) { $('msg-taxa-prop').textContent = 'Use uma taxa entre 0,3% e 5% ao mês. Enquanto isso, a conta usa a taxa de referência.'; $('msg-taxa-prop').className = 'hint warn'; }
+    else { $('msg-taxa-prop').textContent = taxaPropria() ? 'Conta com a taxa da sua proposta' + (estado.taxaIpca ? ', sem somar IPCA.' : ' mais o IPCA de ' + H.pct(H.ref.ipca12m) + ' ao ano.') : 'Deixe em branco para usar a taxa de referência. Se a proposta diz “X% + IPCA”, digite só o X.'; $('msg-taxa-prop').className = 'hint'; }
+
     $('r-total').textContent = semMargem ? '—' : H.brl(r.total);
     $('r-resumo').textContent = semMargem ? 'Ajuste o valor do imóvel ou o saldo para ver o custo.' : 'Você pega ' + H.brl(r.credito) + ' e paga ' + H.brl(r.total) + ' no total: ' + H.brl(r.juros) + ' a mais em juros.';
     $('c-imovel').textContent = H.brl(estado.imovel);
@@ -570,6 +585,26 @@
     if (usouQuitar) return;
     usouQuitar = true;
     evento('usou-quitar-divida', { tipo: estado.tipoDiv });
+  }
+
+  var MESES_CURTOS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+  // Faixa com três números: quando quita, quanto cada R$ 1 de crédito custa de juros e a taxa ao ano.
+  function desenharFaixa(r, i, meses, semMargem) {
+    $('k-aa').textContent = H.pct((Math.pow(1 + i, 12) - 1) * 100);
+    $('k-nota').textContent = 'IPCA de ' + H.ref.ipcaMes + ' (IBGE) e médias do Banco Central de ' + H.ref.garantiaRealMes + '. Estimativa, não é oferta. Taxa do parceiro conferida em 18/11/2026.';
+    if (semMargem) { $('k-quita').textContent = '—'; $('k-quita-s').textContent = ''; $('k-juro1').textContent = '—'; return; }
+    var d = new Date();
+    d.setMonth(d.getMonth() + meses + 2);
+    $('k-quita').textContent = MESES_CURTOS[d.getMonth()] + '/' + d.getFullYear();
+    $('k-quita-s').textContent = meses + ' parcelas, se contratar este mês';
+    $('k-juro1').textContent = 'R$ ' + (r.juros / r.credito).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function mexeuTaxaProp() {
+    if (usouTaxaProp) return;
+    usouTaxaProp = true;
+    evento('usou-taxa-propria', { prazo: estado.anos });
   }
 
   function mexeuAmort() {
@@ -683,6 +718,7 @@
       if (estado.saldo === 0) estado.saldo = Math.round(estado.imovel * 0.2 / 10000) * 10000;
       interagiu(); desenhar();
     });
+    if (taxaPropria()) $('det-taxa').open = true;
     ligarCampo('campo-imovel', 'imovel', H.IMOVEL_MIN, 'imovel');
     ligarCampo('campo-saldo', 'saldo', 1, 'saldo');
     ligarCampo('campo-receber', 'receber', 1000, 'receber');
@@ -695,6 +731,10 @@
       rd.addEventListener('change', function (e) { estado.sistema = e.target.value; interagiu(); desenhar(); });
     });
 
+    $('campo-taxa-prop').addEventListener('input', function (e) { estado.taxaProp = lerNumero(e.target.value); mexeuTaxaProp(); desenhar('taxaprop'); });
+    $('campo-taxa-prop').addEventListener('blur', function () { desenhar(); });
+    $('campo-taxa-prop').addEventListener('keydown', function (e) { if (e.key === 'Enter') e.target.blur(); });
+    $('ck-taxa-ipca').addEventListener('change', function (e) { estado.taxaIpca = e.target.checked; mexeuTaxaProp(); desenhar(); });
     ligarCampo('campo-extra', 'extra', 1, 'extra', mexeuAmort);
     ligarCampo('campo-unico', 'unico', 1, 'unico', mexeuAmort);
     $('range-quando').addEventListener('input', function (e) { estado.quando = Number(e.target.value); mexeuAmort(); desenhar(); });

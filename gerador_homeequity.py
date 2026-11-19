@@ -97,7 +97,7 @@ CALCULO_JS = """/* GERADO por gerador_homeequity.py a partir de calculo.py e dad
   var REF = @@REFERENCIAS@@;
 
   function ipcaMensal(ipca12m) { return Math.pow(1 + ipca12m / 100, 1 / 12) - 1; }
-  function taxaMensal(ipca12m) { return (1 + TAXA_PARCEIRO_AM / 100) * (1 + ipcaMensal(ipca12m)) - 1; }
+  function taxaMensal(ipca12m, baseAm) { return (1 + (baseAm === undefined ? TAXA_PARCEIRO_AM : baseAm) / 100) * (1 + ipcaMensal(ipca12m)) - 1; }
   function pmt(principal, i, n) { return i === 0 ? principal / n : principal * i / (1 - Math.pow(1 + i, -n)); }
   function valorPresente(parcela, i, n) { return i === 0 ? parcela * n : parcela * (1 - Math.pow(1 + i, -n)) / i; }
   function valorPresenteSac(primeira, i, n) { return primeira / (1 / n + i); }
