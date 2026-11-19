@@ -92,6 +92,7 @@ CALCULO_JS = """/* GERADO por gerador_homeequity.py a partir de calculo.py e dad
   var IMOVEL_MIN = @@IMOVEL_MIN@@;
   var IMOVEL_MAX = @@IMOVEL_MAX@@;
   var RECEBER_MIN = @@RECEBER_MIN@@;
+  var RENDA_REFERENCIA = @@RENDA_REF@@;
   // Referências do Banco Central (médias de mercado, não oferta): IPCA em 12 meses e taxa média de crédito com garantia real (% ao mês).
   var REF = @@REFERENCIAS@@;
 
@@ -99,45 +100,70 @@ CALCULO_JS = """/* GERADO por gerador_homeequity.py a partir de calculo.py e dad
   function taxaMensal(ipca12m) { return (1 + TAXA_PARCEIRO_AM / 100) * (1 + ipcaMensal(ipca12m)) - 1; }
   function pmt(principal, i, n) { return i === 0 ? principal / n : principal * i / (1 - Math.pow(1 + i, -n)); }
   function valorPresente(parcela, i, n) { return i === 0 ? parcela * n : parcela * (1 - Math.pow(1 + i, -n)) / i; }
+  function valorPresenteSac(primeira, i, n) { return primeira / (1 / n + i); }
   function limiteCredito(imovel) { return Math.min(LTV_MAX * imovel, CREDITO_MAX); }
+  function rendaParaParcela(parcela, fracao) { return parcela / (fracao === undefined ? RENDA_REFERENCIA : fracao); }
 
-  function simular(imovel, receber, saldo, meses, i) {
+  // [primeira parcela, última parcela, total pago]. No Price as duas parcelas são iguais; no SAC a parcela cai todo mês.
+  function plano(credito, i, meses, sistema) {
+    if (sistema === 'sac') {
+      var am = credito / meses;
+      return [am + credito * i, am * (1 + i), credito + credito * i * (meses + 1) / 2];
+    }
+    var p = pmt(credito, i, meses);
+    return [p, p, p * meses];
+  }
+
+  function simular(imovel, receber, saldo, meses, i, sistema) {
     var credito = receber + saldo;
-    var parcela = pmt(credito, i, meses);
-    var total = parcela * meses;
-    return { credito: credito, parcela: parcela, total: total, juros: total - credito, ltv: imovel > 0 ? credito / imovel : 0,
+    var pl = plano(credito, i, meses, sistema);
+    return { credito: credito, parcela: pl[0], parcelaFinal: pl[1], total: pl[2], juros: pl[2] - credito, ltv: imovel > 0 ? credito / imovel : 0,
              limite: limiteCredito(imovel), acimaLimite: credito > limiteCredito(imovel) + 1e-9 };
   }
 
-  function receberParaParcela(parcelaAlvo, saldo, meses, i, passo) {
-    var bruto = valorPresente(parcelaAlvo, i, meses) - saldo;
+  function receberParaParcela(parcelaAlvo, saldo, meses, i, passo, sistema) {
+    var bruto = (sistema === 'sac' ? valorPresenteSac(parcelaAlvo, i, meses) : valorPresente(parcelaAlvo, i, meses)) - saldo;
     return Math.max(0, Math.floor(bruto / passo) * passo);
   }
 
-  function amortizacaoAnual(credito, i, meses) {
-    var parcela = pmt(credito, i, meses), saldo = credito, restante = meses, ano = 0, linhas = [];
+  function amortizacaoAnual(credito, i, meses, sistema) {
+    var parcela = pmt(credito, i, meses), amSac = credito / meses, saldo = credito, restante = meses, ano = 0, linhas = [];
     while (restante > 0) {
       ano += 1;
       var juros = 0, amortizado = 0, n = Math.min(12, restante);
-      for (var k = 0; k < n; k++) { var j = saldo * i, a = parcela - j; saldo -= a; juros += j; amortizado += a; }
+      for (var k = 0; k < n; k++) { var j = saldo * i, a = sistema === 'sac' ? amSac : parcela - j; saldo -= a; juros += j; amortizado += a; }
       restante -= 12;
       linhas.push({ ano: ano, juros: juros, amortizacao: amortizado, saldo: saldo > 0.005 ? saldo : 0 });
     }
     return linhas;
   }
 
-  function compararQuitacao(divida, taxaDividaAm, meses, i) {
-    var atual = pmt(divida, taxaDividaAm, meses), he = pmt(divida, i, meses);
+  // Total pago até o fim de cada mês (índice 0 = 0): a linha do gráfico "quanto você terá pago ao longo do tempo".
+  function acumuladoMensal(credito, i, meses, sistema) {
+    var saida = [0], total = 0, k;
+    if (sistema === 'sac') {
+      var am = credito / meses, saldo = credito;
+      for (k = 0; k < meses; k++) { total += am + saldo * i; saldo -= am; saida.push(total); }
+      return saida;
+    }
+    var p = pmt(credito, i, meses);
+    saida = [];
+    for (k = 0; k <= meses; k++) saida.push(p * k);
+    return saida;
+  }
+
+  function compararQuitacao(divida, taxaDividaAm, meses, i, sistema) {
+    var atual = pmt(divida, taxaDividaAm, meses), pl = plano(divida, i, meses, sistema);
     return { divida: divida, parcelaAtual: atual, totalAtual: atual * meses, jurosMes1: divida * taxaDividaAm,
-             parcelaHe: he, totalHe: he * meses, economiaMes: atual - he, economiaTotal: (atual - he) * meses };
+             parcelaHe: pl[0], totalHe: pl[2], economiaMes: atual - pl[0], economiaTotal: atual * meses - pl[2] };
   }
 
   function brl(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(Math.round(v)); }
   function pct(v) { return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%'; }
 
-  var api = { TAXA_PARCEIRO_AM: TAXA_PARCEIRO_AM, LTV_MAX: LTV_MAX, CREDITO_MAX: CREDITO_MAX, PRAZO_MIN_ANOS: PRAZO_MIN_ANOS, PRAZO_MAX_ANOS: PRAZO_MAX_ANOS, IMOVEL_MIN: IMOVEL_MIN, IMOVEL_MAX: IMOVEL_MAX, RECEBER_MIN: RECEBER_MIN,
-              ref: REF, ipcaMensal: ipcaMensal, taxaMensal: taxaMensal, pmt: pmt, valorPresente: valorPresente, limiteCredito: limiteCredito,
-              simular: simular, receberParaParcela: receberParaParcela, amortizacaoAnual: amortizacaoAnual, compararQuitacao: compararQuitacao, brl: brl, pct: pct };
+  var api = { TAXA_PARCEIRO_AM: TAXA_PARCEIRO_AM, LTV_MAX: LTV_MAX, CREDITO_MAX: CREDITO_MAX, PRAZO_MIN_ANOS: PRAZO_MIN_ANOS, PRAZO_MAX_ANOS: PRAZO_MAX_ANOS, IMOVEL_MIN: IMOVEL_MIN, IMOVEL_MAX: IMOVEL_MAX, RECEBER_MIN: RECEBER_MIN, RENDA_REFERENCIA: RENDA_REFERENCIA,
+              ref: REF, ipcaMensal: ipcaMensal, taxaMensal: taxaMensal, pmt: pmt, valorPresente: valorPresente, valorPresenteSac: valorPresenteSac, plano: plano, rendaParaParcela: rendaParaParcela, limiteCredito: limiteCredito,
+              simular: simular, receberParaParcela: receberParaParcela, amortizacaoAnual: amortizacaoAnual, acumuladoMensal: acumuladoMensal, compararQuitacao: compararQuitacao, brl: brl, pct: pct };
   root.DatalabHomeEquity = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -210,7 +236,7 @@ def gerar_calculo_js():
     refs = json.dumps(referencias(), ensure_ascii=False, sort_keys=True)
     return _preencher(CALCULO_JS, {
         "TAXA_PARCEIRO": repr(calculo.TAXA_PARCEIRO_AM), "LTV": repr(calculo.LTV_MAX), "CREDITO_MAX": str(calculo.CREDITO_MAX), "PRAZO_MIN": str(calculo.PRAZO_MIN_ANOS), "PRAZO_MAX": str(calculo.PRAZO_MAX_ANOS),
-        "IMOVEL_MIN": str(calculo.IMOVEL_MIN), "IMOVEL_MAX": str(calculo.IMOVEL_MAX), "RECEBER_MIN": str(calculo.RECEBER_MIN), "REFERENCIAS": refs})
+        "IMOVEL_MIN": str(calculo.IMOVEL_MIN), "IMOVEL_MAX": str(calculo.IMOVEL_MAX), "RECEBER_MIN": str(calculo.RECEBER_MIN), "RENDA_REF": repr(calculo.RENDA_REFERENCIA), "REFERENCIAS": refs})
 
 
 def _resumo(dados):
@@ -349,6 +375,9 @@ def _valores_padrao():
                      % (k, k, " checked" if k == conteudo.DIVIDA_TIPO_PADRAO else "", k, nome, conteudo.pct(ref[k + "Am"])) for k, nome in conteudo.DIVIDAS)
     opcoes += '<input type="radio" name="tipodiv" id="div-outra" value="outra"><label for="div-outra">Outra <small>informo a taxa</small></label>'
     return {
+        "D_HINT_SIS": conteudo.hint_sistema(), "D_RENDA_V": conteudo.brl0(calculo.renda_para_parcela(r["parcela"])), "D_RENDA": conteudo.renda_texto(r["parcela"]), "REGRA_RENDA": conteudo.regra_renda(),
+        "D_CM_LEAD": conteudo.cm_lead(r["credito"], 15), "D_CM_SUB": conteudo.cm_sub(r["credito"], 15, i * 100),
+        "D_CM_GAP": conteudo.cm_gap(ref, r["credito"], 180, r["total"]), "D_CM_NOTA": conteudo.cm_nota(ref),
         "D_AMORT_RESUMO": conteudo.amort_resumo(r, amort), "D_AMORT_LINHAS": conteudo.amort_linhas(amort), "D_AMORT_TOTAL": conteudo.amort_total(amort, r["credito"]),
         "D_AMORT_NOTA": conteudo.amort_nota(ref),
         "DIVIDA_OPCOES": opcoes, "D_Q_CARTOES": conteudo.quitar_cartoes(q, taxa_div, 15, i * 100), "D_Q_TEXTO": conteudo.quitar_texto(q, 15),
@@ -376,7 +405,7 @@ def _comparacao_html():
     saida = '<div class="cmp">'
     for nome, v, _, codigo in itens:
         us = " us" if codigo == tr.CODIGO_GARANTIA_REAL else ""
-        cor = "#4aa3b5" if us else "#475569"
+        cor = "#4aa3b5" if us else conteudo.COR_MODALIDADE[codigo]
         saida += ('<div class="r' + us + '"><span>' + nome + '</span><svg width="100%" height="12" role="img" aria-label="' + nome + ": " + conteudo.pct(v) +
                   ' ao mês"><rect width="100%%" height="12" rx="6" fill="rgba(255,255,255,.07)"/><rect width="%.1f%%" height="12" rx="6" fill="%s"/></svg><span class="vv num">' % (v / maximo * 100, cor)
                   + conteudo.pct(v) + " a.m.</span></div>")

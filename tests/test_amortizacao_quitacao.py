@@ -113,3 +113,32 @@ def test_home_traz_rosca_graficos_faixa_e_prazo_livre(home):
     assert 'id="amort-graf"' in home and 'id="q-grafico"' in home and 'class="band fatos"' in home
     assert 'id="campo-prazo"' in home and 'id="range-prazo"' in home and "<select" not in home
     assert 'min="%d" max="%d"' % (c.PRAZO_MIN_ANOS, c.PRAZO_MAX_ANOS) in home
+
+
+def test_home_traz_lista_de_prazo_sac_renda_e_comparativo(home):
+    """Ajustes de 19/11: prazo com lista suspensa (sem <select>), escolha SAC/Price, regra da renda e comparativo com outras modalidades."""
+    assert 'role="combobox"' in home and 'id="lista-prazo"' in home and "<select" not in home
+    assert 'id="sis-price"' in home and 'id="sis-sac"' in home
+    assert 'id="regra-renda"' in home and "Como a renda entra na análise" in home and "não existe um percentual único" in home.lower()
+    assert 'id="r-renda"' in home
+    for ident in ("cm-parcela", "cm-total", "cm-linha", "cm-barras", "cm-gap"):
+        assert 'id="' + ident + '"' in home
+    assert "@@" not in home
+
+
+def test_paginas_internas_tem_botao_de_voltar_a_simulacao():
+    import os
+    pasta = os.path.join("paginas_seo")
+    for nome in ("metodologia", "garantia-do-imovel", "como-funciona", "privacidade"):
+        with open(os.path.join(pasta, nome + ".html"), encoding="utf-8") as f:
+            html = f.read()
+        assert 'class="btn-volta"' in html and "data-volta" in html and "Voltar à simulação" in html, nome
+
+
+def test_barras_de_taxa_usam_cores_leves_e_nao_o_cinza_neutro(home):
+    import conteudo
+    bloco = home.split('<div class="cmp">')[1]
+    bloco = bloco[: bloco.index('<div class="hint">')]
+    assert "#475569" not in bloco
+    for codigo in (20742, 20741, 22022):
+        assert conteudo.COR_MODALIDADE[codigo] in bloco

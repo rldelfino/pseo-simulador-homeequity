@@ -343,6 +343,64 @@ section.blk>.kicker,.band>.kicker,.split-t>.kicker{margin-bottom:6px}
   .rosca{gap:14px;padding:14px}
   .rosca svg{width:100px;height:100px}
 }
+/* v3: lista de prazos, botão de voltar, SAC, regra da renda e comparativo de modalidades */
+.combo{position:relative}
+.combo .caret{flex:none;display:grid;place-items:center;width:44px;height:44px;margin-right:-12px;border:0;border-radius:8px;background:transparent;color:var(--tx2);cursor:pointer}
+.combo .caret:hover,.combo.aberto .caret{background:var(--acsoft);color:var(--aclt)}
+.combo.aberto{border-color:var(--ac)}
+.combo.aberto .caret svg{transform:rotate(180deg)}
+.opts{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;list-style:none;margin:0;padding:6px;max-height:256px;overflow-y:auto;background:#0b1424;border:1px solid var(--acline);border-radius:12px;box-shadow:0 24px 48px -12px rgba(0,0,0,.85)}
+.opts[hidden]{display:none}
+.opts li{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:40px;padding:0 12px;border-radius:8px;color:var(--tx2);font-size:15px;cursor:pointer}
+.opts li small{color:var(--tx3);font-size:12px}
+.opts li:hover,.opts li.ativo{background:rgba(74,163,181,.14);color:var(--tx)}
+.opts li[aria-selected="true"]{background:var(--acsoft);color:var(--aclt);font-weight:600;box-shadow:inset 3px 0 0 var(--ac)}
+.opts li[aria-selected="true"] small{color:var(--tx2)}
+
+.volta{position:sticky;top:68px;z-index:20;padding:10px 0 2px;margin-bottom:-6px}
+.btn-volta{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--acline);border-radius:99px;background:rgba(2,6,23,.88);backdrop-filter:blur(8px);color:var(--aclt);font-size:14px;font-weight:600;text-decoration:none}
+.btn-volta:hover{background:var(--acsoft);color:#fff}
+
+.renda-mini{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:12px;padding:14px 16px;border:1px solid var(--ln);border-radius:14px;background:rgba(2,6,23,.4)}
+.renda-mini .dim{font-size:12px}
+.renda-mini b{font-size:22px;color:var(--tx);white-space:nowrap}
+.cm-j{margin-top:14px}
+.res .ult{margin-top:2px;color:var(--aclt)}
+.regra{margin-top:16px;border:1px solid var(--ln);background:rgba(2,6,23,.35);border-radius:14px;padding:14px 16px}
+.regra .rt{font-size:14px;color:#cbd5e1}
+.regra .rt b{color:var(--tx)}
+.rdet{margin-top:10px}
+.rdet>summary{cursor:pointer;color:var(--aclt);font-size:13px;min-height:44px;display:flex;align-items:center}
+.rdet p,.rdet li{font-size:13.5px;color:#cbd5e1}
+.rdet p{margin-top:10px}
+.rdet ul{margin:8px 0 0 20px;display:grid;gap:4px}
+
+.cmpgrid{display:grid;grid-template-columns:4fr 8fr;gap:20px;align-items:stretch}
+.cmpgrid>*{min-width:0}
+.hecard{border-color:var(--acline);background:linear-gradient(160deg,var(--acsoft),var(--pn) 70%)}
+.hecard .big{font-size:clamp(34px,4vw,44px)}
+.cm-gap{margin-top:16px;font-size:13.5px;color:#cbd5e1;line-height:1.55}
+.cmpviz .qviz{margin-top:20px}
+.cmpviz .qg .r{grid-template-columns:150px 1fr 96px}
+.cmpviz .qg .r.us{color:var(--tx);font-weight:600}
+.lin{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.l-he{stroke:#4aa3b5;stroke-width:3.4}
+.l-gar{stroke:#8aa4c8}
+.l-pes{stroke:#c9a46f}
+.graf .leg s.c-he{background:#4aa3b5}
+.graf .leg s.c-gar{background:#8aa4c8}
+.graf .leg s.c-pes{background:#c9a46f}
+#cm-linha{display:block;width:100%;height:210px}
+@media(max-width:900px){
+  .cmpgrid{grid-template-columns:1fr}
+  .cmpviz .qg .r{grid-template-columns:118px 1fr 84px}
+}
+@media(max-width:480px){
+  .cmpviz .qg .r{grid-template-columns:1fr 84px;grid-template-areas:"a c" "b b"}
+  .cmpviz .qg .r>span:first-child{grid-area:a}
+  .cmpviz .qg .r>svg{grid-area:b}
+  .cmpviz .qg .r>.vv{grid-area:c}
+}
 /* preenchimento dos sliders: data-p (0 a 100) escolhe --p; gerado, não editar à mão */
 input[type=range][data-p="0"]{--p:0%}
 input[type=range][data-p="1"]{--p:1%}

@@ -93,23 +93,87 @@ def nota_taxa_maior(ref, i, imovel, receber, saldo, meses):
             "): nessa taxa, a parcela do cenário acima seria de " + brl0(r["parcela"]) + ". A taxa final vem da análise.")
 
 
+# Cores leves (menos intensas que o azul-petróleo do Home Equity) para as outras modalidades; o simulador.js usa as mesmas.
+COR_MODALIDADE = {tr.CODIGO_GARANTIA_REAL: "#8aa4c8", 20742: "#c9a46f", 20741: "#cf8f82", 22022: "#b68ab5"}
+
+
 # ---------- amortização e "quitar dívida" (home): mesmos textos que o simulador.js escreve ----------
 DIVIDAS = [("pessoal", "Crédito pessoal sem garantia"), ("cheque", "Cheque especial"), ("rotativo", "Cartão de crédito rotativo")]
 DIVIDA_PADRAO = 60_000
 DIVIDA_TIPO_PADRAO = "pessoal"
 
 
-def amort_resumo(r, linhas):
+def amort_resumo(r, linhas, sistema="price"):
     """Frase acima da tabela de amortização: quanto do primeiro ano é juros."""
-    pago = r["parcela"] * 12
+    pago = linhas[0]["juros"] + linhas[0]["amortizacao"]
     j = linhas[0]["juros"]
-    return ("No primeiro ano, " + brl0(j) + " dos " + brl0(pago) + " que você paga são juros (" + str(round(j / pago * 100)) +
-            "%). A parcela é fixa: com o tempo ela amortiza mais a dívida e os juros caem.")
+    cauda = ("No SAC a amortização é a mesma todo mês: a parcela cai porque os juros caem." if sistema == "sac"
+             else "A parcela é fixa: com o tempo ela amortiza mais a dívida e os juros caem.")
+    return ("No primeiro ano, " + brl0(j) + " dos " + brl0(pago) + " que você paga são juros (" + str(round(j / pago * 100)) + "%). " + cauda)
 
 
-def amort_nota(ref):
-    return ("A conta mantém o IPCA em " + pct(ref["ipca12m"]) + " ao ano (últimos 12 meses, " + ref["ipcaMes"] + ") e a parcela fixa. Se o IPCA mudar, a parcela e o saldo mudam. "
+def amort_nota(ref, sistema="price"):
+    final = "a amortização constante (SAC)" if sistema == "sac" else "a parcela fixa"
+    return ("A conta mantém o IPCA em " + pct(ref["ipca12m"]) + " ao ano (últimos 12 meses, " + ref["ipcaMes"] + ") e " + final + ". Se o IPCA mudar, a parcela e o saldo mudam. "
             "Não inclui IOF, avaliação do imóvel, registro nem seguros.")
+
+
+AMORT_LEGENDA = {"price": "Parcela fixa: juros, amortização e saldo devedor no fim de cada ano",
+                 "sac": "Parcela que cai: juros, amortização e saldo devedor no fim de cada ano"}
+
+
+# ---------- sistema de amortização e renda (home): mesmos textos que o simulador.js escreve ----------
+def hint_sistema(sistema="price"):
+    if sistema == "sac":
+        return "A primeira parcela é a maior e ela cai todo mês. Paga menos juros no total. Se o parceiro oferece SAC, ele informa na proposta."
+    return "Parcela igual todo mês: começa menor que no SAC e paga mais juros no total."
+
+
+def renda_texto(parcela, sistema="price"):
+    nome = "a primeira parcela estimada" if sistema == "sac" else "a parcela estimada"
+    return ("Não há um percentual único em lei para o Home Equity: cada instituição define na análise. A referência de mercado mais citada é a parcela de até cerca de 30% da renda mensal. "
+            "Com ela, " + nome + " de " + brl0(parcela) + " pede uma renda mensal comprovada de cerca de " + brl0(calculo.renda_para_parcela(parcela)) + " (conta nossa, não é análise de crédito).")
+
+
+def regra_renda():
+    """Explicação (home e página como-funciona) de como a renda entra na análise do Home Equity."""
+    return (
+        p("Não existe um percentual único, definido em lei, para o Home Equity. Quem decide é a política de crédito de cada instituição, caso a caso, e o parceiro não divulga o percentual dele.")
+        + p("A referência de mercado mais comum é que a parcela não passe de cerca de <b>30% da renda mensal</b> (algumas instituições aceitam até cerca de 35%). É uma prática de bancos, muito citada no "
+            "crédito imobiliário; não encontramos uma norma específica para o Home Equity que a imponha. Aqui ela é só uma referência: usamos 30% para estimar a renda que a parcela pede.")
+        + p("O que costuma entrar na análise:")
+        + ul([
+            "renda comprovada, sua e de quem entrar na operação (cônjuge ou sócios);",
+            "outras dívidas e parcelas já em andamento;",
+            "histórico de crédito e restrições no seu nome;",
+            "valor de avaliação e situação do imóvel: a avaliação define o limite, de até 60% do valor;",
+            "valor, prazo e tipo de renda (assalariado, autônomo, empresário).",
+        ])
+        + p("Como tudo isso conta, a parcela que cabe para você pode ficar abaixo ou acima de 30% da renda. Escolha uma parcela que caiba com folga.")
+    )
+
+
+# ---------- "o mesmo crédito em outras modalidades" (home) ----------
+def cm_lead(credito, anos):
+    return ("Com o mesmo crédito de " + brl0(credito) + " e o mesmo prazo de " + str(anos) + " anos, veja quanto você pagaria em cada modalidade. "
+            "As taxas das outras modalidades são médias de mercado do Banco Central.")
+
+
+def cm_sub(credito, anos, he_pct):
+    return "crédito de " + brl0(credito) + " · " + str(anos) + " anos · " + pct(he_pct) + " a.m."
+
+
+def cm_gap(ref, credito, meses, he_total):
+    taxa = ref["pessoalAm"] / 100
+    pa = calculo.pmt(credito, taxa, meses)
+    total = pa * meses
+    return ("No crédito pessoal sem garantia (média de " + pct(ref["pessoalAm"]) + " a.m.), o mesmo crédito sairia por " + brl0(pa) + " por mês e " + brl0(total) +
+            " no total: " + brl0(total - he_total) + " a mais que no Home Equity.")
+
+
+def cm_nota(ref):
+    return ("Conta de comparação: mesmo crédito e mesma duração, com parcela fixa nas outras modalidades (o Home Equity segue o sistema escolhido). Cheque especial e rotativo não costumam durar tanto; "
+            "o ponto é ver quanto o juro pesa. O crédito com garantia real mistura imóvel e veículo. Médias de mercado em " + ref["garantiaRealMes"] + " (Banco Central); não são oferta.")
 
 
 def amort_linhas(linhas):
@@ -160,6 +224,13 @@ FAQ = [
     ("O que acontece se eu atrasar as parcelas?",
      "Atrasos geram encargos previstos no contrato e, se a dívida não for regularizada, a lei prevê um procedimento de cobrança que pode chegar à venda do imóvel dado em garantia. "
      "Por isso vale escolher uma parcela que caiba com folga. Detalhes em " + a("/garantia-do-imovel", "Garantia do imóvel") + "."),
+    ("Quanto da minha renda a parcela pode ocupar?",
+     "Não há um percentual único em lei para o Home Equity: cada instituição define na análise de crédito, e o parceiro não divulga o dele. A referência de mercado mais citada é a parcela de até "
+     "cerca de 30% da renda mensal (algumas aceitam até 35%), uma prática dos bancos, muito citada no crédito imobiliário. Entram na conta a renda comprovada, outras dívidas, o histórico de crédito e a "
+     "avaliação do imóvel. Veja " + a("/como-funciona", "como funciona") + "."),
+    ("Posso escolher entre SAC e Price?",
+     "No simulador, sim: o Price tem parcela fixa; o SAC começa com a parcela maior e ela cai todo mês, com menos juros no total. Os dois usam a mesma taxa de referência. Quais sistemas "
+     "estão disponíveis, e com que taxa, o parceiro informa na proposta."),
     ("A simulação vale como proposta?",
      "Não. É uma estimativa feita com taxa de referência, sem consultar você nem o imóvel. A taxa, o limite e o prazo finais saem da análise de crédito e da avaliação do imóvel."),
 ]
@@ -171,7 +242,7 @@ FAQ = [
 def corpo_como_funciona(ctx):
     r = calculo.simular(800_000, 250_000, 0, 180, taxa_ref())
     return (
-        p("Home Equity é um crédito em que você oferece um imóvel como garantia e recebe dinheiro em parcelas fixas. Como a instituição tem a garantia, os juros costumam ser "
+        p("Home Equity é um crédito em que você oferece um imóvel como garantia e recebe dinheiro para pagar em parcelas. Como a instituição tem a garantia, os juros costumam ser "
           "bem menores que os do crédito pessoal sem garantia ou do cartão. Você continua usando o imóvel."
           )
         + h2("O que você informa e o que o crédito libera")
@@ -188,6 +259,11 @@ def corpo_como_funciona(ctx):
             "<b>Contrato e registro.</b> Você assina o contrato e a garantia é registrada em cartório.",
             "<b>Liberação.</b> O dinheiro é liberado e você começa a pagar as parcelas.",
         ])
+        + h2("Quanto da renda a parcela pode ocupar")
+        + regra_renda()
+        + h2("Price ou SAC")
+        + p("No <b>Price</b>, a parcela é igual do primeiro ao último mês. No <b>SAC</b>, a amortização é igual todo mês: a primeira parcela é a maior e ela cai com o tempo, e o total de juros é menor. "
+            "O simulador mostra os dois na mesma taxa; confirme com o parceiro quais sistemas ele oferece.")
         + h2("Para que as pessoas usam")
         + ul([
             "Trocar dívidas caras (cartão, cheque especial, empréstimos sem garantia) por uma parcela de juro menor, em prazo maior.",
@@ -348,8 +424,9 @@ def corpo_metodologia(ctx):
         + ol([
             "<b>Crédito total</b> = valor que você quer receber + saldo devedor do financiamento, se o imóvel ainda estiver financiado (o novo crédito quita esse saldo).",
             "<b>Taxa mensal</b> = (1 + 1,09%) x (1 + IPCA mensal) − 1. O IPCA mensal é o equivalente composto do IPCA de 12 meses do IBGE, via Banco Central (SGS 13522), mantido constante.",
-            "<b>Parcela</b> = crédito x i / (1 − (1 + i)^−n), com i a taxa mensal e n o prazo em meses (tabela Price, parcela fixa).",
-            "<b>Total ao final</b> = parcela x n. <b>Juros no total</b> = total − crédito.",
+            "<b>Parcela no Price</b> (padrão) = crédito x i / (1 − (1 + i)^−n), com i a taxa mensal e n o prazo em meses: parcela fixa.",
+            "<b>Parcela no SAC</b> = crédito / n + saldo devedor x i: a amortização (crédito / n) é a mesma todo mês e a parcela cai. A primeira é crédito / n + crédito x i; a última é (crédito / n) x (1 + i).",
+            "<b>Total ao final</b> = parcela x n no Price; crédito + crédito x i x (n + 1) / 2 no SAC. <b>Juros no total</b> = total − crédito.",
             "<b>Limite</b> = 60% do valor do imóvel, conforme divulgado pelo parceiro, e no máximo R$ 3 milhões de crédito por simulação (teto desta ferramenta). O saldo devedor conta para esse limite.",
         ])
         + p("Exemplo: imóvel de " + brl0(800_000) + ", receber " + brl0(250_000) + ", 180 meses, taxa " + pct(i * 100) + " ao mês. Parcela de " + brl0(r["parcela"]) +
@@ -362,7 +439,7 @@ def corpo_metodologia(ctx):
         ])
         + h2("O Raio-X da decisão")
         + p("A \"parcela confortável\" é um número que você informa. O simulador só compara: diz quanto a parcela estimada fica acima ou abaixo dele e mostra duas alternativas (receber menos e outro prazo) com a mesma taxa. "
-            "Ele <b>não avalia capacidade de pagamento</b> nem decide por você.")
+            "Ele <b>não avalia capacidade de pagamento</b> nem decide por você. Também mostra a renda que a parcela pede se ela ocupar 30% dela, uma referência de mercado e não uma regra do parceiro (veja " + a("/como-funciona", "como funciona") + ").")
         + h2("Conferência")
         + p("O código do simulador é testado automaticamente: a conta do navegador é comparada com a conta de referência em Python, em dezenas de cenários, a cada alteração do site.")
     )
@@ -422,7 +499,7 @@ def corpo_privacidade(ctx):
              ["Não vendemos dados. Compartilhamos o mínimo com provedores que operam o site (hospedagem e medição), sob contrato."]),
             ("6. Seus direitos",
              ["Você pode pedir confirmação de tratamento, acesso, correção, eliminação e revogação de consentimento, a qualquer momento, pelo e-mail " + ctx["email"] + "."]),
-            ("7. Cookies", ["Este site não usa cookies de publicidade nem de rastreamento."]),
+            ("7. Cookies e armazenamento", ["Este site não usa cookies de publicidade nem de rastreamento.", "Para o botão \"Voltar à simulação\" funcionar, os números da última simulação (valor do imóvel, valor a receber, prazo e sistema) ficam guardados só na aba do seu navegador e somem quando ela é fechada. Nada disso é enviado para fora."]),
             ("8. Contato e alterações",
              ["O canal para assuntos de privacidade é " + ctx["email"] + ". Esta Política pode ser atualizada; vale a versão publicada nesta página. Responsável: " + ctx["razao"] + ", CNPJ " + ctx["cnpj"] + "."]),
         ])

@@ -111,10 +111,23 @@ HOME_MAIN = """  <section class="hero">
       </div>
       <div class="f">
         <label for="campo-prazo">Prazo <span>de @@PRAZO_MIN@@ a @@PRAZO_MAX@@ anos</span></label>
-        <div class="inp"><input id="campo-prazo" type="text" inputmode="numeric" autocomplete="off" value="15" class="num" aria-describedby="msg-prazo"><em>anos</em></div>
+        <div class="inp combo" id="combo-prazo">
+          <input id="campo-prazo" type="text" inputmode="numeric" autocomplete="off" value="15" class="num" role="combobox" aria-autocomplete="none" aria-expanded="false" aria-controls="lista-prazo" aria-describedby="msg-prazo" aria-label="Prazo em anos: escolha na lista ou digite">
+          <em>anos</em>
+          <button type="button" class="caret" id="btn-prazo" aria-label="Abrir a lista de prazos" aria-haspopup="listbox" aria-controls="lista-prazo"><svg viewBox="0 0 12 8" width="12" height="8" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <ul class="opts" id="lista-prazo" role="listbox" aria-label="Prazos disponíveis" hidden></ul>
+        </div>
         <input id="range-prazo" type="range" aria-label="Prazo em anos, controle deslizante" min="@@PRAZO_MIN@@" max="@@PRAZO_MAX@@" step="1" value="15">
         <div class="slabel"><span>@@PRAZO_MIN@@ anos</span><span>@@PRAZO_MAX@@ anos</span></div>
         <div class="hint warn" id="msg-prazo" hidden></div>
+      </div>
+      <div class="f">
+        <div class="lb" id="lb-sistema">Como a parcela é calculada <span>sistema de amortização</span></div>
+        <div class="seg s2" role="radiogroup" aria-labelledby="lb-sistema">
+          <input type="radio" name="sistema" id="sis-price" value="price" checked><label for="sis-price">Price <small>parcela fixa</small></label>
+          <input type="radio" name="sistema" id="sis-sac" value="sac"><label for="sis-sac">SAC <small>parcela que cai</small></label>
+        </div>
+        <div class="hint" id="hint-sistema">@@D_HINT_SIS@@</div>
       </div>
     </section>
 
@@ -122,9 +135,10 @@ HOME_MAIN = """  <section class="hero">
       <h2 class="sr" id="t-resultado">Resultado da simulação</h2>
       <div class="res">
         <div>
-          <div class="kicker">Parcela estimada</div>
+          <div class="kicker" id="r-kicker">Parcela estimada</div>
           <div class="big num"><span id="r-parcela">@@D_PARCELA@@</span> <small>/mês</small></div>
           <div class="dim" id="r-sub">@@D_SUB@@</div>
+          <div class="dim ult" id="r-ultima" hidden></div>
           <hr class="sep">
           <div class="dim">Total estimado ao final</div>
           <div class="mid num" id="r-total">@@D_TOTAL@@</div>
@@ -152,6 +166,10 @@ HOME_MAIN = """  <section class="hero">
           <div class="lg"><span><s></s>Crédito</span><b class="num" id="rosca-cred-v">@@D_L_CRED@@</b></div>
           <div class="lg"><span><s class="jr"></s>Juros</span><b class="num" id="rosca-juros-v">@@D_L_JUROS@@</b></div>
         </div>
+      </div>
+      <div class="renda-mini">
+        <div><div class="kicker">Renda de referência</div><div class="dim">se a parcela ocupar 30% dela · <a href="#t-raio">entenda</a></div></div>
+        <b class="num" id="r-renda">@@D_RENDA_V@@</b>
       </div>
       <div class="rodape-res">
         <div class="cta">
@@ -182,6 +200,13 @@ HOME_MAIN = """  <section class="hero">
       <div class="mini-in"><label for="campo-conforto">Parcela confortável: quanto cabe por mês?</label><div class="inp"><span class="pre">R$</span><input id="campo-conforto" type="text" inputmode="numeric" autocomplete="off" value="3.000" class="num"><em>/mês</em></div></div>
       <p id="raio-texto">@@D_RAIO@@</p>
       <div class="alts" id="alts"></div>
+      <div class="regra" id="regra-renda">
+        <div class="rt"><b>E o limite de 30% da renda?</b> <span id="renda-texto">@@D_RENDA@@</span></div>
+        <details class="rdet" id="det-renda">
+          <summary>Como a renda entra na análise do Home Equity</summary>
+          @@REGRA_RENDA@@
+        </details>
+      </div>
       <div class="hint">Não dizemos qual é “melhor”: depende do que importa para você. A parcela confortável é só uma conta sua; não é análise de crédito.</div>
     </div>
   </section>
@@ -205,7 +230,7 @@ HOME_MAIN = """  <section class="hero">
     <details class="amort" id="det-amort">
       <summary>Ver a amortização ano a ano</summary>
       <div class="tw"><table id="tab-amort">
-        <caption>Parcela fixa: juros, amortização e saldo devedor no fim de cada ano</caption>
+        <caption id="amort-cap">Parcela fixa: juros, amortização e saldo devedor no fim de cada ano</caption>
         <thead><tr><th scope="col">Ano</th><th scope="col">Juros</th><th scope="col">Amortização</th><th scope="col">Saldo devedor</th></tr></thead>
         <tbody id="amort-corpo">@@D_AMORT_LINHAS@@</tbody>
         <tfoot id="amort-rodape">@@D_AMORT_TOTAL@@</tfoot>
@@ -220,6 +245,33 @@ HOME_MAIN = """  <section class="hero">
     <p class="lead">Com garantia, o juro mensal costuma ser bem menor que o de crédito sem garantia.</p>
     <div class="panel">@@COMPARACAO@@</div>
     <div class="note" id="nota-taxa"><b>E se a taxa for maior?</b> <span id="nota-taxa-texto">@@NOTA_TAXA@@</span></div>
+  </section>
+
+  <section class="blk" aria-labelledby="t-cmpmod">
+    <div class="kicker">Comparativo</div>
+    <h2 id="t-cmpmod">O mesmo crédito em outras modalidades</h2>
+    <p class="lead" id="cm-lead">@@D_CM_LEAD@@</p>
+    <div class="cmpgrid">
+      <div class="panel hecard">
+        <div class="kicker">Seu Home Equity</div>
+        <div class="big num"><span id="cm-parcela">@@D_PARCELA@@</span> <small>/mês</small></div>
+        <div class="dim" id="cm-sub">@@D_CM_SUB@@</div>
+        <hr class="sep">
+        <div class="dim">Total pago ao final</div>
+        <div class="mid num" id="cm-total">@@D_TOTAL@@</div>
+        <div class="dim cm-j">Juros no total</div>
+        <div class="mid num" id="cm-juros">@@D_L_JUROS@@</div>
+        <p class="cm-gap" id="cm-gap">@@D_CM_GAP@@</p>
+      </div>
+      <div class="panel graf cmpviz">
+        <div class="kicker">Quanto você terá pago ao longo do tempo</div>
+        <div class="leg" id="cm-leg"></div>
+        <svg id="cm-linha" viewBox="0 0 640 220" preserveAspectRatio="none" role="img" aria-label="Gráfico de linhas: total pago ao longo do tempo no Home Equity e em outras modalidades"></svg>
+        <div class="eixo"><span>Início</span><span id="cm-eixo-fim">Ano 15</span></div>
+        <div class="qviz" id="cm-barras"></div>
+      </div>
+    </div>
+    <div class="hint" id="cm-nota">@@D_CM_NOTA@@</div>
   </section>
 
   <section class="band" aria-labelledby="t-quitar">
@@ -307,7 +359,8 @@ HOME_MAIN = """  <section class="hero">
   </dialog>
 """
 
-GUIA_CABECALHO = """<nav class="crumb" aria-label="Você está em"><a href="/">Home Equity <span>@@ROTULO_PAGINA@@</span></a></nav>
+GUIA_CABECALHO = """<div class="volta"><a class="btn-volta" href="/#simulador" data-volta>← Voltar à simulação</a></div>
+<nav class="crumb" aria-label="Você está em"><a href="/">Home Equity <span>@@ROTULO_PAGINA@@</span></a></nav>
 <article class="guia">
   <h1>@@H1@@</h1>
   <p class="meta">Atualizado em @@ATUALIZADO@@ · @@RAZAO@@</p>
@@ -320,7 +373,7 @@ GUIA_MEIO = """  </div>
 GUIA_FECHO = """  <aside class="fecho">
     <p class="t">Simule com o seu imóvel</p>
     <p>Veja parcela e custo total antes de decidir.</p>
-    <a class="btn" href="/#simulador">Abrir o simulador →</a>
+    <a class="btn" href="/#simulador" data-volta>Voltar à simulação →</a>
   </aside>
   <section class="rel" aria-labelledby="veja-tambem">
     <h2 id="veja-tambem">Veja também</h2>
