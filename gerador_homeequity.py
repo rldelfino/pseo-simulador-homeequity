@@ -152,6 +152,24 @@ CALCULO_JS = """/* GERADO por gerador_homeequity.py a partir de calculo.py e dad
     return saida;
   }
 
+  // Pagar a mais: extraMensal em toda parcela e/ou unico no começo do mês mesUnico (0 = antes da 1ª parcela). modo "prazo" (parcela igual, acaba antes) ou "parcela" (recalcula depois do valor único).
+  function amortizarAntes(credito, i, meses, sistema, extraMensal, unico, mesUnico, modo) {
+    var saldo = credito, parcela = pmt(credito, i, meses), am = credito / meses, total = 0, nova = null;
+    for (var m = 0; m < meses; m++) {
+      if (m === mesUnico && unico > 0) {
+        var u = Math.min(unico, saldo);
+        saldo -= u; total += u;
+        if (modo === 'parcela' && saldo > 0.005) { parcela = pmt(saldo, i, meses - m); am = saldo / (meses - m); }
+      }
+      if (saldo <= 0.005) return { meses: m, total: total, juros: total - credito, parcelaNova: nova };
+      var j = saldo * i, pago = (sistema === 'sac' ? am + j : parcela) + extraMensal;
+      pago = Math.min(pago, saldo + j);
+      if (m === mesUnico && nova === null) nova = sistema === 'sac' ? am + j : parcela;
+      saldo -= pago - j; total += pago;
+    }
+    return { meses: meses, total: total, juros: total - credito, parcelaNova: nova };
+  }
+
   function compararQuitacao(divida, taxaDividaAm, meses, i, sistema) {
     var atual = pmt(divida, taxaDividaAm, meses), pl = plano(divida, i, meses, sistema);
     return { divida: divida, parcelaAtual: atual, totalAtual: atual * meses, jurosMes1: divida * taxaDividaAm,
@@ -163,7 +181,7 @@ CALCULO_JS = """/* GERADO por gerador_homeequity.py a partir de calculo.py e dad
 
   var api = { TAXA_PARCEIRO_AM: TAXA_PARCEIRO_AM, LTV_MAX: LTV_MAX, CREDITO_MAX: CREDITO_MAX, PRAZO_MIN_ANOS: PRAZO_MIN_ANOS, PRAZO_MAX_ANOS: PRAZO_MAX_ANOS, IMOVEL_MIN: IMOVEL_MIN, IMOVEL_MAX: IMOVEL_MAX, RECEBER_MIN: RECEBER_MIN, RENDA_REFERENCIA: RENDA_REFERENCIA,
               ref: REF, ipcaMensal: ipcaMensal, taxaMensal: taxaMensal, pmt: pmt, valorPresente: valorPresente, valorPresenteSac: valorPresenteSac, plano: plano, rendaParaParcela: rendaParaParcela, limiteCredito: limiteCredito,
-              simular: simular, receberParaParcela: receberParaParcela, amortizacaoAnual: amortizacaoAnual, acumuladoMensal: acumuladoMensal, compararQuitacao: compararQuitacao, brl: brl, pct: pct };
+              simular: simular, receberParaParcela: receberParaParcela, amortizacaoAnual: amortizacaoAnual, acumuladoMensal: acumuladoMensal, amortizarAntes: amortizarAntes, compararQuitacao: compararQuitacao, brl: brl, pct: pct };
   root.DatalabHomeEquity = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -405,6 +423,7 @@ def _valores_padrao():
         "D_CM_GAP": conteudo.cm_gap(ref, r["credito"], 180), "D_CM_NOTA": conteudo.cm_nota(ref),
         "D_AMORT_RESUMO": conteudo.amort_resumo(r, amort), "D_AMORT_LINHAS": conteudo.amort_linhas(amort), "D_AMORT_TOTAL": conteudo.amort_total(amort, r["credito"]),
         "D_AMORT_NOTA": conteudo.amort_nota(ref),
+        "D_AM_TAXA": conteudo.pct(((1 + i) ** 12 - 1) * 100),
         "DIVIDA_OPCOES": opcoes, "D_Q_CARTOES": conteudo.quitar_cartoes(q, taxa_div, 15, i * 100), "D_Q_TEXTO": conteudo.quitar_texto(q, 15),
         "D_ROSCA_P": "%.1f" % (r["credito"] / r["total"] * 289.0265), "D_PCT_JUROS": str(round(r["juros"] / r["total"] * 100)),
         "D_AMORT_PCT": str(round(amort[0]["juros"] / (r["parcela"] * 12) * 100)),

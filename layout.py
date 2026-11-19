@@ -210,11 +210,14 @@ HOME_MAIN = """  <section class="hero">
     </div>
   </section>
 
-  <section class="blk" aria-labelledby="t-amort">
-    <div class="split">
+  <section class="blk amsec" id="amortizacao" aria-labelledby="t-amort">
+    <div class="kicker">Amortização</div>
+    <h2 id="t-amort">Pagar antes pode poupar milhares de reais</h2>
+    <p class="lead amlead">No começo do contrato, quase toda a parcela é juros. Quando você paga um valor a mais, a dívida em que os juros incidem diminui: você termina antes e paga menos. Veja quanto isso vale no seu cenário.</p>
+
+    <div class="split amwhy">
       <div class="split-t">
-        <div class="kicker">Amortização</div>
-        <h2 id="t-amort">Para onde vai a sua parcela</h2>
+        <h3 class="sub"><span class="n" aria-hidden="true">1</span>Os juros vêm primeiro</h3>
         <div class="giga num"><span id="amort-pct">@@D_AMORT_PCT@@%</span><small>do 1º ano é juros</small></div>
         <p class="lead" id="amort-resumo">@@D_AMORT_RESUMO@@</p>
       </div>
@@ -226,6 +229,41 @@ HOME_MAIN = """  <section class="hero">
         <div class="eixo"><span>Ano 1</span><span id="amort-ano-fim">Ano 15</span></div>
       </div>
     </div>
+
+    <div class="panel amx">
+      <h3 class="sub"><span class="n" aria-hidden="true">2</span>Quanto você poupa pagando a mais</h3>
+      <p class="amsub">Escolha o valor e o momento. Quanto mais cedo, maior a economia.</p>
+      <div class="amin">
+        <div class="f">
+          <label for="campo-extra">Pagar a mais todo mês <span>além da parcela</span></label>
+          <div class="inp"><span class="pre">R$</span><input id="campo-extra" type="text" inputmode="numeric" autocomplete="off" value="500" class="num"><em>/mês</em></div>
+        </div>
+        <div class="f">
+          <label for="campo-unico">Amortização única <span>um valor de uma vez</span></label>
+          <div class="inp"><span class="pre">R$</span><input id="campo-unico" type="text" inputmode="numeric" autocomplete="off" value="20.000" class="num"></div>
+        </div>
+        <div class="f">
+          <label for="range-quando">Quando fazer a única <span id="quando-rot">daqui a 1 ano</span></label>
+          <input id="range-quando" type="range" min="0" max="14" step="1" value="1" aria-describedby="quando-rot">
+        </div>
+      </div>
+      <div class="amcards" id="am-cartoes"></div>
+      <p class="qtxt" id="am-texto"></p>
+    </div>
+
+    <div class="panel graf amtempo">
+      <h3 class="sub"><span class="n" aria-hidden="true">3</span>O mesmo valor, em momentos diferentes</h3>
+      <p class="amsub" id="am-tempo-txt"></p>
+      <svg id="am-tempo" viewBox="0 0 640 150" preserveAspectRatio="none" role="img" aria-label="Gráfico: economia de juros conforme o momento da amortização única"></svg>
+      <div class="eixo"><span>Logo no início</span><span id="am-tempo-fim">Ano 14</span></div>
+    </div>
+
+    <div class="amdicas">
+      <div class="amd"><h4>Prazo ou parcela?</h4><p>Reduzir o prazo costuma poupar mais juros: as últimas parcelas somem. Reduzir a parcela dá folga no orçamento do mês. Escolha pelo que você precisa agora.</p></div>
+      <div class="amd"><h4>Veja o que o contrato diz</h4><p>Pergunte como pedir a amortização, se há valor mínimo ou tarifa e se o abatimento reduz o prazo ou a parcela. O Código de Defesa do Consumidor (art. 52, § 2º) prevê a liquidação antecipada com redução proporcional dos juros; confirme como o seu contrato aplica.</p></div>
+      <div class="amd"><h4>Compare com outro uso do dinheiro</h4><p>Amortizar equivale a render a taxa da dívida: <b id="am-taxa-aa">@@D_AM_TAXA@@</b> ao ano nesta simulação. Compare com o que o mesmo dinheiro renderia, já descontados impostos, e mantenha uma reserva de emergência antes de adiantar parcelas. Não é recomendação de investimento.</p></div>
+    </div>
+
     <details class="amort" id="det-amort">
       <summary>Ver a amortização ano a ano</summary>
       <div class="tw"><table id="tab-amort">

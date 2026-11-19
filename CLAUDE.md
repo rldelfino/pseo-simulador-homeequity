@@ -9,7 +9,7 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 - **Mensagem agnóstica sobre o parceiro**: "um parceiro de crédito". Sem texto sobre remuneração/comissão e sem citar o nome do parceiro nem de bancos (há teste que barra). Sem ranking.
 - Tom calmo sobre a garantia: aviso curto perto do botão, explicação na seção/página própria. Um valor único de parcela (taxa de referência do parceiro); a média do BCB só na nota "E se a taxa for maior?".
 - Link de conversão do parceiro (`LINK_PARCEIRO` em `gerador_homeequity.py`) só no botão da tela de confirmação. Não copiar o link de outros produtos para cá.
-- Medição: Umami, **ID próprio deste site** (`UMAMI_ID`, hoje vazio = sem script). Eventos: `usou-simulador-homeequity`, `abriu-confirmacao`, `cta-parceiro`, `copiou-link` (só `receber` e `prazo`), `abriu-amortizacao` (`prazo`), `usou-quitar-divida` (`tipo`: pessoal/cheque/rotativo/outra). Não mandar evento de teste ao Umami (nos testes o Umami é bloqueado).
+- Medição: Umami, **ID próprio deste site** (`UMAMI_ID`, hoje vazio = sem script). Eventos: `usou-simulador-homeequity`, `abriu-confirmacao`, `cta-parceiro`, `copiou-link` (só `receber` e `prazo`), `abriu-amortizacao` (`prazo`), `usou-quitar-divida` (`tipo`: pessoal/cheque/rotativo/outra), `simulou-amortizacao` (`prazo`). Não mandar evento de teste ao Umami (nos testes o Umami é bloqueado).
 - Sem segredo em arquivo/GitHub. Sem identificar modelo de IA em commits/PRs (só as linhas de atribuição que o sistema mandar). Python 3.10 no CI (sem f-string aninhado). Merge só com `pytest` saindo 0. Fluxo: branch → PR → merge.
 - CSP: sem `style=` nem script inline. Barras são SVG com atributos; preenchimento dos sliders usa `data-p` definido por JS.
 - Máximo ~15 páginas indexáveis, cada uma com conteúdo próprio.
@@ -17,7 +17,7 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 
 ## Comandos
 - Gerar: `python gerador_homeequity.py` (saída em `paginas_seo/`, publicada no Cloudflare Pages sem build). O CSS é escrito à mão em `src/estilo.css` (sem Tailwind/npm).
-- Testes: `python -m pytest -q` (97). Amortização e "quitar dívida" no navegador: `python testar_amort_quitar.py` (Chromium + WebKit, desktop e celular).
+- Testes: `python -m pytest -q` (108). Amortização e "quitar dívida" no navegador: `python testar_amort_quitar.py` (Chromium + WebKit, desktop e celular).
 - Seções da home (18/11): "Para onde vai a sua parcela" (amortização anual recolhível, `calculo.amortizacao_anual`) e "Tem uma dívida cara? Veja se vale trocar" (`calculo.comparar_quitacao`, taxas médias BCB 20742/20741/22022 em `REF`; mesmo prazo do simulador; botão leva o valor ao simulador). Navegador de ponta a ponta (Chromium + WebKit, desktop e celular, 160 checagens no total): `python testar_navegador.py` (precisa do Playwright; fora do CI).
 - Ícones e imagem de compartilhamento: `python gerar_icones.py` (Playwright + Pillow).
 - Taxas do BCB: `python etl_taxas.py` (grava `dados/taxas_referencia.csv`; falha de rede não derruba). Robô semanal em `.github/workflows/atualiza_taxas.yml` (seg 08:00 UTC): taxas, rebuild, pytest, commit, IndexNow.
@@ -46,6 +46,9 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 - v3b (19/11, feedback: "pesado, com muita informação"): o painel do resultado ficou só com parcela, total, escolha Price/SAC (cartão pequeno), rosca e botão; a barra "valor do imóvel/limite" virou uma faixa fina (`.uso`) logo abaixo do simulador (mesmos ids); a renda de referência saiu do painel e fica só no Raio-X. Comparativo redesenhado: 4 linhas (Home Equity, garantia real média, crédito pessoal, cheque especial; rotativo fica de fora, distorce a escala), cada barra = crédito (claro) + juros (cor da modalidade), destaque grande "R$ X a mais no crédito pessoal". Regra de design: o topo da home tem que ser leve; informação extra vai para as seções de baixo.
 
 - SEO (19/11): `logo` na Organization, BreadcrumbList nas páginas internas, Dataset em `/dados-abertos`, termos "empréstimo com garantia de imóvel", "crédito com garantia de imóvel", "refinanciamento" e "portabilidade" onde o assunto já é esse (como-funciona, comparação, quando não vale, FAQ), descrições das páginas pequenas mais completas e JS com `?v=` com cache imutável.
+
+- v4 (19/11, visual do Pix aplicado, só aparência): cartões por campo, número grande à direita, controle com botão brilhante, painel de resultado escuro, frase-resumo âmbar (`r-resumo`), moldura de vidro. Juros em âmbar `#e3a96b`, crédito em azul-petróleo.
+- v5 (19/11, benchmark Creditas/NerdWallet/Bankrate): seção "Amortização" (`#amortizacao`) virou "Pagar antes pode poupar milhares de reais": (1) juros vêm primeiro (gráfico anual), (2) simulador de pagar a mais (extra mensal e/ou valor único, em qual ano, reduzindo prazo ou parcela; `calculo.amortizar_antes` = `H.amortizarAntes`, testado Python x JS), (3) gráfico "mesmo valor em momentos diferentes", e três avisos (prazo ou parcela, contrato/CDC art. 52 §2º, comparar com outro uso do dinheiro). Texto jurídico NÃO revisado. Números em reais de hoje, sem custo de oportunidade nem tarifas.
 
 ## Próximos passos
 1. Decidir melhorias do benchmark: tabela de amortização, custos estimados (só com fonte), renda mínima estimada, "quitar dívida cara".

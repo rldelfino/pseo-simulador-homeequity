@@ -128,6 +128,35 @@ def amortizacao_anual(credito, i, meses, sistema="price"):
     return linhas
 
 
+def amortizar_antes(credito, i, meses, sistema="price", extra_mensal=0.0, unico=0.0, mes_unico=0, modo="prazo"):
+    """Efeito de pagar a mais: `extra_mensal` em toda parcela e/ou `unico` no começo do mês `mes_unico` (0 = antes da 1ª parcela).
+    modo "prazo": a parcela segue igual e a dívida acaba antes; "parcela": depois do valor único a parcela é recalculada para o prazo restante (o extra mensal sempre encurta o prazo).
+    Devolve meses até quitar, total pago (parcelas + extras), juros e a primeira parcela depois do valor único (no SAC, a parcela daquele mês)."""
+    saldo = credito
+    parcela = pmt(credito, i, meses)
+    amort = credito / meses
+    total = 0.0
+    nova = None
+    for m in range(meses):
+        if m == mes_unico and unico > 0:
+            u = min(unico, saldo)
+            saldo -= u
+            total += u
+            if modo == "parcela" and saldo > 0.005:
+                parcela = pmt(saldo, i, meses - m)
+                amort = saldo / (meses - m)
+        if saldo <= 0.005:
+            return {"meses": m, "total": total, "juros": total - credito, "parcela_nova": nova}
+        j = saldo * i
+        pago = (amort + j if sistema == "sac" else parcela) + extra_mensal
+        pago = min(pago, saldo + j)
+        if m == mes_unico and nova is None:
+            nova = amort + j if sistema == "sac" else parcela
+        saldo -= pago - j
+        total += pago
+    return {"meses": meses, "total": total, "juros": total - credito, "parcela_nova": nova}
+
+
 def comparar_quitacao(divida, taxa_divida_am, meses, i, sistema="price"):
     """Mesma dívida e mesmo prazo: parcela e total na taxa da dívida (taxa_divida_am em fração ao mês, sempre parcela fixa) e no Home Equity (taxa i, no sistema escolhido).
     Com SAC, a parcela do Home Equity é a primeira. juros_mes1 = o que a dívida cobra de juros só no primeiro mês."""
