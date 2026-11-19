@@ -121,14 +121,6 @@ HOME_MAIN = """  <section class="hero">
         <div class="slabel"><span>@@PRAZO_MIN@@ anos</span><span>@@PRAZO_MAX@@ anos</span></div>
         <div class="hint warn" id="msg-prazo" hidden></div>
       </div>
-      <div class="f">
-        <div class="lb" id="lb-sistema">Como a parcela é calculada <span>sistema de amortização</span></div>
-        <div class="seg s2" role="radiogroup" aria-labelledby="lb-sistema">
-          <input type="radio" name="sistema" id="sis-price" value="price" checked><label for="sis-price">Price <small>parcela fixa</small></label>
-          <input type="radio" name="sistema" id="sis-sac" value="sac"><label for="sis-sac">SAC <small>parcela que cai</small></label>
-        </div>
-        <div class="hint" id="hint-sistema">@@D_HINT_SIS@@</div>
-      </div>
     </section>
 
     <section class="panel resp" id="resultado" aria-labelledby="t-resultado" aria-live="polite">
@@ -144,14 +136,13 @@ HOME_MAIN = """  <section class="hero">
           <div class="mid num" id="r-total">@@D_TOTAL@@</div>
           <div class="dim"><a href="/metodologia">Como calculamos</a></div>
         </div>
-        <div class="ctx">
-          <div class="t">Valor do imóvel</div>
-          <div class="v num" id="c-imovel">R$ 800.000</div>
-          <svg class="bar" id="bar-ltv" width="100%" height="12" role="img" aria-label="Quanto do valor do imóvel o crédito usa">
-            <rect width="100%" height="12" rx="6" fill="rgba(255,255,255,.1)"/><rect id="bar-fill" width="@@D_BARRA@@%" height="12" rx="6" fill="#4aa3b5"/><rect id="bar-mark" x="60%" y="-3" width="2" height="18" fill="#e2e8f0"/>
-          </svg>
-          <div class="lg"><span><s></s>Crédito (<span id="c-ltv-rot">você recebe</span>)</span><b class="num" id="c-credito">@@D_CREDITO@@</b></div>
-          <div class="lg"><span><s class="lim"></s><span id="c-limite-rot">Limite (60%)</span></span><b class="num" id="c-limite">@@D_LIMITE@@</b></div>
+        <div class="ctx sis">
+          <div class="t" id="lb-sistema">Tipo de parcela</div>
+          <div class="seg s2" role="radiogroup" aria-labelledby="lb-sistema">
+            <input type="radio" name="sistema" id="sis-price" value="price" checked><label for="sis-price">Price <small>parcela fixa</small></label>
+            <input type="radio" name="sistema" id="sis-sac" value="sac"><label for="sis-sac">SAC <small>parcela cai</small></label>
+          </div>
+          <div class="hint" id="hint-sistema">@@D_HINT_SIS@@</div>
         </div>
       </div>
       <div class="rosca">
@@ -167,10 +158,6 @@ HOME_MAIN = """  <section class="hero">
           <div class="lg"><span><s class="jr"></s>Juros</span><b class="num" id="rosca-juros-v">@@D_L_JUROS@@</b></div>
         </div>
       </div>
-      <div class="renda-mini">
-        <div><div class="kicker">Renda de referência</div><div class="dim">se a parcela ocupar 30% dela · <a href="#t-raio">entenda</a></div></div>
-        <b class="num" id="r-renda">@@D_RENDA_V@@</b>
-      </div>
       <div class="rodape-res">
         <div class="cta">
           <div><strong>Faça sua proposta</strong><span class="s">Com um parceiro de crédito · sem compromisso</span></div>
@@ -180,6 +167,17 @@ HOME_MAIN = """  <section class="hero">
         <div class="copiar"><button type="button" id="btn-copiar">Copiar o link desta simulação</button><span id="msg-copiado" role="status"></span></div>
       </div>
     </section>
+  </div>
+
+  <div class="uso" aria-label="Quanto do valor do imóvel o crédito usa">
+    <div class="uso-t"><span class="t">Valor do imóvel</span><b class="v num" id="c-imovel">R$ 800.000</b></div>
+    <div class="uso-b"><svg class="bar" id="bar-ltv" width="100%" height="12" role="img" aria-label="Quanto do valor do imóvel o crédito usa">
+            <rect width="100%" height="12" rx="6" fill="rgba(255,255,255,.1)"/><rect id="bar-fill" width="@@D_BARRA@@%" height="12" rx="6" fill="#4aa3b5"/><rect id="bar-mark" x="60%" y="-3" width="2" height="18" fill="#e2e8f0"/>
+          </svg></div>
+    <div class="uso-l">
+      <div class="lg"><span><s></s>Crédito (<span id="c-ltv-rot">você recebe</span>)</span><b class="num" id="c-credito">@@D_CREDITO@@</b></div>
+      <div class="lg"><span><s class="lim"></s><span id="c-limite-rot">Limite (60%)</span></span><b class="num" id="c-limite">@@D_LIMITE@@</b></div>
+    </div>
   </div>
 
   <section class="band fatos" aria-label="Condições divulgadas por um parceiro de crédito">
@@ -251,24 +249,12 @@ HOME_MAIN = """  <section class="hero">
     <div class="kicker">Comparativo</div>
     <h2 id="t-cmpmod">O mesmo crédito em outras modalidades</h2>
     <p class="lead" id="cm-lead">@@D_CM_LEAD@@</p>
-    <div class="cmpgrid">
-      <div class="panel hecard">
-        <div class="kicker">Seu Home Equity</div>
-        <div class="big num"><span id="cm-parcela">@@D_PARCELA@@</span> <small>/mês</small></div>
-        <div class="dim" id="cm-sub">@@D_CM_SUB@@</div>
-        <hr class="sep">
-        <div class="dim">Total pago ao final</div>
-        <div class="mid num" id="cm-total">@@D_TOTAL@@</div>
-        <div class="dim cm-j">Juros no total</div>
-        <div class="mid num" id="cm-juros">@@D_L_JUROS@@</div>
-        <p class="cm-gap" id="cm-gap">@@D_CM_GAP@@</p>
-      </div>
-      <div class="panel graf cmpviz">
-        <div class="kicker">Quanto você terá pago ao longo do tempo</div>
-        <div class="leg" id="cm-leg"></div>
-        <svg id="cm-linha" viewBox="0 0 640 220" preserveAspectRatio="none" role="img" aria-label="Gráfico de linhas: total pago ao longo do tempo no Home Equity e em outras modalidades"></svg>
-        <div class="eixo"><span>Início</span><span id="cm-eixo-fim">Ano 15</span></div>
-        <div class="qviz" id="cm-barras"></div>
+    <div class="panel cmpx">
+      <div class="cmleg"><span><s class="cr"></s>O que você recebe</span><span><s class="jr2"></s>Juros pagos até o fim</span></div>
+      <div class="cmrows" id="cm-linhas"></div>
+      <div class="cmgap">
+        <div class="gv num" id="cm-gap-v">@@D_CM_GAPV@@</div>
+        <p id="cm-gap">@@D_CM_GAP@@</p>
       </div>
     </div>
     <div class="hint" id="cm-nota">@@D_CM_NOTA@@</div>

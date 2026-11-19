@@ -375,9 +375,9 @@ def _valores_padrao():
                      % (k, k, " checked" if k == conteudo.DIVIDA_TIPO_PADRAO else "", k, nome, conteudo.pct(ref[k + "Am"])) for k, nome in conteudo.DIVIDAS)
     opcoes += '<input type="radio" name="tipodiv" id="div-outra" value="outra"><label for="div-outra">Outra <small>informo a taxa</small></label>'
     return {
-        "D_HINT_SIS": conteudo.hint_sistema(), "D_RENDA_V": conteudo.brl0(calculo.renda_para_parcela(r["parcela"])), "D_RENDA": conteudo.renda_texto(r["parcela"]), "REGRA_RENDA": conteudo.regra_renda(),
-        "D_CM_LEAD": conteudo.cm_lead(r["credito"], 15), "D_CM_SUB": conteudo.cm_sub(r["credito"], 15, i * 100),
-        "D_CM_GAP": conteudo.cm_gap(ref, r["credito"], 180, r["total"]), "D_CM_NOTA": conteudo.cm_nota(ref),
+        "D_HINT_SIS": conteudo.hint_sistema(),  "D_RENDA": conteudo.renda_texto(r["parcela"]), "REGRA_RENDA": conteudo.regra_renda(),
+        "D_CM_LEAD": conteudo.cm_lead(r["credito"], 15), "D_CM_GAPV": conteudo.brl0(conteudo.cm_gap_valor(ref, r["credito"], 180, r["total"])),
+        "D_CM_GAP": conteudo.cm_gap(ref, r["credito"], 180), "D_CM_NOTA": conteudo.cm_nota(ref),
         "D_AMORT_RESUMO": conteudo.amort_resumo(r, amort), "D_AMORT_LINHAS": conteudo.amort_linhas(amort), "D_AMORT_TOTAL": conteudo.amort_total(amort, r["credito"]),
         "D_AMORT_NOTA": conteudo.amort_nota(ref),
         "DIVIDA_OPCOES": opcoes, "D_Q_CARTOES": conteudo.quitar_cartoes(q, taxa_div, 15, i * 100), "D_Q_TEXTO": conteudo.quitar_texto(q, 15),
@@ -387,7 +387,7 @@ def _valores_padrao():
         "PRAZO_MIN": str(calculo.PRAZO_MIN_ANOS), "PRAZO_MAX": str(calculo.PRAZO_MAX_ANOS),
         "D_L_CRED": conteudo.brl0(r["credito"]), "D_L_JUROS": conteudo.brl0(r["juros"]),
         "D_PARCELA": conteudo.brl0(r["parcela"]), "D_TOTAL": conteudo.brl0(r["total"]),
-        "D_SUB": "em 180 meses · taxa de referência " + conteudo.pct(i * 100) + " a.m.",
+        "D_SUB": "em 180 meses · taxa " + conteudo.pct(i * 100) + " a.m.",
         "D_CREDITO": conteudo.brl0(r["credito"]) + " · " + str(round(r["ltv"] * 100)) + "%", "D_BARRA": "%.1f" % (r["ltv"] * 100),
         "D_LIMITE": conteudo.brl0(r["limite"]), "D_RAIO": raio,
         "NOTA_TAXA": conteudo.nota_taxa_maior(ref, i, 800_000, 250_000, 0, 180),

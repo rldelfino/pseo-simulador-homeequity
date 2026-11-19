@@ -120,8 +120,8 @@ def test_home_traz_lista_de_prazo_sac_renda_e_comparativo(home):
     assert 'role="combobox"' in home and 'id="lista-prazo"' in home and "<select" not in home
     assert 'id="sis-price"' in home and 'id="sis-sac"' in home
     assert 'id="regra-renda"' in home and "Como a renda entra na análise" in home and "não existe um percentual único" in home.lower()
-    assert 'id="r-renda"' in home
-    for ident in ("cm-parcela", "cm-total", "cm-linha", "cm-barras", "cm-gap"):
+    assert 'id="r-renda"' not in home and 'class="uso"' in home and 'class="renda-mini"' not in home
+    for ident in ("cm-linhas", "cm-gap-v", "cm-gap"):
         assert 'id="' + ident + '"' in home
     assert "@@" not in home
 
