@@ -147,7 +147,7 @@ HOME_MAIN = """  <section class="hero">
       </div>
       <div class="rosca">
         <svg viewBox="0 0 120 120" width="120" height="120" role="img" id="rosca-svg" aria-label="Do total pago, @@D_PCT_JUROS@@% é juros">
-          <circle cx="60" cy="60" r="46" fill="none" stroke="#cbd5e1" stroke-width="14"/>
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#e3a96b" stroke-width="14"/>
           <circle id="rosca-cred" cx="60" cy="60" r="46" fill="none" stroke="#4aa3b5" stroke-width="14" stroke-dasharray="@@D_ROSCA_P@@ 289.03" transform="rotate(-90 60 60)"/>
           <text x="60" y="61" text-anchor="middle" class="rc-n" id="rosca-pct">@@D_PCT_JUROS@@%</text>
           <text x="60" y="77" text-anchor="middle" class="rc-t">em juros</text>
