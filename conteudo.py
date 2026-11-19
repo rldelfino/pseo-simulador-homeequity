@@ -93,6 +93,8 @@ def nota_taxa_maior(ref, i, imovel, receber, saldo, meses):
             "): nessa taxa, a parcela do cenário acima seria de " + brl0(r["parcela"]) + ". A taxa final vem da análise.")
 
 
+CITACAO = "Datalab Global (https://homeequity.datalabglobal.com/dados-abertos)"
+
 # Cores leves (menos intensas que o azul-petróleo do Home Equity) para as outras modalidades; o simulador.js usa as mesmas.
 COR_MODALIDADE = {tr.CODIGO_GARANTIA_REAL: "#8aa4c8", 20742: "#c9a46f", 20741: "#cf8f82", 22022: "#b68ab5"}
 
@@ -226,6 +228,9 @@ FAQ = [
     ("O que acontece se eu atrasar as parcelas?",
      "Atrasos geram encargos previstos no contrato e, se a dívida não for regularizada, a lei prevê um procedimento de cobrança que pode chegar à venda do imóvel dado em garantia. "
      "Por isso vale escolher uma parcela que caiba com folga. Detalhes em " + a("/garantia-do-imovel", "Garantia do imóvel") + "."),
+    ("Home Equity é o mesmo que refinanciamento ou portabilidade?",
+     "Não. No refinanciamento do imóvel, o novo crédito quita o saldo do financiamento e libera a diferença; é o que a opção \"Ainda financiado\" do simulador calcula. A portabilidade leva uma dívida que "
+     "você já tem para outra instituição, em geral com taxa menor. Já o Home Equity, também chamado de empréstimo com garantia de imóvel, é um crédito novo com o imóvel em garantia. Veja " + a("/home-equity-ou-outro-credito", "a comparação") + "."),
     ("Quanto da minha renda a parcela pode ocupar?",
      "Não há um percentual único em lei para o Home Equity: cada instituição define na análise de crédito, e o parceiro não divulga o dele. A referência de mercado mais citada é a parcela de até "
      "cerca de 30% da renda mensal (algumas aceitam até 35%), uma prática dos bancos, muito citada no crédito imobiliário. Entram na conta a renda comprovada, outras dívidas, o histórico de crédito e a "
@@ -244,7 +249,7 @@ FAQ = [
 def corpo_como_funciona(ctx):
     r = calculo.simular(800_000, 250_000, 0, 180, taxa_ref())
     return (
-        p("Home Equity é um crédito em que você oferece um imóvel como garantia e recebe dinheiro para pagar em parcelas. Como a instituição tem a garantia, os juros costumam ser "
+        p("Home Equity, também chamado de empréstimo com garantia de imóvel (ou crédito com garantia de imóvel), é um crédito em que você oferece um imóvel como garantia e recebe dinheiro para pagar em parcelas. Como a instituição tem a garantia, os juros costumam ser "
           "bem menores que os do crédito pessoal sem garantia ou do cartão. Você continua usando o imóvel."
           )
         + h2("O que você informa e o que o crédito libera")
@@ -347,12 +352,16 @@ def corpo_comparar(ctx):
         pm = calculo.pmt(base, taxa / 100, meses)
         tab.append([nome, pct(taxa), brl0(pm), brl0(pm * meses - base)])
     return (
-        p("O Home Equity costuma ter juros mensais bem menores que os do crédito sem garantia. A comparação abaixo usa a mesma conta para todos: tomar " + brl0(base) + " em " + str(meses) +
+        p("O Home Equity, também chamado de empréstimo com garantia de imóvel, costuma ter juros mensais bem menores que os do crédito sem garantia. A comparação abaixo usa a mesma conta para todos: tomar " + brl0(base) + " em " + str(meses) +
           " meses, com parcela fixa e a taxa de cada modalidade.")
         + tabela(["Modalidade", "Juros ao mês", "Parcela", "Juros no total"], tab,
                  "Mesmo valor e mesmo prazo, só mudando a taxa. Médias do Banco Central (" + mes_curto(tr.ultima(29976, linhas)["mes"]) + "); a taxa de referência do Home Equity é a do parceiro mais IPCA.")
         + aviso("É uma comparação de taxas, não de ofertas. Na prática o crédito sem garantia costuma ter prazo e valor máximos menores, e o Home Equity pode ter custos de avaliação e registro. "
                 "Compare o CET de cada proposta antes de decidir.")
+        + h2("Refinanciamento e portabilidade: o que é diferente")
+        + p("No <b>refinanciamento do imóvel</b>, com o imóvel ainda financiado, o novo crédito quita o saldo e libera a diferença para você; é o que a opção \"Ainda financiado\" do simulador calcula. "
+            "A <b>portabilidade de crédito</b> é outra coisa: levar uma dívida que você já tem para outra instituição, em geral por uma taxa menor. "
+            "Usar o Home Equity para quitar uma dívida é contratar um crédito novo, com o imóvel em garantia.")
         + h2("O que a garantia muda")
         + ul([
             "<b>Cartão rotativo e cheque especial</b> são os mais caros e feitos para uso curto. Dívida neles por meses sai muito mais cara.",
@@ -373,7 +382,7 @@ def corpo_quando_nao(ctx):
             "<b>A renda é incerta.</b> Com a garantia em jogo, uma queda de renda pesa mais; uma reserva de alguns meses de parcela ajuda.",
             "<b>O dinheiro é para um gasto que não se paga.</b> Usar uma dívida de 15 anos para uma despesa de consumo de curto prazo costuma sair caro no total.",
             "<b>O valor é pequeno.</b> Avaliação, registro e seguros pesam mais em valores baixos; compare o CET com o de outras opções.",
-            "<b>Existe crédito mais barato disponível.</b> Consignado, refinanciar o financiamento atual ou pagar uma dívida com recursos próprios podem custar menos.",
+            "<b>Existe crédito mais barato disponível.</b> Consignado, portabilidade da dívida atual para uma instituição com taxa menor, refinanciamento do financiamento do imóvel ou pagar uma dívida com recursos próprios podem custar menos.",
             "<b>A situação do imóvel é complexa.</b> Pendências na matrícula, imóvel de mais de um dono ou inventário podem atrasar ou impedir a operação.",
         ])
         + h2("Quando pode fazer sentido")
@@ -447,6 +456,44 @@ def corpo_metodologia(ctx):
     )
 
 
+def corpo_dados_abertos(ctx):
+    linhas = tr.ler()
+    meses = sorted({l["mes"] for l in linhas})
+    colunas = [
+        ("codigo_serie", "Código da série no SGS do Banco Central"),
+        ("modalidade", "Nome da série (por exemplo, Cartão de crédito rotativo)"),
+        ("mes_referencia", "Mês de referência (AAAA-MM)"),
+        ("valor", "Valor da série, em %"),
+        ("unidade", "\"am\" = % ao mês; \"aa\" = % ao ano"),
+    ]
+    series = [[str(s["codigo"]), s["nome"], "% ao mês" if s["unidade"] == "am" else "% ao ano", '<a href="' + tr.url_fonte(s["codigo"]) + '" rel="noopener">SGS ' + str(s["codigo"]) + "</a>"]
+              for s in tr.SERIES]
+    return (
+        p("As taxas de referência que o simulador usa estão disponíveis para baixar em CSV, para quem quiser conferir, citar ou usar em outra análise. "
+          "São médias de mercado do Banco Central (e o IPCA), não ofertas de crédito.")
+        + h2("O arquivo")
+        + tabela(["Arquivo", "Formato", "Período"],
+                 [[a("/dados/taxas-referencia.csv", "taxas-referencia.csv"), "CSV, UTF-8, separador ponto e vírgula", mes_curto(meses[0]) + " a " + mes_curto(meses[-1]) + ", " + str(len(linhas)) + " linhas"]],
+                 "Atualizado toda semana. Página atualizada em " + ctx["atualizado"] + ".")
+        + h2("Colunas")
+        + ul(["<code>" + n + "</code>: " + d for n, d in colunas])
+        + h2("Séries incluídas")
+        + tabela(["Código", "Série", "Unidade", "Fonte"], series, "Séries do Banco Central (SGS) usadas no simulador de Home Equity.")
+        + h2("Licença")
+        + p("Contém informações do Banco Central do Brasil, disponibilizadas por ele sob a licença ODbL 1.0 (" + a("https://opendatacommons.org/licenses/odbl/1-0/", "https://opendatacommons.org/licenses/odbl/1-0/") +
+            "). Esta base derivada também é licenciada sob ODbL 1.0: você pode copiar, distribuir e adaptar, citando a fonte e mantendo a mesma licença.")
+        + h2("Como citar")
+        + p("Cite como: " + CITACAO + ", com a data de acesso, e cite também o Banco Central do Brasil como fonte original.")
+        + h2("Limites")
+        + ul([
+            "São médias de mercado das novas operações, não ofertas: a taxa que você receber pode ser maior ou menor.",
+            "A série de crédito com garantia real mistura imóvel e veículo; o Banco Central não separa o Home Equity.",
+            "As séries saem com defasagem. Veja " + a("/taxas-de-referencia", "de onde vêm os números") + " e " + a("/metodologia", "como calculamos") + ".",
+            "Para acompanhar as atualizações, use o " + a("/feed.xml", "feed Atom") + " ou a página " + a("/atualizacoes", "Atualizações") + ".",
+        ])
+    )
+
+
 def corpo_sobre(ctx):
     return (
         p("Datalab Global é uma marca de " + ctx["razao"] + ", CNPJ " + ctx["cnpj"] + ". Este simulador existe para você ver a parcela e o custo do Home Equity antes de pedir uma proposta.")
@@ -469,6 +516,7 @@ def corpo_sobre(ctx):
 
 
 ATUALIZACOES = [
+    ("19/11/2026", "Prazo em lista suspensa, escolha entre Price e SAC, explicação da regra de renda, comparativo com outras modalidades, botão Voltar à simulação nas páginas internas e página de dados abertos com o CSV das taxas do Banco Central."),
     ("18/11/2026", "Simulador de Home Equity publicado em homeequity.datalabglobal.com, com parcela estimada, Raio-X da decisão, comparação de custo mensal entre tipos de crédito e guias sobre garantia, custos e taxas."),
 ]
 
@@ -550,12 +598,15 @@ PAGINAS = [
          desc="A taxa do parceiro (1,09% ao mês mais IPCA) e as médias do Banco Central usadas no simulador, com o mês e a fonte de cada uma.", corpo=corpo_taxas),
     dict(slug="metodologia", cartao=None, menu="Metodologia", title="Metodologia: como calculamos o Home Equity",
          h1="Metodologia: como calculamos a parcela", desc="A conta do simulador, passo a passo, o que ela não inclui e como o Raio-X compara cenários.", corpo=corpo_metodologia),
+    dict(slug="dados-abertos", cartao=None, menu="Dados abertos", title="Dados abertos: taxas do Banco Central em CSV",
+         h1="Dados abertos: taxas de referência em CSV",
+         desc="Baixe em CSV as taxas médias do Banco Central e o IPCA usados no simulador de Home Equity, com colunas, licença ODbL 1.0 e como citar.", corpo=corpo_dados_abertos),
     dict(slug="sobre", cartao=None, menu="Sobre", title="Sobre a Datalab Global e este simulador",
-         h1="Sobre este simulador", desc="Quem mantém o simulador de Home Equity, o que fazemos e o que não fazemos.", corpo=corpo_sobre),
+         h1="Sobre este simulador", desc="Quem mantém o simulador de Home Equity (empréstimo com garantia de imóvel), o que a Datalab Global faz, o que não faz e como falar com a gente.", corpo=corpo_sobre),
     dict(slug="atualizacoes", cartao=None, menu="Atualizações", title="Atualizações do simulador de Home Equity",
-         h1="Atualizações do simulador", desc="Registro das mudanças e correções do simulador de Home Equity.", corpo=corpo_atualizacoes, guia=False),
+         h1="Atualizações do simulador", desc="Registro das mudanças, conferências de taxas e correções do simulador de Home Equity, com a data de cada atualização.", corpo=corpo_atualizacoes, guia=False),
     dict(slug="privacidade", cartao=None, menu="Privacidade", title="Política de Privacidade", h1="Política de Privacidade",
-         desc="Como o simulador de Home Equity trata dados pessoais (LGPD).", corpo=corpo_privacidade, guia=False),
+         desc="Como o simulador de Home Equity trata dados pessoais (LGPD): o que não coletamos, a medição sem cookies e como falar com a gente.", corpo=corpo_privacidade, guia=False),
     dict(slug="termos", cartao=None, menu="Termos de uso", title="Termos de Uso", h1="Termos de Uso",
-         desc="Condições de uso do simulador de Home Equity.", corpo=corpo_termos, guia=False),
+         desc="Condições de uso do simulador de Home Equity: a simulação não é proposta de crédito, limites de responsabilidade e como falar com a gente.", corpo=corpo_termos, guia=False),
 ]

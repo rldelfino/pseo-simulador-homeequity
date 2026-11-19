@@ -1,50 +1,54 @@
 {
   "atualizacoes": {
     "data": "2026-11-19",
-    "hash": "0743d09243"
+    "hash": "e8e7295081"
   },
   "como-funciona": {
     "data": "2026-11-19",
-    "hash": "662ebc6a9b"
+    "hash": "219d7c003c"
   },
   "custos-alem-dos-juros": {
     "data": "2026-11-19",
-    "hash": "ad6faa6ee1"
+    "hash": "99794b7048"
+  },
+  "dados-abertos": {
+    "data": "2026-11-19",
+    "hash": "8ed3518e00"
   },
   "garantia-do-imovel": {
     "data": "2026-11-19",
-    "hash": "865d59a204"
+    "hash": "1e2382df4b"
   },
   "home-equity-ou-outro-credito": {
     "data": "2026-11-19",
-    "hash": "db4cb4dd67"
+    "hash": "b398f86cf8"
   },
   "index": {
     "data": "2026-11-19",
-    "hash": "de1c23074d"
+    "hash": "0d06d0b616"
   },
   "metodologia": {
     "data": "2026-11-19",
-    "hash": "ebd067dfef"
+    "hash": "0572d42529"
   },
   "privacidade": {
     "data": "2026-11-19",
-    "hash": "1ecd3217e9"
+    "hash": "516da7cc3c"
   },
   "quando-nao-vale-a-pena": {
     "data": "2026-11-19",
-    "hash": "7dc61d0496"
+    "hash": "73e5c86da7"
   },
   "sobre": {
     "data": "2026-11-19",
-    "hash": "1b8e670447"
+    "hash": "aec7d0ce00"
   },
   "taxas-de-referencia": {
     "data": "2026-11-19",
-    "hash": "ea68fc9be6"
+    "hash": "6a93153502"
   },
   "termos": {
     "data": "2026-11-19",
-    "hash": "7e50c5a6c1"
+    "hash": "c5c065bf7e"
   }
 }
