@@ -125,7 +125,7 @@ HOME_MAIN = """  <section class="hero">
         <summary>Já tem uma proposta? Use a taxa dela</summary>
         <div class="oi">
           <label for="campo-taxa-prop">Taxa da proposta <span>% ao mês</span></label>
-          <div class="inp"><input id="campo-taxa-prop" type="text" inputmode="decimal" autocomplete="off" placeholder="ex.: 1,09" class="num" aria-describedby="msg-taxa-prop"><em>% a.m.</em></div>
+          <div class="inp"><input id="campo-taxa-prop" type="text" inputmode="decimal" autocomplete="off" placeholder="ex.: 1,12" class="num" aria-describedby="msg-taxa-prop"><em>% a.m.</em></div>
           <label class="ck" for="ck-taxa-ipca"><input type="checkbox" id="ck-taxa-ipca"> A taxa já inclui o IPCA</label>
           <div class="hint" id="msg-taxa-prop">Deixe em branco para usar a taxa de referência. Se a proposta diz “X% + IPCA”, digite só o X.</div>
         </div>
@@ -246,6 +246,8 @@ HOME_MAIN = """  <section class="hero">
       </div>
     </div>
 
+    <details class="amort amsim" id="det-amsim">
+      <summary>Simular: pagar a mais todo mês ou amortizar de uma vez</summary>
     <div class="panel amx">
       <h3 class="sub"><span class="n" aria-hidden="true">2</span>Amortização: quanto você poupa pagando a mais</h3>
       <p class="amsub">Escolha o valor e o momento. Quanto mais cedo, maior a economia.</p>
@@ -279,6 +281,8 @@ HOME_MAIN = """  <section class="hero">
       <div class="amd"><h4>Veja o que o contrato diz</h4><p>Pergunte como pedir a amortização, se há valor mínimo ou tarifa e se o abatimento reduz o prazo ou a parcela. O Código de Defesa do Consumidor (art. 52, § 2º) prevê a liquidação antecipada com redução proporcional dos juros; confirme como o seu contrato aplica.</p></div>
       <div class="amd"><h4>Compare com outro uso do dinheiro</h4><p>Amortizar equivale a render a taxa da dívida: <b id="am-taxa-aa">@@D_AM_TAXA@@</b> ao ano nesta simulação. Compare com o que o mesmo dinheiro renderia, já descontados impostos, e mantenha uma reserva de emergência antes de adiantar parcelas. Não é recomendação de investimento.</p></div>
     </div>
+
+    </details>
 
     <details class="amort" id="det-amort">
       <summary>Ver a amortização ano a ano</summary>

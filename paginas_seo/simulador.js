@@ -752,6 +752,9 @@
     $('det-amort').addEventListener('toggle', function (e) {
       if (e.target.open && !abriuAmort) { abriuAmort = true; evento('abriu-amortizacao', { prazo: estado.anos }); }
     });
+    $('det-amsim').addEventListener('toggle', function (e) {
+      if (e.target.open && !abriuAmort) { abriuAmort = true; evento('abriu-amortizacao', { prazo: estado.anos }); }
+    });
 
     var dlg = $('dlg-confirma');
     function fechar() { if (typeof dlg.close === 'function') dlg.close(); else { dlg.removeAttribute('open'); devolverFoco(); } }

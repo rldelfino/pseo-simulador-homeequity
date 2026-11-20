@@ -2,13 +2,13 @@
 
 Modelo: parcela fixa (tabela Price, padrão) ou parcelas que caem (SAC) sobre o crédito total, com taxa de referência = taxa do parceiro + IPCA.
 O SAC é uma opção de simulação na mesma taxa: o parceiro confirma na proposta quais sistemas oferece.
-  - taxa do parceiro: "a partir de 1,09% a.m. + IPCA" (página pública do parceiro, conferida em 18/11/2026);
+  - taxa do parceiro: "a partir de 1,12% a.m. + IPCA" (página pública do parceiro, conferida em 20/11/2026; era 1,09% em 18/11);
   - IPCA: o acumulado em 12 meses do IBGE (série SGS 13522 do Banco Central), convertido em taxa mensal e mantido constante na simulação;
   - limite: o parceiro divulga que libera "até 60% do valor do imóvel" e prazo "até 20 anos".
 É ESTIMATIVA: a taxa e o limite finais saem da análise do parceiro. Não inclui IOF, avaliação do imóvel, registro em cartório nem seguros.
 """
 
-TAXA_PARCEIRO_AM = 1.09   # % ao mês, "a partir de"
+TAXA_PARCEIRO_AM = 1.12   # % ao mês, "a partir de"
 LTV_MAX = 0.60            # fração do valor do imóvel
 CREDITO_MAX = 3_000_000   # teto de crédito da interface: teto comum de mercado (R$ 3 mi em Creditas e Neon); não é regra do parceiro
 PRAZO_MAX_MESES = 240     # 20 anos

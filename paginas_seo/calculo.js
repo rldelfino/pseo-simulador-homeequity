@@ -2,7 +2,7 @@
    Mesma conta de calculo.py (os testes comparam os dois). */
 (function (root) {
   'use strict';
-  var TAXA_PARCEIRO_AM = 1.09;
+  var TAXA_PARCEIRO_AM = 1.12;
   var LTV_MAX = 0.6;
   var CREDITO_MAX = 3000000;
   var PRAZO_MIN_ANOS = 2;

@@ -40,7 +40,9 @@ HOME_TITLE = "Home Equity: simule a parcela com seu imóvel em garantia"
 HOME_DESC = ("Simule o Home Equity (crédito com imóvel em garantia): veja a parcela e o custo total estimados, até 60% do valor do imóvel e até 20 anos. "
              "Grátis e sem cadastro.")
 
-PAGINAS_INDEXAVEIS = ["/"] + ["/" + pg["slug"] for pg in conteudo.PAGINAS]
+# Privacidade e termos são texto padrão, quase igual nos três simuladores da Datalab: ficam acessíveis (links do rodapé) mas fora do índice e do sitemap, para não parecerem cópia.
+SEM_INDICE = ("privacidade", "termos")
+PAGINAS_INDEXAVEIS = ["/"] + ["/" + pg["slug"] for pg in conteudo.PAGINAS if pg["slug"] not in SEM_INDICE]
 
 CSP = (
     "default-src 'self'; "
@@ -214,7 +216,7 @@ LLMS = """# Home Equity — simulador (Datalab Global)
 
 - Responsável: @@RAZAO@@, CNPJ @@CNPJ@@
 - Atualizado em @@ATUALIZADO@@
-- Conta: parcela fixa (tabela Price) sobre o crédito total; taxa de referência = 1,09% ao mês + IPCA em 12 meses (estimativa, não oferta). Detalhes em @@DOMINIO@@/metodologia
+- Conta: parcela fixa (tabela Price) sobre o crédito total; taxa de referência = 1,12% ao mês + IPCA em 12 meses (estimativa, não oferta). Detalhes em @@DOMINIO@@/metodologia
 - Taxas de comparação: médias do Banco Central (SGS 29976, 20742, 20741, 22022 e IPCA 13522), em @@DOMINIO@@/taxas-de-referencia
 - A simulação não é proposta de crédito; a taxa e o limite finais vêm da análise do parceiro.
 - Dados das taxas (CSV): @@DOMINIO@@/dados/taxas-referencia.csv (séries do Banco Central, ODbL 1.0)
@@ -348,6 +350,7 @@ OUTROS_SIMULADORES = [
     ("https://simulador.datalabglobal.com/", "Financiamento imobiliário"),
     ("https://veiculos.datalabglobal.com/", "Financiamento de veículos"),
     ("https://autoequity.datalabglobal.com/", "Crédito com veículo em garantia (Auto Equity)"),
+    ("https://condominio.datalabglobal.com/", "Empréstimo para condomínios"),
     (HUB + "/", "Datalab Global"),
 ]
 
@@ -469,6 +472,9 @@ def _pagina_home(valores, hoje):
         _organizacao(),
         {"@type": "WebSite", "@id": DOMINIO + "/#site", "url": DOMINIO + "/", "name": "Home Equity — Datalab Global", "inLanguage": "pt-BR",
          "publisher": {"@id": DOMINIO + "/#organizacao"}},
+        {"@type": "WebApplication", "@id": DOMINIO + "/#app", "url": DOMINIO + "/", "name": "Simulador de Home Equity", "description": HOME_DESC, "inLanguage": "pt-BR",
+         "applicationCategory": "FinanceApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript", "isAccessibleForFree": True,
+         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "BRL"}, "publisher": {"@id": DOMINIO + "/#organizacao"}},
     ]}
     main = _preencher(layout.HOME_MAIN, dict(valores, COMPARACAO=_comparacao_html(), CARTOES=_cartoes_html(), FAQ=_faq_html(),
                                              PARCEIRO=LINK_PARCEIRO, **_valores_padrao()))
@@ -495,7 +501,7 @@ def _pagina_guia(pg, valores, hoje, ctx):
     ld = (_ld(artigo) if guia else "") + _ld(_breadcrumb(pg, canonical))
     if pg["slug"] == "dados-abertos":
         ld += _ld(_dataset(hoje))
-    return _preencher(layout.LAYOUT, dict(valores, TITLE=pg["title"], DESC=pg["desc"], CANONICAL=canonical, ROBOTS="index,follow,max-image-preview:large",
+    return _preencher(layout.LAYOUT, dict(valores, TITLE=pg["title"], DESC=pg["desc"], CANONICAL=canonical, ROBOTS=("noindex,follow" if pg["slug"] in SEM_INDICE else "index,follow,max-image-preview:large"),
                                           OGTYPE="article" if guia else "website", JSONLD=ld, MAIN=main, SCRIPTS=menu_script()))
 
 

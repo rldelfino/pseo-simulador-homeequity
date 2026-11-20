@@ -221,7 +221,7 @@ FAQ = [
      "Em geral, sim, conforme a instituição: o novo crédito quita o saldo do financiamento e libera a diferença para você. Por isso o simulador tem a opção "
      "\"Ainda financiado\": o saldo entra no total do crédito e conta para o limite de 60% do valor do imóvel (teto de R$ 3 milhões de crédito nesta ferramenta)."),
     ("Por que a parcela muda com o IPCA?",
-     "Porque a taxa divulgada pelo parceiro é \"a partir de 1,09% ao mês mais IPCA\": além dos juros, o saldo é atualizado pela inflação. O simulador usa o IPCA dos últimos 12 meses "
+     "Porque a taxa divulgada pelo parceiro é \"a partir de 1,12% ao mês mais IPCA\": além dos juros, o saldo é atualizado pela inflação. O simulador usa o IPCA dos últimos 12 meses "
      "e o mantém constante, então a parcela real pode ficar acima ou abaixo da estimativa, conforme a inflação dos próximos anos."),
     ("Quanto tempo leva até o dinheiro cair na conta?",
      "Não há um prazo único: depende da análise de crédito, da avaliação do imóvel, da análise jurídica e do registro da garantia em cartório. Cada instituição informa o seu prazo na proposta."),
@@ -253,7 +253,7 @@ def corpo_como_funciona(ctx):
           "bem menores que os do crédito pessoal sem garantia ou do cartão. Você continua usando o imóvel."
           )
         + h2("O que você informa e o que o crédito libera")
-        + p("O parceiro de crédito divulga que o Home Equity libera <b>até 60% do valor do imóvel</b>, em <b>até 20 anos</b>, com taxa a partir de <b>1,09% ao mês mais IPCA</b>. "
+        + p("O parceiro de crédito divulga que o Home Equity libera <b>até 60% do valor do imóvel</b>, em <b>até 20 anos</b>, com taxa a partir de <b>1,12% ao mês mais IPCA</b>. "
             "O imóvel pode ser residencial, comercial ou terreno, e pode estar financiado ou ser de terceiro, conforme a instituição.")
         + p("Exemplo do simulador: imóvel de " + brl0(800_000) + ", você quer receber " + brl0(250_000) + " em 15 anos. O crédito usa " + str(round(r["ltv"] * 100)) +
             "% do valor do imóvel, a parcela estimada é de " + brl0(r["parcela"]) + " por mês e o total ao final é de " + brl0(r["total"]) + ".")
@@ -326,7 +326,7 @@ def corpo_custos(ctx):
         ])
         + p("Quais dessas despesas existem, e quanto custam, varia de uma instituição para outra. Este simulador <b>não as inclui</b>: por isso a parcela mostrada é uma estimativa.")
         + h2("A atualização pelo IPCA")
-        + p("A taxa de referência do parceiro é composta: 1,09% ao mês mais a inflação medida pelo IPCA. Com o IPCA de " + pct(_ref()["ipca12m"]) + " em 12 meses (" + _ref()["ipcaMes"] +
+        + p("A taxa de referência do parceiro é composta: 1,12% ao mês mais a inflação medida pelo IPCA. Com o IPCA de " + pct(_ref()["ipca12m"]) + " em 12 meses (" + _ref()["ipcaMes"] +
             "), a taxa de referência fica em torno de " + pct(i * 100) + " ao mês. Se a inflação subir, a parcela sobe; se cair, a parcela cai. "
             "Para " + brl0(250_000) + " em 15 anos, a parcela estimada é de " + brl0(p15["parcela"]) + " hoje.")
         + h2("Exemplo de como o prazo pesa")
@@ -410,8 +410,8 @@ def corpo_taxas(ctx):
     return (
         p("O simulador usa duas famílias de taxa: a <b>taxa do parceiro</b>, para estimar a parcela, e as <b>médias do Banco Central</b>, para comparar e para o aviso \"e se a taxa for maior?\".")
         + h2("Taxa de referência do Home Equity")
-        + p("Segundo o parceiro de crédito, o Home Equity tem taxa a partir de <b>1,09% ao mês mais IPCA</b>. Com o IPCA em 12 meses de " + pct(_ref()["ipca12m"]) + " (" + _ref()["ipcaMes"] +
-            "), a taxa mensal de referência fica em <b>" + pct(i * 100) + "</b>: (1 + 1,09%) x (1 + IPCA mensal) − 1. É a melhor condição divulgada, e a proposta real pode ser maior.")
+        + p("Segundo o parceiro de crédito, o Home Equity tem taxa a partir de <b>1,12% ao mês mais IPCA</b>. Com o IPCA em 12 meses de " + pct(_ref()["ipca12m"]) + " (" + _ref()["ipcaMes"] +
+            "), a taxa mensal de referência fica em <b>" + pct(i * 100) + "</b>: (1 + 1,12%) x (1 + IPCA mensal) − 1. É a melhor condição divulgada, e a proposta real pode ser maior.")
         + h2("Médias do Banco Central")
         + tabela(["Série", "Mês", "Valor da série", "Em % ao mês", "Fonte"], ref,
                  "Taxas médias das novas operações de crédito livre de pessoas físicas e IPCA. Fonte: Banco Central do Brasil (SGS), licença ODbL.")
@@ -434,7 +434,7 @@ def corpo_metodologia(ctx):
         + h2("A conta")
         + ol([
             "<b>Crédito total</b> = valor que você quer receber + saldo devedor do financiamento, se o imóvel ainda estiver financiado (o novo crédito quita esse saldo).",
-            "<b>Taxa mensal</b> = (1 + 1,09%) x (1 + IPCA mensal) − 1. O IPCA mensal é o equivalente composto do IPCA de 12 meses do IBGE, via Banco Central (SGS 13522), mantido constante.",
+            "<b>Taxa mensal</b> = (1 + 1,12%) x (1 + IPCA mensal) − 1. O IPCA mensal é o equivalente composto do IPCA de 12 meses do IBGE, via Banco Central (SGS 13522), mantido constante.",
             "<b>Parcela no Price</b> (padrão) = crédito x i / (1 − (1 + i)^−n), com i a taxa mensal e n o prazo em meses: parcela fixa.",
             "<b>Parcela no SAC</b> = crédito / n + saldo devedor x i: a amortização (crédito / n) é a mesma todo mês e a parcela cai. A primeira é crédito / n + crédito x i; a última é (crédito / n) x (1 + i).",
             "<b>Total ao final</b> = parcela x n no Price; crédito + crédito x i x (n + 1) / 2 no SAC. <b>Juros no total</b> = total − crédito.",
@@ -516,6 +516,7 @@ def corpo_sobre(ctx):
 
 
 ATUALIZACOES = [
+    ("20/11/2026", "Taxa de referência do parceiro atualizada de 1,09% para 1,12% ao mês mais IPCA, conforme a página pública do parceiro, e revisão geral dos números e dos textos."),
     ("19/11/2026", "Prazo em lista suspensa, escolha entre Price e SAC, explicação da regra de renda, comparativo com outras modalidades, botão Voltar à simulação nas páginas internas e página de dados abertos com o CSV das taxas do Banco Central."),
     ("18/11/2026", "Simulador de Home Equity publicado em homeequity.datalabglobal.com, com parcela estimada, Raio-X da decisão, comparação de custo mensal entre tipos de crédito e guias sobre garantia, custos e taxas."),
 ]
@@ -595,18 +596,18 @@ PAGINAS = [
          desc="Situações em que vale pensar duas vezes antes de dar o imóvel em garantia, e as em que o crédito pode fazer sentido.", corpo=corpo_quando_nao),
     dict(slug="taxas-de-referencia", cartao="Taxas do Banco Central", title="Taxas de referência do Home Equity e do Banco Central",
          h1="Taxas de referência: de onde vêm os números",
-         desc="A taxa do parceiro (1,09% ao mês mais IPCA) e as médias do Banco Central usadas no simulador, com o mês e a fonte de cada uma.", corpo=corpo_taxas),
+         desc="A taxa do parceiro (1,12% ao mês mais IPCA) e as médias do Banco Central usadas no simulador, com o mês e a fonte de cada uma.", corpo=corpo_taxas),
     dict(slug="metodologia", cartao=None, menu="Metodologia", title="Metodologia: como calculamos o Home Equity",
          h1="Metodologia: como calculamos a parcela", desc="A conta do simulador, passo a passo, o que ela não inclui e como o Raio-X compara cenários.", corpo=corpo_metodologia),
     dict(slug="dados-abertos", cartao=None, menu="Dados abertos", title="Dados abertos: taxas do Banco Central em CSV",
          h1="Dados abertos: taxas de referência em CSV",
          desc="Baixe em CSV as taxas médias do Banco Central e o IPCA usados no simulador de Home Equity, com colunas, licença ODbL 1.0 e como citar.", corpo=corpo_dados_abertos),
-    dict(slug="sobre", cartao=None, menu="Sobre", title="Sobre a Datalab Global e este simulador",
+    dict(slug="sobre", cartao=None, menu="Sobre", title="Sobre o simulador de Home Equity da Datalab Global",
          h1="Sobre este simulador", desc="Quem mantém o simulador de Home Equity (empréstimo com garantia de imóvel), o que a Datalab Global faz, o que não faz e como falar com a gente.", corpo=corpo_sobre),
     dict(slug="atualizacoes", cartao=None, menu="Atualizações", title="Atualizações do simulador de Home Equity",
          h1="Atualizações do simulador", desc="Registro das mudanças, conferências de taxas e correções do simulador de Home Equity, com a data de cada atualização.", corpo=corpo_atualizacoes, guia=False),
-    dict(slug="privacidade", cartao=None, menu="Privacidade", title="Política de Privacidade", h1="Política de Privacidade",
+    dict(slug="privacidade", cartao=None, menu="Privacidade", title="Privacidade do simulador de Home Equity", h1="Política de Privacidade",
          desc="Como o simulador de Home Equity trata dados pessoais (LGPD): o que não coletamos, a medição sem cookies e como falar com a gente.", corpo=corpo_privacidade, guia=False),
-    dict(slug="termos", cartao=None, menu="Termos de uso", title="Termos de Uso", h1="Termos de Uso",
+    dict(slug="termos", cartao=None, menu="Termos de uso", title="Termos de uso do simulador de Home Equity", h1="Termos de Uso",
          desc="Condições de uso do simulador de Home Equity: a simulação não é proposta de crédito, limites de responsabilidade e como falar com a gente.", corpo=corpo_termos, guia=False),
 ]

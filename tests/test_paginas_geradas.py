@@ -151,7 +151,8 @@ def test_sitemap_lista_todas_as_paginas_indexaveis(site):
     sm = _ler(site, "sitemap.xml")
     for c in g.PAGINAS_INDEXAVEIS:
         assert "<loc>" + g.DOMINIO + c + "</loc>" in sm
-    assert sm.count("<url>") == 1 + len(conteudo.PAGINAS)
+    assert sm.count("<url>") == len(g.PAGINAS_INDEXAVEIS)
+    assert "/privacidade" not in sm and "/termos" not in sm
     assert "Sitemap: " + g.DOMINIO + "/sitemap.xml" in _ler(site, "robots.txt")
 
 
@@ -160,7 +161,7 @@ def test_numeros_dos_textos_vem_do_calculo(site):
     r = calculo.simular(800_000, 250_000, 0, 180, conteudo.taxa_ref())
     assert conteudo.brl0(r["parcela"]) in cm and conteudo.brl0(r["total"]) in cm
     tx = _ler(site, "taxas-de-referencia.html")
-    assert "SGS 29976" in tx and "SGS 13522" in tx and "1,09%" in tx
+    assert "SGS 29976" in tx and "SGS 13522" in tx and "1,12%" in tx
 
 
 def test_calculo_js_publicado_e_o_gerado(site):
@@ -249,3 +250,15 @@ def test_js_com_versao_no_endereco_tem_cache_imutavel():
     for nome in ("calculo.js", "simulador.js", "menu.js"):
         trecho = g.HEADERS.split("/" + nome)[1].split("\n\n")[0]
         assert "immutable" in trecho, nome
+
+
+def test_privacidade_e_termos_ficam_fora_do_indice(site):
+    for slug in ("privacidade", "termos"):
+        h = _ler(site, slug + ".html")
+        assert 'name="robots" content="noindex,follow"' in h, slug
+    assert 'name="robots" content="index,follow' in _ler(site, "como-funciona.html")
+
+
+def test_home_declara_o_simulador_como_aplicacao_web(site):
+    h = _ler(site, "index.html")
+    assert '"@type": "WebApplication"' in h and '"applicationCategory": "FinanceApplication"' in h and '"price": "0"' in h

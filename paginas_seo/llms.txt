@@ -4,7 +4,7 @@
 
 - Responsável: Satori Soluções Comerciais LTDA, CNPJ 63.998.502/0001-73
 - Atualizado em 20/11/2026
-- Conta: parcela fixa (tabela Price) sobre o crédito total; taxa de referência = 1,09% ao mês + IPCA em 12 meses (estimativa, não oferta). Detalhes em https://homeequity.datalabglobal.com/metodologia
+- Conta: parcela fixa (tabela Price) sobre o crédito total; taxa de referência = 1,12% ao mês + IPCA em 12 meses (estimativa, não oferta). Detalhes em https://homeequity.datalabglobal.com/metodologia
 - Taxas de comparação: médias do Banco Central (SGS 29976, 20742, 20741, 22022 e IPCA 13522), em https://homeequity.datalabglobal.com/taxas-de-referencia
 - A simulação não é proposta de crédito; a taxa e o limite finais vêm da análise do parceiro.
 - Dados das taxas (CSV): https://homeequity.datalabglobal.com/dados/taxas-referencia.csv (séries do Banco Central, ODbL 1.0)
@@ -22,5 +22,3 @@
 - https://homeequity.datalabglobal.com/dados-abertos
 - https://homeequity.datalabglobal.com/sobre
 - https://homeequity.datalabglobal.com/atualizacoes
-- https://homeequity.datalabglobal.com/privacidade
-- https://homeequity.datalabglobal.com/termos

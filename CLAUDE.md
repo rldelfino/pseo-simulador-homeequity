@@ -24,7 +24,7 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 - Fontes: `conteudo.py` (textos, títulos ≤ 60), `layout.py` (HTML), `src/simulador.js`, `calculo.py` (conta de referência; `calculo.js` é gerado e os testes comparam as duas via Node).
 
 ## Fatos do produto (conferidos em 18/11/2026)
-- Parceiro divulga: Home Equity a partir de 1,09% a.m. + IPCA, libera até 60% do valor do imóvel, prazo até 20 anos. Taxa de referência = (1+1,09%)·(1+IPCA mensal)−1, IPCA = série SGS 13522 (12 meses) mantido constante: hoje ≈ 1,47% a.m. Parcela fixa (Price) sobre crédito = receber + saldo devedor (financiado). Não inclui IOF, avaliação, registro, seguros.
+- Parceiro divulga: Home Equity a partir de 1,12% a.m. + IPCA, libera até 60% do valor do imóvel, prazo até 20 anos. Taxa de referência = (1+1,12%)·(1+IPCA mensal)−1, IPCA = série SGS 13522 (12 meses) mantido constante: hoje ≈ 1,47% a.m. Parcela fixa (Price) sobre crédito = receber + saldo devedor (financiado). Não inclui IOF, avaliação, registro, seguros.
 - Séries BCB: 29976 (garantia real, a.m., mistura imóvel e veículo), 20742/20741/22022 (a.a.), 13522 (IPCA 12m). Fonte e mês aparecem em `/taxas-de-referencia`.
 - Cenário padrão da home: imóvel R$ 800.000, receber R$ 250.000, 15 anos → R$ 3.966/mês, total R$ 713.837 (igual ao desenho aprovado).
 - Páginas: home + dados-abertos (CSV das taxas, ODbL, Dataset em JSON-LD), como-funciona, garantia-do-imovel, custos-alem-dos-juros, home-equity-ou-outro-credito, quando-nao-vale-a-pena, taxas-de-referencia, metodologia, sobre, atualizacoes, privacidade, termos (13 no sitemap). Dados: `/dados/taxas-referencia.csv`. Dados abertos só em `/dados-abertos` (sem Kaggle por enquanto).
@@ -63,3 +63,10 @@ Projeto irmão de `../005-pseo-simulador-emprestimo` (mesmas regras de operaçã
 - `python varredura_dispositivos.py` — iPhone SE/13/15, iPad, Pixel, Galaxy (em pé e deitado): rolagem lateral, alvos de toque, diálogo, menu, voltar do navegador.
 - Achado conhecido: o Playwright-WebKit avisa "Refused to apply a stylesheet" no console por causa do `<select>` do prazo quando a CSP de produção está ativa (sem efeito funcional; não confirmado em Safari real).
 - Mínimo a receber (R$ 50 mil) e teto de crédito (R$ 3 milhões) são limites da interface; o cartão "Receber menos" nunca fica abaixo do mínimo (vira "Receber mais").
+
+## Revisão geral de 20/11/2026 (pedido do dono)
+- Números: conta conferida por testes (pytest, navegador, aleatório Chromium+WebKit, 0 falha); taxas do BCB conferidas ao vivo. Taxa do parceiro atualizada de 1,09% para 1,12% ao mês + IPCA (página pública do parceiro em 20/11/2026).
+- Menos informação: o simulador de "pagar a mais" (valor extra por mês, amortização única, gráfico por momento, dicas) ficou recolhido em `<details id="det-amsim">`; a parte 1 ("Os juros vêm primeiro") e a tabela por blocos continuam visíveis. Cortou cerca de 2.700 px da home no celular. Os testes que mexem nesses campos abrem o bloco antes.
+- SEO: privacidade e termos agora `noindex,follow` e fora do sitemap (texto padrão quase igual nos três simuladores; `SEM_INDICE` no gerador); schema `WebApplication` na home; títulos de sobre/privacidade/termos distintos por produto. Textos do Auto Equity reescritos (a similaridade de 5-gramas com o Home Equity caiu de 0,50 para 0,29 na home e ficou abaixo de 0,40 nas demais páginas indexáveis).
+- Rodapé: links cruzados entre Home Equity, Auto Equity e Condomínio.
+- Console: o Cloudflare injeta o beacon de Web Analytics (zona datalabglobal.com, "Automatic setup") e a CSP o bloqueia; é só ruído no console, não afeta o uso. Para limpar: ou liberar `static.cloudflareinsights.com` na CSP, ou desligar o setup automático no Cloudflare (decisão do dono).
