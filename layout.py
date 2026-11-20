@@ -125,7 +125,7 @@ HOME_MAIN = """  <section class="hero">
         <summary>Já tem uma proposta? Use a taxa dela</summary>
         <div class="oi">
           <label for="campo-taxa-prop">Taxa da proposta <span>% ao mês</span></label>
-          <div class="inp"><input id="campo-taxa-prop" type="text" inputmode="decimal" autocomplete="off" placeholder="ex.: 1,12" class="num" aria-describedby="msg-taxa-prop"><em>% a.m.</em></div>
+          <div class="inp"><input id="campo-taxa-prop" type="text" inputmode="decimal" autocomplete="off" placeholder="ex.: 1,09" class="num" aria-describedby="msg-taxa-prop"><em>% a.m.</em></div>
           <label class="ck" for="ck-taxa-ipca"><input type="checkbox" id="ck-taxa-ipca"> A taxa já inclui o IPCA</label>
           <div class="hint" id="msg-taxa-prop">Deixe em branco para usar a taxa de referência. Se a proposta diz “X% + IPCA”, digite só o X.</div>
         </div>

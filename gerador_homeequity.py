@@ -216,7 +216,7 @@ LLMS = """# Home Equity — simulador (Datalab Global)
 
 - Responsável: @@RAZAO@@, CNPJ @@CNPJ@@
 - Atualizado em @@ATUALIZADO@@
-- Conta: parcela fixa (tabela Price) sobre o crédito total; taxa de referência = 1,12% ao mês + IPCA em 12 meses (estimativa, não oferta). Detalhes em @@DOMINIO@@/metodologia
+- Conta: parcela fixa (tabela Price) sobre o crédito total; taxa de referência = 1,09% ao mês + IPCA em 12 meses (estimativa, não oferta). Detalhes em @@DOMINIO@@/metodologia
 - Taxas de comparação: médias do Banco Central (SGS 29976, 20742, 20741, 22022 e IPCA 13522), em @@DOMINIO@@/taxas-de-referencia
 - A simulação não é proposta de crédito; a taxa e o limite finais vêm da análise do parceiro.
 - Dados das taxas (CSV): @@DOMINIO@@/dados/taxas-referencia.csv (séries do Banco Central, ODbL 1.0)

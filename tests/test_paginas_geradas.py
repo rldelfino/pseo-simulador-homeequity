@@ -161,7 +161,7 @@ def test_numeros_dos_textos_vem_do_calculo(site):
     r = calculo.simular(800_000, 250_000, 0, 180, conteudo.taxa_ref())
     assert conteudo.brl0(r["parcela"]) in cm and conteudo.brl0(r["total"]) in cm
     tx = _ler(site, "taxas-de-referencia.html")
-    assert "SGS 29976" in tx and "SGS 13522" in tx and "1,12%" in tx
+    assert "SGS 29976" in tx and "SGS 13522" in tx and "1,09%" in tx
 
 
 def test_calculo_js_publicado_e_o_gerado(site):

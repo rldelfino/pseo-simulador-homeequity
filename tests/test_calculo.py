@@ -5,16 +5,16 @@ import calculo as c
 
 def test_pmt_exemplo_do_desenho():
     i = c.taxa_mensal(4.63)
-    assert i == pytest.approx(0.015021, abs=1e-6)
+    assert i == pytest.approx(0.014720, abs=1e-6)
     r = c.simular(800_000, 250_000, 0, 180, i)
-    assert round(r["parcela"]) == 4031
-    assert round(r["total"]) == 725510
+    assert round(r["parcela"]) == 3966
+    assert round(r["total"]) == 713837
     assert r["ltv"] == pytest.approx(0.3125)
     assert not r["acima_limite"]
 
 
 def test_taxa_com_ipca_zero_e_so_a_do_parceiro():
-    assert c.taxa_mensal(0) == pytest.approx(0.0112)
+    assert c.taxa_mensal(0) == pytest.approx(0.0109)
 
 
 def test_parcela_com_taxa_zero_divide_igual():
