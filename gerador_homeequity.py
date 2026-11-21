@@ -346,7 +346,7 @@ def _lista_rodape(slugs, extra=""):
 
 # Os outros simuladores da Datalab Global (outros produtos, outros subdomínios). O texto do link descreve o destino.
 OUTROS_SIMULADORES = [
-    ("https://emprestimo.datalabglobal.com/", "Pix no cartão de crédito"),
+    ("https://emprestimo.datalabglobal.com/", "Empréstimo com crédito do cartão"),
     ("https://simulador.datalabglobal.com/", "Financiamento imobiliário"),
     ("https://veiculos.datalabglobal.com/", "Financiamento de veículos"),
     ("https://autoequity.datalabglobal.com/", "Crédito com veículo em garantia (Auto Equity)"),
