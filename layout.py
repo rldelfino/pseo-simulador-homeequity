@@ -358,9 +358,9 @@ HOME_MAIN = """  <section class="hero">
         <p class="hint"><a href="/garantia-do-imovel">Leia o guia completo sobre a garantia</a></p>
       </div>
       <div class="lista3">
-        <div class="li3"><span class="n" aria-hidden="true">1</span><div><h4>O que muda para você</h4><ul><li>Você continua morando ou usando o imóvel</li><li>A garantia é o que permite juros menores</li></ul></div></div>
-        <div class="li3"><span class="n" aria-hidden="true">2</span><div><h4>O que fica registrado</h4><ul><li>O imóvel é dado em garantia à instituição, com registro em cartório</li><li>O registro sai quando a dívida é quitada</li></ul></div></div>
-        <div class="li3"><span class="n" aria-hidden="true">3</span><div><h4>Para ficar tranquilo</h4><ul><li>Escolha uma parcela que caiba com folga</li><li>Em atraso prolongado, a instituição pode seguir o que o contrato prevê</li></ul></div></div>
+        <div class="li3"><span class="n" aria-hidden="true">1</span><div><h3>O que muda para você</h3><ul><li>Você continua morando ou usando o imóvel</li><li>A garantia é o que permite juros menores</li></ul></div></div>
+        <div class="li3"><span class="n" aria-hidden="true">2</span><div><h3>O que fica registrado</h3><ul><li>O imóvel é dado em garantia à instituição, com registro em cartório</li><li>O registro sai quando a dívida é quitada</li></ul></div></div>
+        <div class="li3"><span class="n" aria-hidden="true">3</span><div><h3>Para ficar tranquilo</h3><ul><li>Escolha uma parcela que caiba com folga</li><li>Em atraso prolongado, a instituição pode seguir o que o contrato prevê</li></ul></div></div>
       </div>
     </div>
   </section>
@@ -370,9 +370,9 @@ HOME_MAIN = """  <section class="hero">
     <h2 id="t-pede">O que o parceiro costuma pedir</h2>
     <p class="lead">Cada instituição tem a sua lista. Em geral, para Home Equity:</p>
     <div class="steps">
-      <div class="st"><span class="sn" aria-hidden="true">01</span><h4>Sobre você</h4><ul><li>Documento e estado civil</li><li>Comprovante de renda ou extratos</li><li>Cônjuge ou sócios, se entrarem</li></ul></div>
-      <div class="st"><span class="sn" aria-hidden="true">02</span><h4>Sobre o imóvel</h4><ul><li>Matrícula atualizada</li><li>Avaliação do imóvel</li><li>Pode ser financiado, comercial ou de terceiros, conforme a instituição</li></ul></div>
-      <div class="st"><span class="sn" aria-hidden="true">03</span><h4>Etapas até receber</h4><ul><li>Análise de crédito</li><li>Avaliação e análise jurídica</li><li>Contrato e registro em cartório</li></ul></div>
+      <div class="st"><span class="sn" aria-hidden="true">01</span><h3>Sobre você</h3><ul><li>Documento e estado civil</li><li>Comprovante de renda ou extratos</li><li>Cônjuge ou sócios, se entrarem</li></ul></div>
+      <div class="st"><span class="sn" aria-hidden="true">02</span><h3>Sobre o imóvel</h3><ul><li>Matrícula atualizada</li><li>Avaliação do imóvel</li><li>Pode ser financiado, comercial ou de terceiros, conforme a instituição</li></ul></div>
+      <div class="st"><span class="sn" aria-hidden="true">03</span><h3>Etapas até receber</h3><ul><li>Análise de crédito</li><li>Avaliação e análise jurídica</li><li>Contrato e registro em cartório</li></ul></div>
     </div>
   </section>
 

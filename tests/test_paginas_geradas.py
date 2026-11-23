@@ -102,7 +102,7 @@ def test_umami_so_entra_com_id(site, monkeypatch, tmp_path):
 
 def test_csp_permite_so_o_necessario(site):
     h = _ler(site, "_headers")
-    assert "script-src 'self' https://cloud.umami.is;" in h
+    assert "script-src 'self' https://static.cloudflareinsights.com https://cloud.umami.is;" in h
     assert "style-src 'self';" in h
     assert "object-src 'none'" in h and "frame-ancestors 'none'" in h
     assert "triagem" not in h and "unsafe-inline" not in h
