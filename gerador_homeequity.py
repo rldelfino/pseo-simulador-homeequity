@@ -46,11 +46,11 @@ PAGINAS_INDEXAVEIS = ["/"] + ["/" + pg["slug"] for pg in conteudo.PAGINAS if pg[
 
 CSP = (
     "default-src 'self'; "
-    "script-src 'self' https://cloud.umami.is; "
+    "script-src 'self' https://static.cloudflareinsights.com https://cloud.umami.is; "
     "style-src 'self'; "
     "img-src 'self' data:; "
     "font-src 'self'; "
-    "connect-src 'self' https://cloud.umami.is https://api-gateway.umami.dev https://gateway.umami.is; "
+    "connect-src 'self' https://cloudflareinsights.com https://cloud.umami.is https://api-gateway.umami.dev https://gateway.umami.is; "
     "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
 )
 
@@ -368,7 +368,7 @@ def _cartoes_html():
     for pg in conteudo.PAGINAS:
         if not pg.get("cartao"):
             continue
-        saida += ('<a class="card" href="/' + pg["slug"] + '"><h4>' + pg["cartao"] + "</h4>" + pg["desc"] + '<span class="go">Ler →</span></a>')
+        saida += ('<a class="card" href="/' + pg["slug"] + '"><h3>' + pg["cartao"] + "</h3>" + pg["desc"] + '<span class="go">Ler →</span></a>')
     return saida
 
 
@@ -609,7 +609,10 @@ def gerar_site(saida=SAIDA_PADRAO, hoje=None, manifesto=None):
         linhas.append("  <url><loc>" + DOMINIO + caminho + "</loc><lastmod>" + datas["index" if caminho == "/" else caminho[1:]].isoformat() + "</lastmod></url>")
     linhas.append("</urlset>")
     escrever("sitemap.xml", "\n".join(linhas) + "\n")
-    lista = "\n".join("- " + DOMINIO + c for c in PAGINAS_INDEXAVEIS)
+    # llms.txt: links em Markdown ([título](url)), o formato que o Lighthouse e os leitores de LLM esperam.
+    titulos = {"/" + pg["slug"]: pg.get("cartao") or pg["h1"] for pg in conteudo.PAGINAS}
+    titulos["/"] = "Início: o simulador"
+    lista = "\n".join("- [" + titulos.get(c, c) + "](" + DOMINIO + c + ")" for c in PAGINAS_INDEXAVEIS)
     escrever("llms.txt", _preencher(LLMS, dict(valores, LISTA=lista)))
     return saida
 
