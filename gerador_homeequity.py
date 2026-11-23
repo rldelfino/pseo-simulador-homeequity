@@ -275,8 +275,8 @@ def versao_arquivo(*partes):
 def home_scripts():
     """Os scripts também têm a versão no endereço: o Cloudflare guarda .js na borda por horas e ignora o max-age do _headers; com ?v=<resumo>
     o endereço muda junto com o conteúdo e ninguém recebe HTML novo com JS velho."""
-    return ('<script src="/calculo.js?v=' + _resumo(gerar_calculo_js().encode("utf-8")) + '"></script>\n'
-            '<script src="/simulador.js?v=' + versao_arquivo("src", "simulador.js") + '"></script>\n' + menu_script())
+    return ('<script defer src="/calculo.js?v=' + _resumo(gerar_calculo_js().encode("utf-8")) + '"></script>\n'
+            '<script defer src="/simulador.js?v=' + versao_arquivo("src", "simulador.js") + '"></script>\n' + menu_script())
 
 
 def menu_script():
