@@ -475,6 +475,12 @@ def corpo_dados_abertos(ctx):
         + tabela(["Arquivo", "Formato", "Período"],
                  [[a("/dados/taxas-referencia.csv", "taxas-referencia.csv"), "CSV, UTF-8, separador ponto e vírgula", mes_curto(meses[0]) + " a " + mes_curto(meses[-1]) + ", " + str(len(linhas)) + " linhas"]],
                  "Atualizado toda semana. Página atualizada em " + ctx["atualizado"] + ".")
+        + h2("Cópias para citar")
+        + tabela(["Onde", "Para quê"],
+                 [[a("https://doi.org/10.5281/zenodo.24475425", "Zenodo (DOI)"), "Cópia com DOI, para citar (mesma licença)"],
+                  [a("https://huggingface.co/datasets/datalabglobal/home-equity-taxas-referencia-bcb", "Hugging Face"), "Cópia para carregar em código (mesma licença)"],
+                  [a("https://www.kaggle.com/datasets/rodolfodelfino/taxas-de-referncia-para-home-equity-bcb", "Kaggle"), "Cópia para notebooks (mesma licença)"]],
+                 "Essas cópias foram publicadas em 23/11/2026 e não se atualizam sozinhas: o arquivo desta página é o mais recente.")
         + h2("Colunas")
         + ul(["<code>" + n + "</code>: " + d for n, d in colunas])
         + h2("Séries incluídas")
