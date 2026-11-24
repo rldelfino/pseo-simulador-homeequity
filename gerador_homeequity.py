@@ -399,6 +399,8 @@ def _dataset(hoje):
             "url": DOMINIO + "/dados-abertos", "inLanguage": "pt-BR", "isAccessibleForFree": True, "license": "https://opendatacommons.org/licenses/odbl/1-0/",
             "creator": {"@type": "Organization", "name": "Datalab Global", "url": HUB + "/"}, "publisher": {"@id": DOMINIO + "/#organizacao"},
             "dateModified": hoje.isoformat(), "keywords": ["crédito", "juros", "Home Equity", "Banco Central", "IPCA", "Brasil"],
+            "identifier": "https://doi.org/10.5281/zenodo.24475425",
+            "sameAs": ["https://doi.org/10.5281/zenodo.24475425", "https://huggingface.co/datasets/datalabglobal/home-equity-taxas-referencia-bcb", "https://www.kaggle.com/datasets/rodolfodelfino/taxas-de-referncia-para-home-equity-bcb"],
             "isBasedOn": "https://dadosabertos.bcb.gov.br/", "temporalCoverage": meses[0] + "/" + meses[-1],
             "variableMeasured": [{"@type": "PropertyValue", "name": n, "description": d} for n, d in (
                 ("codigo_serie", "Código da série no SGS do Banco Central"), ("modalidade", "Nome da série"), ("mes_referencia", "Mês de referência (AAAA-MM)"),
