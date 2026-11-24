@@ -456,6 +456,25 @@ def corpo_metodologia(ctx):
     )
 
 
+def _ultimos():
+    saida = []
+    for s in tr.SERIES:
+        u = tr.ultima(s["codigo"])
+        if u:
+            saida.append([s["nome"], mes_curto(u["mes"]), pct(u["valor"]) + (" ao mês" if u["unidade"] == "am" else " ao ano")])
+    return saida
+
+
+def _leitura_garantia(frase_final):
+    """Compara garantia real e crédito pessoal no último mês, com as contas feitas sobre o próprio CSV."""
+    g, pe = tr.ultima(29976), tr.ultima(20742)
+    if not g or not pe:
+        return ""
+    g_ano = ((1 + g["valor"] / 100) ** 12 - 1) * 100
+    return ("No último mês do arquivo (" + tr.mes_extenso(g["mes"]) + "), o crédito com garantia real custou " + pct(g["valor"]) + " ao mês, o que dá cerca de " + pct(g_ano) +
+            " ao ano; o crédito pessoal sem garantia custou " + pct(pe["valor"]) + " ao ano. " + frase_final)
+
+
 def corpo_dados_abertos(ctx):
     linhas = tr.ler()
     meses = sorted({l["mes"] for l in linhas})
@@ -485,6 +504,9 @@ def corpo_dados_abertos(ctx):
         + ul(["<code>" + n + "</code>: " + d for n, d in colunas])
         + h2("Séries incluídas")
         + tabela(["Código", "Série", "Unidade", "Fonte"], series, "Séries do Banco Central (SGS) usadas no simulador de Home Equity.")
+        + h2("Último mês de cada série")
+        + tabela(["Série", "Mês", "Valor"], _ultimos(), "Valores do arquivo desta página, sem arredondar além de duas casas.")
+        + p(_leitura_garantia("Como a série de garantia real mistura imóvel e outras garantias, ela serve de ponto de comparação para o Home Equity, não de taxa de proposta."))
         + h2("Licença")
         + p("Contém informações do Banco Central do Brasil, disponibilizadas por ele sob a licença ODbL 1.0 (" + a("https://opendatacommons.org/licenses/odbl/1-0/", "https://opendatacommons.org/licenses/odbl/1-0/") +
             "). Esta base derivada também é licenciada sob ODbL 1.0: você pode copiar, distribuir e adaptar, citando a fonte e mantendo a mesma licença.")
